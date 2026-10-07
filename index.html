@@ -461,14 +461,19 @@ input[type=range]{accent-color:var(--petrol);width:100%}
           <div class="row2s"><button class="ghost" id="edgeDone">Fertig</button><button class="ghost" id="edgeUndo">Letzte Kante entfernen</button></div>
         </div>
         <div class="topt" id="optBuild" hidden>
-          <div class="pgrid">
-            <label class="pf">Breite<span class="in"><input type="number" id="bW" value="960" step="8"><span>cm</span></span></label>
-            <label class="pf">Tiefe<span class="in"><input type="number" id="bD" value="800" step="8"><span>cm</span></span></label>
+          <div class="seg full" role="group" aria-label="Gebäudeform"><button data-bs="rect" aria-pressed="true">Rechteck</button><button data-bs="poly" aria-pressed="false">Grundriss zeichnen</button></div>
+          <div class="pgrid" style="margin-top:12px">
+            <label class="pf rect-only">Breite<span class="in"><input type="number" id="bW" value="960" step="8"><span>cm</span></span></label>
+            <label class="pf rect-only">Tiefe<span class="in"><input type="number" id="bD" value="800" step="8"><span>cm</span></span></label>
             <label class="pf">Höhe<span class="in"><input type="number" id="bH" value="312" step="8"><span>cm</span></span></label>
-            <label class="pf">Dach<select id="bR"><option value="flat">Flachdach</option><option value="gable" selected>Satteldach</option><option value="hip">Walmdach</option><option value="mono">Pultdach</option></select></label>
+            <label class="pf rect-only">Dach<select id="bR"><option value="flat">Flachdach</option><option value="gable" selected>Satteldach</option><option value="hip">Walmdach</option><option value="mono">Pultdach</option></select></label>
           </div>
-          <button class="ghost wide" id="bAdd">Gebäude mit diesen Maßen einfügen</button>
-          <p class="tip">Oder ziehen Sie mit gedrückter Maustaste ein Rechteck auf. Gebäude dürfen auch außerhalb des Gartens stehen. Hilfslinien richten sie an Garten, Gebäuden und Produkten aus. Nachträglich ändern Sie ein Gebäude, indem Sie es im Modus „Auswählen“ anklicken.</p>
+          <button class="ghost wide rect-only" id="bAdd">Gebäude mit diesen Maßen einfügen</button>
+          <p class="tip poly-only" hidden>Klicken Sie die Ecken des Grundrisses nacheinander an. Hilfslinien richten sie aus. Zum Abschließen den ersten Punkt erneut anklicken oder Enter drücken. Für unterschiedliche Höhen zeichnen Sie einfach mehrere Bauteile nebeneinander.</p>
+          <p class="sublbl">Fenster &amp; Türen</p>
+          <div class="seg full" role="group" aria-label="Fenster und Türen"><button data-om="off" aria-pressed="true">Aus</button><button data-om="win" aria-pressed="false">Fenster</button><button data-om="tall" aria-pressed="false">Bodentief</button><button data-om="door" aria-pressed="false">Tür</button></div>
+          <p class="tip" id="omTip" hidden>Klicken Sie auf eine Hauswand, um das Element zu setzen. Mit Alt-Klick entfernen Sie es wieder.</p>
+          <p class="tip rect-only">Oder ziehen Sie mit gedrückter Maustaste ein Rechteck auf. Gebäude dürfen auch außerhalb des Gartens stehen. Hilfslinien richten sie an Garten, Gebäuden und Produkten aus. Nachträglich ändern Sie ein Gebäude, indem Sie es im Modus „Auswählen“ anklicken.</p>
           <div class="row2s"><button class="ghost" id="bUndo">Letztes Gebäude entfernen</button></div>
 </div>
       </div>
@@ -681,6 +686,7 @@ const M={
   edgeHi:new T.MeshStandardMaterial({color:0xcfcac2,roughness:.9}),
   wallM:new T.MeshStandardMaterial({color:0xbab5ad,roughness:.9}),
   roof:new T.MeshStandardMaterial({color:0x4b4a48,roughness:.8,side:T.DoubleSide}),
+  door:new T.MeshStandardMaterial({color:0x3e3b37,roughness:.6}),
   curb:new T.MeshStandardMaterial({map:tex(noiseCanvas(256,"#c9c4bc",.08,200,17),1),roughness:.9}),
   plaster:new T.MeshStandardMaterial({color:0xe9e6e0,roughness:.95}),
   glass:new T.MeshStandardMaterial({color:0x34444a,roughness:.15,metalness:.4}),
@@ -826,8 +832,23 @@ function roofGeo(type,W,D,r,noEnds){const v=[],P=(x,y,z)=>[x,y,z],tri=(a,b,c)=>v
   if(type==="mono"){const C2=P(W/2,r,D/2),D2=P(-W/2,r,D/2);quad(A,D2,C2,B);if(!noEnds){tri(A,Dd,D2);tri(B,C2,C);quad(Dd,C,C2,D2)}}
   else{let h0=type==="hip"?Math.min(D/2,W/2):0;const R1=P(-W/2+h0,r,0),R2=P(W/2-h0,r,0);quad(A,R1,R2,B);quad(Dd,C,R2,R1);if(!noEnds||type==="hip"){tri(A,Dd,R1);tri(B,R2,C)}}
   const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(v,3));g.computeVertexNormals();return g}
-function normB(b){return Array.isArray(b)?{x0:b[0],z0:b[1],x1:b[2],z1:b[3],h:b[4],r:"flat",rd:0}:b}
-function buildBuildings(){disposeGroup(bldG);state.buildings=state.buildings.map(normB);state.buildings.forEach((b,i)=>{const w=b.x1-b.x0,d=b.z1-b.z0,h=b.h,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;
+function normB(b){if(Array.isArray(b))return{x0:b[0],z0:b[1],x1:b[2],z1:b[3],h:b[4],r:"flat",rd:0};if(b.poly){const bb=bbox(b.poly);b.x0=bb.x0;b.x1=bb.x1;b.z0=bb.z0;b.z1=bb.z1;b.r="flat"}return b}
+function bPoly(b){return b.poly||[[b.x0,b.z0],[b.x1,b.z0],[b.x1,b.z1],[b.x0,b.z1]]}
+function rectHitsPoly(cx,cz,w,d,p){const x0=cx-w/2+.01,x1=cx+w/2-.01,z0=cz-d/2+.01,z1=cz+d/2-.01,nx=Math.max(1,Math.ceil((x1-x0)/.08)),nz=Math.max(1,Math.ceil((z1-z0)/.08));
+  for(let i=0;i<=nx;i++)for(let j=0;j<=nz;j++)if(inPoly(p,x0+(x1-x0)*i/nx,z0+(z1-z0)*j/nz))return true;for(const[x,z]of p)if(x>x0&&x<x1&&z>z0&&z<z1)return true;return false}
+const OPN={win:{w:1.2,h:1.36,y:.96,n:"Fenster"},tall:{w:1.84,h:2.24,y:.04,n:"Bodentiefes Fenster"},door:{w:1.04,h:2.16,y:0,n:"Tür"}};
+function addOpenings(b,i){const p=bPoly(b),opn=b.op||[];opn.forEach((o,k)=>{const sp=OPN[o.k];if(!sp)return;const a=p[o.e],c=p[(o.e+1)%p.length];if(!a||!c)return;const dx=c[0]-a[0],dz=c[1]-a[1],L=Math.hypot(dx,dz);if(L<sp.w+.2||sp.y+sp.h>b.h-.12)return;
+  const t=Math.min(1-(sp.w/2+.08)/L,Math.max((sp.w/2+.08)/L,o.t)),px=a[0]+dx*t,pz=a[1]+dz*t;let nx=dz/L,nz=-dx/L;if(inPoly(p,px+nx*.1,pz+nz*.1)){nx=-nx;nz=-nz}
+  const g=new T.Group();g.position.set(px+nx*.012,sp.y,pz+nz*.012);g.rotation.y=-Math.atan2(dz,dx);if(Math.abs(Math.atan2(nz,nx)+Math.atan2(dz,dx)+PI2)<.01||true){}
+  const pane=new T.Mesh(new T.BoxGeometry(sp.w-.1,sp.h-.1,.03),o.k==="door"?M.door:M.glass);pane.position.y=sp.h/2;g.add(pane);
+  [[sp.w,.06,0,sp.h-.03],[sp.w,.06,0,.03],[.06,sp.h,-sp.w/2+.03,sp.h/2],[.06,sp.h,sp.w/2-.03,sp.h/2]].forEach(([w,h,x,y])=>{const f=new T.Mesh(new T.BoxGeometry(w,h,.06),M.frame);f.position.set(x,y,0);g.add(f)});
+  if(o.k==="door"){const hd=new T.Mesh(new T.BoxGeometry(.12,.025,.04),M.metal);hd.position.set(sp.w/2-.16,1.02,.04);g.add(hd)}
+  if(o.k==="win"){const sill=new T.Mesh(new T.BoxGeometry(sp.w+.08,.03,.12),M.frame);sill.position.set(0,-.01,.05);g.add(sill)}
+  const nrm=new T.Vector3(nx,0,nz);g.lookAt(g.position.clone().add(nrm));g.traverse(m=>{if(m.isMesh){m.castShadow=false;m.receiveShadow=true;m.userData.bld=i;m.userData.opn=k}});bldG.add(g)})}
+function buildBuildings(){disposeGroup(bldG);state.buildings=state.buildings.map(normB);state.buildings.forEach((b,i)=>{
+  if(b.poly){const sh=new T.Shape(b.poly.map(([x,z])=>new T.Vector2(x,-z))),m=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:b.h,bevelEnabled:false}),M.plaster);m.rotation.x=-PI2;m.castShadow=m.receiveShadow=true;m.userData.bld=i;bldG.add(m);
+    const cap=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:.12,bevelEnabled:false}),M.frame);cap.rotation.x=-PI2;cap.position.y=b.h;cap.castShadow=true;cap.userData.bld=i;bldG.add(cap);addOpenings(b,i);return}
+  addOpenings(b,i);const w=b.x1-b.x0,d=b.z1-b.z0,h=b.h,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;
   const m=new T.Mesh(new T.BoxGeometry(w,h,d),M.plaster);m.position.set(cx,h/2,cz);m.castShadow=m.receiveShadow=true;m.userData.bld=i;bldG.add(m);
   if(b.r==="flat"){const cap=new T.Mesh(new T.BoxGeometry(w+.04,.16,d+.04),M.frame);cap.position.set(cx,h+.08,cz);cap.castShadow=true;cap.userData.bld=i;bldG.add(cap)}
   else{const o=.3,along=b.rd?d:w,across=b.rd?w:d,pitch=b.r==="mono"?Math.tan(12*Math.PI/180):Math.tan(35*Math.PI/180),rise=b.r==="mono"?(across+2*o)*pitch:(across/2+o)*pitch;
@@ -885,7 +906,7 @@ function blocked(o,x,z){const f=fp(o),e=1e-6;blockWhy="";if(!rectInPoly(x,z,f.w,
   for(const zn of zonesAt(o,x,z)){const cxz=(zn.x0+zn.x1)/2,czz=(zn.z0+zn.z1)/2;if(!rectInPoly(cxz,czz,zn.x1-zn.x0,zn.z1-zn.z0)){blockWhy="zoneOut";return true}
     for(const b0 of state.buildings){const b=normB(b0);if(ovl(zn,{x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1},e)){blockWhy="zoneMe";return true}}
     for(const q of objects){if(q===o||!q.visible||isP(q))continue;const g=fp(q);if(ovl(zn,{x0:q.position.x-g.w/2,x1:q.position.x+g.w/2,z0:q.position.z-g.d/2,z1:q.position.z+g.d/2},e)){blockWhy="zoneMe";return true}}}
-  for(const b0 of state.buildings){const b=normB(b0);if(x+f.w/2>b.x0+e&&x-f.w/2<b.x1-e&&z+f.d/2>b.z0+e&&z-f.d/2<b.z1-e)return true}
+  for(const b0 of state.buildings){const b=normB(b0);if(x+f.w/2>b.x0+e&&x-f.w/2<b.x1-e&&z+f.d/2>b.z0+e&&z-f.d/2<b.z1-e&&(!b.poly||rectHitsPoly(x,z,f.w,f.d,b.poly)))return true}
   for(const q of objects){if(q===o||!q.visible)continue;if(isP(q)&&q.userData.host===o)continue;const g=fp(q);if(Math.abs(x-q.position.x)<(f.w+g.w)/2-e&&Math.abs(z-q.position.z)<(f.d+g.d)/2-e){
     if(isP(o)&&INTER[q.userData.pid]&&hostAt(o,x,z)===q)continue;return true}}return false}
 function sinkOf(o){const D=o.userData.dims;return(D&&D.sink)||0}
@@ -965,7 +986,7 @@ function enterEye(){if(!state.poly)return;select(null);if(tool!=="select")setToo
   eye={x,z,yaw:Math.atan2(-(cx-x),-(cz-z)||-1),pitch:-.08,keys:{},walk:null,drag:null,y:heightAt(x,z)+1.65};orbit.enabled=false;camera.fov=60;camera.updateProjectionMatrix();camera.rotation.order="YXZ";
   stage.classList.add("eye");$("eyehint").hidden=false;cv.style.cursor="grab"}
 function exitEye(){eye=null;camera.fov=38;camera.updateProjectionMatrix();camera.rotation.order="XYZ";orbit.enabled=true;stage.classList.remove("eye");$("eyehint").hidden=true;$("veye").setAttribute("aria-pressed",false);cv.style.cursor="default"}
-function eyeBlocked(x,z){const bb=bbox(state.poly);if(x<bb.x0-4||x>bb.x1+4||z<bb.z0-4||z>bb.z1+4)return true;for(const b0 of state.buildings){const b=normB(b0);if(x>b.x0-.2&&x<b.x1+.2&&z>b.z0-.2&&z<b.z1+.2)return true}return false}
+function eyeBlocked(x,z){const bb=bbox(state.poly);if(x<bb.x0-4||x>bb.x1+4||z<bb.z0-4||z>bb.z1+4)return true;for(const b0 of state.buildings){const b=normB(b0);if(x>b.x0-.2&&x<b.x1+.2&&z>b.z0-.2&&z<b.z1+.2&&(!b.poly||inPoly(b.poly,x,z)||rectHitsPoly(x,z,.4,.4,b.poly)))return true}return false}
 function eyeStep(dt){const k=eye.keys,f=(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0),r=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0);
   if(f||r){eye.walk=null;const sp=1.6*dt,fx=-Math.sin(eye.yaw),fz=-Math.cos(eye.yaw),nx=eye.x+(fx*f+(-fz)*r)*sp,nz=eye.z+(fz*f+fx*r)*sp;if(!eyeBlocked(nx,eye.z))eye.x=nx;if(!eyeBlocked(eye.x,nz))eye.z=nz}
   if(eye.walk){const w=eye.walk,kk=Math.min(1,(performance.now()-w.t0)/w.dur),e2=kk<.5?2*kk*kk:1-Math.pow(-2*kk+2,2)/2;eye.x=w.x0+(w.x1-w.x0)*e2;eye.z=w.z0+(w.z1-w.z0)*e2;if(kk>=1)eye.walk=null}
@@ -988,7 +1009,7 @@ $("v3d").onclick=()=>setView("3d");$("vtop").onclick=()=>setView("top");$("fit")
 let tool="select",paintMat="bed",brushS=.8,paintMode="brush",rectDraft=null,tMode="set",tSize=.8,tStr=4,tTarget=.4,tShape="rect",tEdge="step",edgeType="curb",edgeDraft=null;
 const TOOLN={paint:"Malen",terrain:"Gelände",edge:"Kanten",build:"Gebäude",garden:"Fläche bearbeiten",plan:"Plan bearbeiten"};
 function applyOrbitMode(){const t=tool!=="select";orbit.enableRotate=viewMode!=="top"&&!t;orbit.mouseButtons={LEFT:t?null:T.MOUSE.ROTATE,MIDDLE:T.MOUSE.DOLLY,RIGHT:T.MOUSE.PAN};orbit.touches={ONE:t?null:T.TOUCH.ROTATE,TWO:T.TOUCH.DOLLY_PAN}}
-function setTool(t){clearGuides();setTimeout(()=>showVHandles(),0);if(calib)endCalib();$("hread").hidden=true;if(edgeDraft&&t!=="edge")edgeFinish();tool=t;document.querySelectorAll(".tool").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===t));
+function setTool(t){clearGuides();if(typeof bDraft!=="undefined"&&bDraft){bDraft=null;bDraftRender()}setTimeout(()=>showVHandles(),0);if(calib)endCalib();$("hread").hidden=true;if(edgeDraft&&t!=="edge")edgeFinish();tool=t;document.querySelectorAll(".tool").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===t));
   ["Select","Paint","Terrain","Edge","Build","Garden","Plan"].forEach(n=>$("opt"+n).hidden=("opt"+n).toLowerCase()!=="opt"+t);
   $("toolchip").hidden=t==="select";$("toolname").textContent=(TOOLN[t]||"")+" aktiv";if(t!=="select"){select(null);showHover(null);hint(false)}else refresh();brushRing.visible=false;showSq(null);rectDraft=null;applyOrbitMode();cv.style.cursor=t==="select"?"default":"crosshair"}
 document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>setTool(b.dataset.tool));$("toolOff").onclick=()=>setTool("select");
@@ -1001,6 +1022,24 @@ document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{paintMode=b.dat
   $("paintTip").textContent=paintMode==="brush"?"Ein quadratischer Pinsel im 8-cm-Raster. Mit gedrückter Maustaste oder dem Finger über den Garten malen. Mit dem Grundbelag radieren Sie.":"Ziehen Sie ein Rechteck auf. Es rastet im 8-cm-Raster ein und wird mit dem gewählten Belag gefüllt."});
 let bHv=3.12;$("bH").addEventListener("change",e=>{bHv=Math.max(2,r2((+e.target.value||0)/100));e.target.value=cm(bHv)});
 ["bW","bD"].forEach(id=>$(id).addEventListener("change",e=>{e.target.value=cm(Math.max(1,r2((+e.target.value||0)/100)))}));
+let bShape="rect",openMode="off",bDraft=null;const bDraftG=new T.Group();scene.add(bDraftG);
+function bUI(){document.querySelectorAll("[data-bs]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bs===bShape));document.querySelectorAll(".rect-only").forEach(x=>x.hidden=bShape!=="rect");document.querySelectorAll(".poly-only").forEach(x=>x.hidden=bShape!=="poly");
+  document.querySelectorAll("[data-om]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.om===openMode));$("omTip").hidden=openMode==="off"}
+document.querySelectorAll("[data-bs]").forEach(b=>b.onclick=()=>{bShape=b.dataset.bs;openMode="off";bDraft=null;bDraftRender();bUI()});
+document.querySelectorAll("[data-om]").forEach(b=>b.onclick=()=>{openMode=b.dataset.om;bDraft=null;bDraftRender();bUI();if(openMode!=="off")toast("Klicken Sie auf eine Hauswand.")});
+function bPt(e){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return null;let[x,z]=snapG(g.x,g.z);const p=bDraft?bDraft.p:[];
+  if(p.length>=3&&Math.hypot(x-p[0][0],z-p[0][1])<.3){clearGuides();return p[0].slice()}
+  if(p.length){const[lx,lz]=p[p.length-1],dx=x-lx,dz=z-lz,ang=Math.abs(Math.atan2(dz,dx)*180/Math.PI)%90;if(ang<7||ang>83){if(Math.abs(dx)>Math.abs(dz))z=lz;else x=lx}}return guidePoint(x,z,null,p)}
+function bDraftRender(cur){disposeGroup(bDraftG);if(!bDraft)return;const p=bDraft.p.concat(cur?[cur]:[]);if(p.length>=2){const l=new T.Line(new T.BufferGeometry().setFromPoints(p.map(([x,z])=>new T.Vector3(x,.05,z))),new T.LineBasicMaterial({color:0x054958,depthTest:false}));l.renderOrder=9;bDraftG.add(l)}
+  if(bDraft.p.length>=3){const sh=new T.Shape(bDraft.p.map(([x,z])=>new T.Vector2(x,-z))),m=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:bHv,bevelEnabled:false}),new T.MeshStandardMaterial({color:0xe9e6e0,transparent:true,opacity:.45}));m.rotation.x=-PI2;bDraftG.add(m)}
+  bDraft.p.forEach(([x,z],i)=>{const m=new T.Mesh(new T.CircleGeometry(i===0&&bDraft.p.length>=3?.16:.09,20),new T.MeshBasicMaterial({color:0x054958,depthTest:false}));m.rotation.x=-PI2;m.position.set(x,.06,z);m.renderOrder=10;bDraftG.add(m)})}
+function bFinish(){if(!bDraft||bDraft.p.length<3){bDraft=null;bDraftRender();return}let p=bDraft.p;if(p.length>3&&p[p.length-1][0]===p[0][0]&&p[p.length-1][1]===p[0][1])p=p.slice(0,-1);bDraft=null;bDraftRender();clearGuides();
+  if(areaOf(p)<1){toast("Der Grundriss ist zu klein.");return}state.buildings.push({poly:p.map(q=>[+q[0].toFixed(3),+q[1].toFixed(3)]),h:bHv,r:"flat",rd:0});buildBuildings();commit();toast("Gebäude angelegt. Höhe und Fassade können Sie anpassen.")}
+function bPolyClick(e){const q=bPt(e);if(!q)return;if(!bDraft)bDraft={p:[]};const p=bDraft.p;if(p.length>=3&&q[0]===p[0][0]&&q[1]===p[0][1]){bFinish();return}if(p.length&&Math.hypot(q[0]-p[p.length-1][0],q[1]-p[p.length-1][1])<.05)return;p.push(q);bDraftRender()}
+function placeOpening(e){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children,true);if(!h.length){toast("Bitte direkt auf eine Hauswand klicken.");return}let o=h[0].object;while(o&&o.userData.bld===undefined)o=o.parent;if(!o)return;const i=o.userData.bld,b=state.buildings[i],p=bPoly(b),pt=h[0].point;
+  let best=null;p.forEach((a,k)=>{const c=p[(k+1)%p.length],dx=c[0]-a[0],dz=c[1]-a[1],L2=dx*dx+dz*dz;if(!L2)return;let t=((pt.x-a[0])*dx+(pt.z-a[1])*dz)/L2;t=Math.max(0,Math.min(1,t));const d=Math.hypot(a[0]+dx*t-pt.x,a[1]+dz*t-pt.z);if(!best||d<best.d)best={k,t,d,L:Math.sqrt(L2)}});
+  if(!best||best.d>.3){toast("Bitte direkt auf eine Hauswand klicken.");return}const sp=OPN[openMode];if(best.L<sp.w+.2){toast("Diese Wand ist zu kurz dafür.");return}if(sp.y+sp.h>b.h-.12){toast("Das Gebäude ist dafür zu niedrig.");return}
+  const t=r2(best.t*best.L)/best.L;b.op=(b.op||[]).concat([{e:best.k,t:+t.toFixed(4),k:openMode}]);buildBuildings();commit()}
 $("bAdd").onclick=()=>{if(!state.poly)return;const w=r2(+$("bW").value/100),d=r2(+$("bD").value/100),c=viewCenter(),[x0,z0]=snapG(c.x-w/2,c.z-d/2);state.buildings.push({x0,z0,x1:+(x0+w).toFixed(3),z1:+(z0+d).toFixed(3),h:bHv,r:$("bR").value,rd:w>=d?0:1});buildBuildings();setTool("select");selectB(state.buildings.length-1);commit();toast("Gebäude eingefügt. Ziehen Sie es an die richtige Stelle.")};
 $("bUndo").onclick=()=>{if(!state.buildings.length)return;state.buildings.pop();buildBuildings();commit()};
 $("tSize").addEventListener("input",e=>{tSize=r2(+e.target.value)/2;$("tSizeO").textContent=fmtR(tSize*2)});
@@ -1054,7 +1093,7 @@ const guideG=new T.Group();scene.add(guideG);const gMat=new T.LineDashedMaterial
 function clearGuides(){guideG.children.slice().forEach(c=>{guideG.remove(c);c.geometry.dispose()})}
 function cands(ex,extra){const xs=[],zs=[],ax=(v,a,b)=>xs.push({v,a:Math.min(a,b),b:Math.max(a,b)}),az=(v,a,b)=>zs.push({v,a:Math.min(a,b),b:Math.max(a,b)});
   (state.poly||[]).forEach(([x,z])=>{ax(x,z,z);az(z,x,x)});
-  state.buildings.forEach((b0,i)=>{if(ex&&ex.b===i)return;const b=normB(b0);[b.x0,b.x1,(b.x0+b.x1)/2].forEach(v=>ax(v,b.z0,b.z1));[b.z0,b.z1,(b.z0+b.z1)/2].forEach(v=>az(v,b.x0,b.x1))});
+  state.buildings.forEach((b0,i)=>{if(ex&&ex.b===i)return;const b=normB(b0);if(b.poly){b.poly.forEach(([x,z])=>{ax(x,z,z);az(z,x,x)});return}[b.x0,b.x1,(b.x0+b.x1)/2].forEach(v=>ax(v,b.z0,b.z1));[b.z0,b.z1,(b.z0+b.z1)/2].forEach(v=>az(v,b.x0,b.x1))});
   objects.forEach(o=>{if(ex&&ex.o===o||!o.visible)return;const f=fp(o),x=o.position.x,z=o.position.z;[x-f.w/2,x,x+f.w/2].forEach(v=>ax(v,z-f.d/2,z+f.d/2));[z-f.d/2,z,z+f.d/2].forEach(v=>az(v,x-f.w/2,x+f.w/2))});
   state.edges.forEach((e,i)=>{if(ex&&ex.e===i)return;e.p.forEach(([x,z])=>{ax(x,z,z);az(z,x,x)})});
   (extra||[]).forEach(([x,z])=>{ax(x,z,z);az(z,x,x)});return{xs,zs}}
@@ -1091,6 +1130,7 @@ function selInfo(){const P=$("sbProps");let h="";
     if(p.opts){const on=(selected.userData.dims&&selected.userData.dims.op)||[];h+='<div class="pf">Ausstattung<div class="optl">'+p.opts.map(q=>'<label class="optc"><input type="checkbox" data-opt="'+q.id+'"'+(on.includes(q.id)?" checked":"")+'><span>'+q.n+'</span><b>+ '+eur(q.p)+'</b></label>').join("")+'</div></div>'}
     if(p.sizes){const cur=(selected.userData.dims&&selected.userData.dims.sz)||0;h+='<div class="pf">Größe<div class="szseg" role="group" aria-label="Größe">'+p.sizes.map((z,i)=>'<button data-size="'+i+'" aria-pressed="'+(i===cur)+'">'+sizeLbl(z)+'</button>').join("")+'</div></div>'}
     if(p.rs)Object.keys(p.rs).forEach(k=>{h+=fieldH(k,p.hs&&k==="h"?"Höhe":NAMES[k],cm(dimOf(selected,k)))});if(p.hatch){const op=selected.userData.dims&&selected.userData.dims.open;h+='<span class="pf">Technikraum<button class="tg" data-act="hatch">'+(op?"Abdeckung auflegen":"Abdeckung abnehmen")+'</button></span>'}$("rot").hidden=$("dup").hidden=false}
+  else if(selB>=0&&state.buildings[selB].poly){const b=state.buildings[selB];$("selname").textContent="Gebäude (Grundriss)";$("seldim").textContent=cm(b.x1-b.x0)+" × "+cm(b.z1-b.z0)+" cm";h=fieldH("bh","Höhe",cm(b.h))+'<span class="pf">Fassade<span class="tip" style="margin:4px 0 0;text-transform:none;letter-spacing:0;font-weight:300">Fenster und Türen setzen Sie im Werkzeug „Gebäude“.</span></span>';$("rot").hidden=false;$("dup").hidden=false}
   else if(selB>=0){const b=state.buildings[selB];$("selname").textContent="Gebäude";$("seldim").textContent=cm(b.x1-b.x0)+" × "+cm(b.z1-b.z0)+" cm";
     h=fieldH("bw","Breite",cm(b.x1-b.x0))+fieldH("bd","Tiefe",cm(b.z1-b.z0))+fieldH("bh","Höhe",cm(b.h))+'<label class="pf">Dach<select data-sel="r">'+[["flat","Flachdach"],["gable","Satteldach"],["hip","Walmdach"],["mono","Pultdach"]].map(([v,n])=>'<option value="'+v+'"'+(b.r===v?" selected":"")+'>'+n+'</option>').join("")+'</select></label>'+(b.r!=="flat"?'<span class="pf">First<button class="tg" data-act="rd">drehen</button></span>':'');$("rot").hidden=false;$("dup").hidden=false}
   else if(selE>=0){const e=state.edges[selE],t=EDGE[e.t]||EDGE.curb;$("selname").textContent=t.n;$("seldim").textContent=e.p.length+" Punkte";
@@ -1121,7 +1161,7 @@ function toggleOpt(o,id,on){const p=BYID[o.userData.pid],D={...(o.userData.dims|
   o.children.slice().forEach(c=>{o.remove(c);c.traverse(q=>{if(q.geometry)q.geometry.dispose()})});o.add(buildInner(p,o.userData.dims||{}));selInfo();commit();if(id==="cover"&&on)toast("Abgedeckt: Schwimmen ist jetzt nicht möglich.")}
 $("sbProps").addEventListener("change",e=>{const t=e.target;if(t.dataset.opt&&selected){toggleOpt(selected,t.dataset.opt,t.checked);return}if(t.dataset.sel){setProp(t.dataset.sel,t.value);return}if(t.dataset.k&&t.tagName==="INPUT")setProp(t.dataset.k,(+t.value||0)/100)});
 $("sbProps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.size!==undefined){if(b.getAttribute("aria-pressed")!=="true")setProp("size",+b.dataset.size);return}if(b.dataset.act){setProp(b.dataset.act);return}if(b.dataset.step){const k=b.dataset.k,inp=$("sbProps").querySelector('input[data-k="'+k+'"]');setProp(k,(+inp.value/100)+SNAP*(+b.dataset.step)*(e.shiftKey?5:1))}});
-const frameB=b=>{if(!handleDrag||true)updateHandles(b);frame.geometry.setFromPoints([new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
+const frameB=b=>{if(!handleDrag||true)updateHandles(b);frame.geometry.setFromPoints(b.poly?b.poly.map(([x,z])=>new T.Vector3(x,.03,z)):[new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
 const eSel=new T.Line(new T.BufferGeometry(),new T.LineBasicMaterial({color:0x17a2b8,depthTest:false}));eSel.renderOrder=8;eSel.visible=false;scene.add(eSel);
 function frameE(e){if(!e){eSel.visible=false;return}const t=EDGE[e.t]||EDGE.curb,H=(e.h||t.h);eSel.geometry.setFromPoints(e.p.map(([x,z])=>new T.Vector3(x,heightAt(x,z)+H,z)));eSel.visible=true}
 /* ---------- Plan als Vorlage ---------- */
@@ -1188,9 +1228,9 @@ function shiftGarden(dx,dz){
 
 /* ---------- Gebäude ziehen (Push & Pull) ---------- */
 const hG=new T.Group();scene.add(hG);const hMat=new T.MeshBasicMaterial({color:0x054958,depthTest:false}),hMatH=new T.MeshBasicMaterial({color:0x17a2b8,depthTest:false});
-function roofTop(b){if(b.r==="flat")return .16;const across=b.rd?b.x1-b.x0:b.z1-b.z0;return b.r==="mono"?(across+.6)*Math.tan(12*Math.PI/180):(across/2+.3)*Math.tan(35*Math.PI/180)}
+function roofTop(b){if(b.poly)return .12;if(b.r==="flat")return .16;const across=b.rd?b.x1-b.x0:b.z1-b.z0;return b.r==="mono"?(across+.6)*Math.tan(12*Math.PI/180):(across/2+.3)*Math.tan(35*Math.PI/180)}
 function updateHandles(b){disposeGroup(hG);if(!b)return;const cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,y=Math.min(1.2,b.h/2);
-  [["x0",b.x0-.18,y,cz],["x1",b.x1+.18,y,cz],["z0",cx,y,b.z0-.18],["z1",cx,y,b.z1+.18],["h",cx,b.h+roofTop(b)+.35,cz]].forEach(([k,x,yy,z])=>{const m=new T.Mesh(k==="h"?new T.ConeGeometry(.14,.28,4):new T.BoxGeometry(.24,.24,.24),hMat);m.position.set(x,yy,z);if(k==="h")m.rotation.y=Math.PI/4;else m.rotation.y=k[0]==="x"?0:PI2;m.renderOrder=10;m.userData.hk=k;hG.add(m)})}
+  (b.poly?[["h",cx,b.h+roofTop(b)+.35,cz]]:[["x0",b.x0-.18,y,cz],["x1",b.x1+.18,y,cz],["z0",cx,y,b.z0-.18],["z1",cx,y,b.z1+.18],["h",cx,b.h+roofTop(b)+.35,cz]]).forEach(([k,x,yy,z])=>{const m=new T.Mesh(k==="h"?new T.ConeGeometry(.14,.28,4):new T.BoxGeometry(.24,.24,.24),hMat);m.position.set(x,yy,z);if(k==="h")m.rotation.y=Math.PI/4;else m.rotation.y=k[0]==="x"?0:PI2;m.renderOrder=10;m.userData.hk=k;hG.add(m)})}
 function handleTry(e){if(selB<0||!hG.children.length)return false;setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(hG.children,false);if(!h.length)return false;const k=h[0].object.userData.hk,b=state.buildings[selB];
   handleDrag={k,id:e.pointerId,b,top:roofTop(b)};h[0].object.material=hMatH;orbit.enabled=false;cv.setPointerCapture(e.pointerId);return true}
 function handleMove(e){const{k,b}=handleDrag;setNdc(e);ray.setFromCamera(ndc,camera);
@@ -1216,7 +1256,10 @@ cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)r
   if(tool!=="select"&&state.poly){const pt=groundAt(e);if(!pt)return;
     if(tool==="edge"){if(e.altKey){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(edgeG.children,false);if(h.length){state.edges.splice(h[0].object.userData.edge,1);buildEdges();commit();toast("Kante entfernt.")}return}
       const q=edgePoint(pt);if(!edgeDraft)edgeDraft={t:edgeType,p:[q]};else{const l=edgeDraft.p[edgeDraft.p.length-1],f=edgeDraft.p[0];if(Math.hypot(q[0]-l[0],q[1]-l[1])<.05){edgeFinish();clearGuides();return}if(edgeDraft.p.length>=2&&q[0]===f[0]&&q[1]===f[1]){edgeDraft.p.push(q);edgeFinish();clearGuides();toast("Kante geschlossen.");return}edgeDraft.p.push(q)}edgeDraftRender();return}
-    if(tool==="build"){if(e.altKey){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children,false);if(h.length){state.buildings.splice(h[0].object.userData.bld,1);buildBuildings();commit();toast("Gebäude entfernt.")}return}
+    if(tool==="build"&&e.altKey){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children,true);if(h.length){let o=h[0].object;while(o&&o.userData.bld===undefined)o=o.parent;if(o){const bi=o.userData.bld;if(o.userData.opn!==undefined){state.buildings[bi].op.splice(o.userData.opn,1);toast("Element entfernt.")}else{state.buildings.splice(bi,1);toast("Gebäude entfernt.")}buildBuildings();commit()}}return}
+    if(tool==="build"&&openMode!=="off"){placeOpening(e);return}
+    if(tool==="build"&&bShape==="poly"){bPolyClick(e);return}
+    if(tool==="build"){
       setNdc(e);ray.setFromCamera(ndc,camera);const g0=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g0)return;rectDraft={a:guidePoint(...snapG(g0.x,g0.z)),id:e.pointerId};cv.setPointerCapture(e.pointerId);return}
     if((tool==="paint"&&paintMode==="rect")||(tool==="terrain"&&tMode==="set"&&tShape==="rect")){if(!inPoly(state.poly,pt.x,pt.z))return;rectDraft={a:snapG(pt.x,pt.z),id:e.pointerId};cv.setPointerCapture(e.pointerId);return}
     if(!inPoly(state.poly,pt.x,pt.z))return;stroke={last:null,id:e.pointerId,base:T_?T_.h.slice():null};cv.setPointerCapture(e.pointerId);lastT=performance.now();
@@ -1225,7 +1268,7 @@ cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)r
   const ot=pickOther(e);if(ot&&ot.b!==undefined){selectB(ot.b);setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3()),b=state.buildings[ot.b];drag={b:ot.b,ox:g?b.x0-g.x:0,oz:g?b.z0-g.z:0,id:e.pointerId,moved:false};orbit.enabled=false;cv.setPointerCapture(e.pointerId);e.preventDefault();return}
   if(ot&&ot.e!==undefined){selectE(ot.e);return}
   drag={empty:true,x:e.clientX,y:e.clientY}});
-cv.addEventListener("dblclick",()=>{if(tool==="edge")edgeFinish()});
+cv.addEventListener("dblclick",()=>{if(tool==="edge")edgeFinish();if(tool==="build"&&bDraft)bFinish()});
 cv.addEventListener("pointermove",e=>{
   if(eye){if(eye.drag&&e.pointerId===eye.drag.id){const dx=e.clientX-eye.drag.x,dy=e.clientY-eye.drag.y;if(Math.hypot(dx,dy)>5)eye.drag.moved=true;eye.yaw=eye.drag.yaw+dx*.0045;eye.pitch=Math.max(-1.25,Math.min(1.1,eye.drag.pitch+dy*.0045))}return}
   if(vdrag){vMove(e);return}if(handleDrag){handleMove(e);return}if(planDrag){planMove(e);return}if(gardenDrag){gardenMove(e);return}
@@ -1235,13 +1278,15 @@ cv.addEventListener("pointermove",e=>{
   if(tool!=="select"&&state.poly){const pt=groundAt(e);
     if(tool==="edge"){showRing(null);if(edgeDraft&&pt)edgeDraftRender(edgePoint(pt));return}
     if(tool==="terrain"){const hr=$("hread");if(pt&&inPoly(state.poly,pt.x,pt.z)){const r=cv.getBoundingClientRect(),hv2=Math.round(heightAt(pt.x,pt.z)*100);hr.hidden=false;hr.style.left=(e.clientX-r.left)+"px";hr.style.top=(e.clientY-r.top)+"px";hr.textContent=(rectDraft?"Ziel "+(tTarget>=0?"+":"")+Math.round(tTarget*100):"Höhe "+(hv2>0?"+":"")+hv2)+" cm"}else hr.hidden=true}
+    if(tool==="build"&&openMode!=="off"){showRing(null);showSq(null);cv.style.cursor="copy";return}
+    if(tool==="build"&&bShape==="poly"){showRing(null);showSq(null);if(bDraft){const q=bPt(e);if(q)bDraftRender(q)}else{const q=bPt(e);if(q)showSq([q[0]-.04,q[1]-.04,q[0]+.04,q[1]+.04])}return}
     if(tool==="build"||(tool==="paint"&&paintMode==="rect")||(tool==="terrain"&&tMode==="set"&&tShape==="rect")){showRing(null);let g=pt;if(tool==="build"){setNdc(e);ray.setFromCamera(ndc,camera);g=ray.ray.intersectPlane(groundPlane,new T.Vector3())}if(!g)return;const b=guidePoint(...snapG(g.x,g.z));
       if(rectDraft){const r=normRect(rectDraft.a,b);showSq(r);rectLabel(r);if(tool==="build"){const w=r[2]-r[0],d=r[3]-r[1];draftBox.visible=w>.05&&d>.05;draftBox.scale.set(Math.max(w,.01),bHv,Math.max(d,.01));draftBox.position.set((r[0]+r[2])/2,bHv/2,(r[1]+r[3])/2)}}
       else showSq([b[0]-.04,b[1]-.04,b[0]+.04,b[1]+.04]);return}
     if(tool==="paint"){showRing(null);showSq(pt&&inPoly(state.poly,pt.x,pt.z)?sqAt(pt):null)}else{showRing(null);showSq(pt&&inPoly(state.poly,pt.x,pt.z)?sqAtS(pt,tSize*2):null)}
     if(stroke&&pt&&inPoly(state.poly,pt.x,pt.z)){if(tool==="paint")paintAt(pt);else sculptAt(pt)}return}
   if(drag&&drag.b!==undefined&&e.pointerId===drag.id){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return;const b=state.buildings[drag.b],w=b.x1-b.x0,d=b.z1-b.z0;let[x0,z0]=snapG(g.x+drag.ox,g.z+drag.oz);const[dx,dz]=guideRect(x0,z0,x0+w,z0+d,{b:drag.b});x0=+(x0+dx).toFixed(3);z0=+(z0+dz).toFixed(3);
-    if(x0===b.x0&&z0===b.z0)return;b.x0=x0;b.z0=z0;b.x1=+(x0+w).toFixed(3);b.z1=+(z0+d).toFixed(3);drag.moved=true;buildBuildings();return}
+    if(x0===b.x0&&z0===b.z0)return;if(b.poly){const ddx=x0-b.x0,ddz=z0-b.z0;b.poly=b.poly.map(([px,pz])=>[+(px+ddx).toFixed(3),+(pz+ddz).toFixed(3)])}b.x0=x0;b.z0=z0;b.x1=+(x0+w).toFixed(3);b.z1=+(z0+d).toFixed(3);drag.moved=true;buildBuildings();return}
   if(drag&&drag.o&&e.pointerId===drag.id){const g=groundAt(e);if(!g)return;let[x,z]=snapPos(drag.o,g.x+drag.ox,g.z+drag.oz);{const f=fp(drag.o),[dx,dz]=guideRect(x-f.w/2,z-f.d/2,x+f.w/2,z+f.d/2,{o:drag.o});x=+(x+dx).toFixed(4);z=+(z+dz).toFixed(4)}if(x===drag.o.position.x&&z===drag.o.position.z)return;const bad=blocked(drag.o,x,z);setPos(drag.o,x,z);if(!bad)drag.last=[x,z];drag.moved=true;showFrame(drag.o,bad);showFine(drag.o);measures(drag.o);if(BYID[drag.o.userData.pid].keep||bad)drawZones(drag.o);if(isP(drag.o)){const h=bad?null:hostAt(drag.o,x,z);setPose(drag.o,h?INTER[h.userData.pid]:"stand");if(h)drag.o.rotation.y=h.rotation.y}else followHost(drag.o)}
   else if(!drag&&e.pointerType==="mouse"){const o=pick(e);cv.style.cursor=o?"grab":"default";if(o!==hovered)showHover(o)}});
 cv.addEventListener("pointerleave",()=>{$("hread").hidden=true;if(!drag)showHover(null);showRing(null);if(!rectDraft)showSq(null)});
@@ -1259,12 +1304,13 @@ cv.addEventListener("pointerup",endDrag);cv.addEventListener("pointercancel",end
 
 orbit=new T.OrbitControls(camera,cv);orbit.enableDamping=true;orbit.dampingFactor=.08;orbit.minDistance=2.5;orbit.screenSpacePanning=false;applyOrbitMode();
 
-function rotateSel(){if(selB>=0){const b=state.buildings[selB],w=b.x1-b.x0,d=b.z1-b.z0,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;const[x0,z0]=snapG(cx-d/2,cz-w/2);b.x0=x0;b.z0=z0;b.x1=+(x0+d).toFixed(3);b.z1=+(z0+w).toFixed(3);b.rd=b.rd?0:1;buildBuildings();selInfo();commit();return}if(!selected)return;const o=selected,old=o.userData.rot,r0=o.rotation.y;o.userData.rot=(old+1)%4;const ud=o.userData;if(!ud.rc||!ud.rcPos||ud.rcPos[0]!==o.position.x||ud.rcPos[1]!==o.position.z)ud.rc=[o.position.x,o.position.z];const cx0=ud.rc[0],cz0=ud.rc[1];let[x,z]=snapPos(o,cx0,cz0);
+function rotateSel(){if(selB>=0&&state.buildings[selB].poly){const b=state.buildings[selB],cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;let p=b.poly.map(([x,z])=>[cx-(z-cz),cz+(x-cx)]);const bb=bbox(p),[sx,sz]=snapG(bb.x0,bb.z0);p=p.map(([x,z])=>[+(x+sx-bb.x0).toFixed(3),+(z+sz-bb.z0).toFixed(3)]);b.poly=p;buildBuildings();selInfo();commit();return}
+  if(selB>=0){const b=state.buildings[selB],w=b.x1-b.x0,d=b.z1-b.z0,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;const[x0,z0]=snapG(cx-d/2,cz-w/2);b.x0=x0;b.z0=z0;b.x1=+(x0+d).toFixed(3);b.z1=+(z0+w).toFixed(3);b.rd=b.rd?0:1;buildBuildings();selInfo();commit();return}if(!selected)return;const o=selected,old=o.userData.rot,r0=o.rotation.y;o.userData.rot=(old+1)%4;const ud=o.userData;if(!ud.rc||!ud.rcPos||ud.rcPos[0]!==o.position.x||ud.rcPos[1]!==o.position.z)ud.rc=[o.position.x,o.position.z];const cx0=ud.rc[0],cz0=ud.rc[1];let[x,z]=snapPos(o,cx0,cz0);
   if(blocked(o,x,z)){let best=null;for(let r=1;r<=6&&!best;r++)for(let i=-r;i<=r&&!best;i++)for(let j=-r;j<=r;j++){if(Math.max(Math.abs(i),Math.abs(j))!==r)continue;const[a,b]=snapPos(o,cx0+i*SNAP,cz0+j*SNAP);if(!blocked(o,a,b)){best=[a,b];break}}
     if(best)[x,z]=best;else{o.userData.rot=old;toast("Zum Drehen ist hier kein Platz.");return}}
   setPos(o,x,z);ud.rcPos=[o.position.x,o.position.z];const r1=-o.userData.rot*PI2,tg=r0-PI2;animate(k=>{const e=1-Math.pow(1-k,3);o.rotation.y=r0+(tg-r0)*e;if(k>=1)o.rotation.y=r1},220);showFrame(o,false);selInfo();measures(o);commit()}
 function delSel(){if(selB>=0){state.buildings.splice(selB,1);select(null);buildBuildings();commit();return}if(selE>=0){state.edges.splice(selE,1);select(null);buildEdges();commit();return}if(!selected)return;const o=selected;select(null);if(RM){removeObject(o);commit();return}animate(k=>{const s=1-k*.9;o.scale.set(s,s,s);if(k>=1){removeObject(o);commit()}},160)}
-function dupSel(){if(selB>=0){const b={...state.buildings[selB]},w=b.x1-b.x0;b.x0=+(b.x0+w+.48).toFixed(3);b.x1=+(b.x1+w+.48).toFixed(3);state.buildings.push(b);buildBuildings();selectB(state.buildings.length-1);commit();return}if(!selected)return;const o=selected,n=addObject(o.userData.pid,0,0,o.userData.rot,o.userData.dims?{...o.userData.dims}:null),f=findFree(n,o.position.x+fp(o).w,o.position.z);
+function dupSel(){if(selB>=0){const b={...state.buildings[selB]},w=b.x1-b.x0;if(b.op)b.op=b.op.map(o=>({...o}));if(b.poly)b.poly=b.poly.map(([x,z])=>[+(x+w+.48).toFixed(3),z]);b.x0=+(b.x0+w+.48).toFixed(3);b.x1=+(b.x1+w+.48).toFixed(3);state.buildings.push(b);buildBuildings();selectB(state.buildings.length-1);commit();return}if(!selected)return;const o=selected,n=addObject(o.userData.pid,0,0,o.userData.rot,o.userData.dims?{...o.userData.dims}:null),f=findFree(n,o.position.x+fp(o).w,o.position.z);
   if(!f){removeObject(n);toast("Kein Platz mehr. Vergrößern Sie die Gartenfläche.");return}setPos(n,f[0],f[1]);dropIn(n);select(n);commit()}
 $("rot").onclick=rotateSel;$("del").onclick=delSel;$("dup").onclick=dupSel;$("undo").onclick=undo;$("redo").onclick=redo;
 document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"))return;if(!$("wiz").hidden)return;
@@ -1274,6 +1320,7 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INP
   if((e.ctrlKey||e.metaKey)&&(e.key==="z"||e.key==="Z")){e.preventDefault();e.shiftKey?redo():undo();return}
   if((e.ctrlKey||e.metaKey)&&(e.key==="y"||e.key==="Y")){e.preventDefault();redo();return}
   if(tool==="edge"&&e.key==="Enter"){edgeFinish();return}
+  if(tool==="build"&&bDraft){if(e.key==="Enter"){bFinish();return}if(e.key==="Escape"){bDraft=null;bDraftRender();clearGuides();return}if(e.key==="Backspace"){e.preventDefault();bDraft.p.pop();bDraftRender();return}}
   if(e.key==="Escape"){if(edgeDraft){edgeDraft=null;edgeDraftRender();return}if(tool!=="select"){setTool("select");return}select(null);closeSheets();$("help").hidden=true;return}
   if(tool!=="select")return;
   const ar={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
