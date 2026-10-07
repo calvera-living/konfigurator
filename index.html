@@ -306,6 +306,12 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .calbar .row2{display:flex;gap:10px;align-items:flex-end}
 .calbar .pf input{width:90px}
 .calbar .ghost.pri{background:var(--petrol);color:#fff;border-color:var(--petrol)}
+.row small.sz{font-size:12px;color:var(--text);margin-left:22px}
+.szseg{display:flex;flex-wrap:wrap;border:1px solid var(--line);background:#fff}
+.szseg button{border:0;border-left:1px solid var(--line);padding:8px 12px;font-size:12.5px;background:#fff;cursor:pointer;text-transform:none;letter-spacing:0;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--text)}
+.szseg button:first-child{border-left:0}
+.szseg button:hover{color:var(--petrol)}
+.szseg button[aria-pressed="true"]{background:var(--petrol);color:#fff}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -684,15 +690,15 @@ function plant(g,x,z,y,s){const a=new T.Mesh(new T.IcosahedronGeometry(.16*s,1),
 /* ---------- Produkte (später aus Wix-CMS oder Tabelle) ---------- */
 const CATS=["Pool & Wasser","Garten","Outdoor Kitchen","Pflanzen","Extras"];
 const PRODUCTS=[
- {id:"pool",cat:0,name:"Lounge Pool",w:2.48,d:2.48,price:9990,dims:"2,48 × 2,48 m",build(g){trough(g,2.48,.96,2.48,.16,.84,M.water);g.add(box(2.16,.48,.4,M.concrete,0,0,-1.24+.36));for(let i=0;i<5;i++)g.add(box(2.5,.064,.03,M.wood,0,.064+i*.08,1.255))}},
- {id:"stairs",cat:0,name:"Pooltreppe",w:.96,d:.96,dims:"Maße folgen",build(g){for(let i=0;i<3;i++)g.add(box(.96,.32*(i+1),.32,M.concrete,0,0,.32-i*.32))}},
- {id:"wtrough",cat:0,name:"Wassertrog",w:1.2,d:.48,dims:"Maße folgen",build(g){trough(g,1.2,.48,.48,.064,.42,M.water)}},
- {id:"planter",cat:1,name:"Pflanztrog",w:1.2,d:.48,dims:"Maße folgen",build(g){trough(g,1.2,.56,.48,.064,.49,M.soil);[-.38,-.1,.18,.42].forEach((x,i)=>plant(g,x,i%2?.06:-.06,.5,1+((i*37)%5)/10))}},
- {id:"seat",cat:1,name:"Sitzblock",w:.48,d:.48,dims:"Maße folgen",build(g){g.add(box(.48,.48,.48,M.concrete))}},
- {id:"birdhouse",cat:1,name:"Vogelhäuschen",w:.4,d:.4,dims:"Maße folgen",build(g){g.add(box(.08,1.28,.08,M.concrete),box(.32,.32,.32,M.concrete,0,1.28,0));const sh=new T.Shape();sh.moveTo(-.2,0);sh.lineTo(0,.16);sh.lineTo(.2,0);sh.lineTo(-.2,0);const rf=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:.4,bevelEnabled:false}),M.concrete);rf.position.set(0,1.6,-.2);rf.castShadow=true;g.add(rf);const h=new T.Mesh(new T.CircleGeometry(.045,24),M.dark);h.position.set(0,1.46,.161);g.add(h)}},
- {id:"birdbath",cat:1,name:"Vogeltränke",w:.64,d:.64,dims:"Maße folgen",build(g){const p=new T.Mesh(new T.CylinderGeometry(.11,.15,.72,32),M.concrete);p.position.y=.36;const b=new T.Mesh(new T.CylinderGeometry(.32,.25,.08,48),M.concrete);b.position.y=.76;[p,b].forEach(m=>{m.castShadow=m.receiveShadow=true});const w=new T.Mesh(new T.CylinderGeometry(.28,.28,.01,48),M.water);w.position.y=.795;g.add(p,b,w)}},
- {id:"table",cat:2,name:"Betontisch",w:2.24,d:.96,dims:"Maße folgen",build(g){g.add(box(2.24,.08,.96,M.concrete,0,.64,0),box(.08,.64,.8,M.concrete,-.88,0,0),box(.08,.64,.8,M.concrete,.88,0,0))}},
- {id:"sidetable",cat:2,name:"Beistelltisch",w:.48,d:.48,dims:"Maße folgen",build(g){g.add(box(.48,.08,.48,M.concrete,0,.4,0),box(.32,.4,.32,M.concrete))}},
+ {id:"pool",cat:0,keep:1,name:"Lounge Pool",w:2.48,d:2.48,price:9990,dims:"248 × 248 × 96 cm",build(g){trough(g,2.48,.96,2.48,.16,.84,M.water);g.add(box(2.16,.48,.4,M.concrete,0,0,-1.24+.36));for(let i=0;i<5;i++)g.add(box(2.5,.064,.03,M.wood,0,.064+i*.08,1.255))}},
+ {id:"stairs",cat:0,name:"Pooltreppe",w:.96,d:.96,dims:"96 × 96 × 96 cm",build(g){for(let i=0;i<3;i++)g.add(box(.96,.32*(i+1),.32,M.concrete,0,0,.32-i*.32))}},
+ {id:"wtrough",cat:0,name:"Wassertrog",w:1.2,d:.48,sizes:[{w:1.2,d:.48,h:.48},{w:1.6,d:.64,h:.56}],dims:"2 Größen",build(g,D){const w=D.w||1.2,d=D.d||.48,h=D.h||.48;trough(g,w,h,d,.064,h-.06,M.water)}},
+ {id:"planter",cat:1,name:"Pflanztrog",w:1.2,d:.48,sizes:[{w:1.2,d:.48,h:.56},{w:1.6,d:.56,h:.64}],dims:"2 Größen",build(g,D){const w=D.w||1.2,d=D.d||.48,h=D.h||.56;trough(g,w,h,d,.064,h-.07,M.soil);const n=Math.max(3,Math.round(w/.3));for(let i=0;i<n;i++){const x=-w/2+.16+i*(w-.32)/(n-1);plant(g,x,i%2?.06:-.06,h-.06,1+((i*37)%5)/10)}}},
+ {id:"seat",cat:1,name:"Sitzblock",w:.48,d:.48,sizes:[{w:.48,d:.48,h:.48},{w:.96,d:.48,h:.48}],dims:"2 Größen",build(g,D){g.add(box(D.w||.48,D.h||.48,D.d||.48,M.concrete))}},
+ {id:"birdhouse",cat:1,name:"Vogelhäuschen",w:.4,d:.4,dims:"40 × 40 × 176 cm",build(g){g.add(box(.08,1.28,.08,M.concrete),box(.32,.32,.32,M.concrete,0,1.28,0));const sh=new T.Shape();sh.moveTo(-.2,0);sh.lineTo(0,.16);sh.lineTo(.2,0);sh.lineTo(-.2,0);const rf=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:.4,bevelEnabled:false}),M.concrete);rf.position.set(0,1.6,-.2);rf.castShadow=true;g.add(rf);const h=new T.Mesh(new T.CircleGeometry(.045,24),M.dark);h.position.set(0,1.46,.161);g.add(h)}},
+ {id:"birdbath",cat:1,name:"Vogeltränke",w:.64,d:.64,dims:"64 × 64 × 80 cm",build(g){const p=new T.Mesh(new T.CylinderGeometry(.11,.15,.72,32),M.concrete);p.position.y=.36;const b=new T.Mesh(new T.CylinderGeometry(.32,.25,.08,48),M.concrete);b.position.y=.76;[p,b].forEach(m=>{m.castShadow=m.receiveShadow=true});const w=new T.Mesh(new T.CylinderGeometry(.28,.28,.01,48),M.water);w.position.y=.795;g.add(p,b,w)}},
+ {id:"table",cat:2,name:"Betontisch",w:2.24,d:.96,dims:"224 × 96 × 72 cm",build(g){g.add(box(2.24,.08,.96,M.concrete,0,.64,0),box(.08,.64,.8,M.concrete,-.88,0,0),box(.08,.64,.8,M.concrete,.88,0,0))}},
+ {id:"sidetable",cat:2,name:"Beistelltisch",w:.48,d:.48,dims:"48 × 48 × 48 cm",build(g){g.add(box(.48,.08,.48,M.concrete,0,.4,0),box(.32,.4,.32,M.concrete))}},
  {id:"olive",cat:3,noList:true,plant:true,hs:2.6,rs:{h:[1.2,5.2]},name:"Olivenbaum",w:.48,d:.48,dims:"ca. 2,6 m hoch",build(g){const tr=new T.Mesh(new T.CylinderGeometry(.07,.12,1.3,10),M.bark);tr.position.set(0,.65,0);tr.rotation.z=.12;tr.castShadow=true;g.add(tr);canopy(g,[[.1,1.6,0,.55],[-.35,1.9,.15,.45],[.4,2,-.1,.45],[0,2.25,.1,.5],[-.1,1.75,-.35,.4]],M.olive)}},
  {id:"tree",cat:3,noList:true,plant:true,hs:4.5,rs:{h:[2,9]},name:"Laubbaum",w:.64,d:.64,dims:"ca. 4,5 m hoch",build(g){const tr=new T.Mesh(new T.CylinderGeometry(.1,.16,2.2,10),M.bark);tr.position.y=1.1;tr.castShadow=true;g.add(tr);canopy(g,[[0,2.9,0,1.1],[.7,2.6,.3,.75],[-.6,2.7,-.3,.8],[.2,3.6,-.2,.8],[-.3,3.3,.6,.7]],M.leafTree)}},
  {id:"column",cat:3,noList:true,plant:true,hs:3.5,rs:{h:[1.5,7]},name:"Säulenbaum",w:.48,d:.48,dims:"ca. 3,5 m hoch",build(g){const tr=new T.Mesh(new T.CylinderGeometry(.06,.09,.6,8),M.bark);tr.position.y=.3;tr.castShadow=true;g.add(tr);const c=new T.Mesh(jitter(new T.SphereGeometry(.5,14,12),.06),M.leafTree);c.scale.set(1,3,1);c.position.y=2;c.castShadow=true;const sw=new T.Group();sw.add(c);sw.userData.sway=1;g.add(sw)}},
@@ -702,7 +708,7 @@ const PRODUCTS=[
  {id:"umbrella",cat:4,noList:true,name:"Sonnenschirm",w:.48,d:.48,dims:"Ø 3 m",build(g){const p=new T.Mesh(new T.CylinderGeometry(.025,.025,2.4,8),M.metal);p.position.y=1.2;p.castShadow=true;const bse=box(.48,.08,.48,M.concrete);const c=new T.Mesh(new T.ConeGeometry(1.5,.45,8,1,true),M.fabric);c.position.y=2.25;c.castShadow=true;g.add(p,bse,c)}},
  {id:"lounger",cat:4,noList:true,name:"Liege",w:.72,d:2,dims:"72 × 200 cm",build(g){g.add(box(.68,.3,1.9,M.frame,0,0,0));const cu=box(.66,.08,1.4,M.fabric,0,.3,.22);const hinge=new T.Group();hinge.position.set(0,.38,-.48);hinge.rotation.x=.62;const back=box(.66,.08,.62,M.fabric,0,-.04,-.31);hinge.add(back);g.add(cu,hinge)}},
  {id:"person",cat:4,noList:true,name:"Person (1,75 m)",w:.48,d:.32,dims:"In Pool, auf Liege oder Sitzblock ziehen",build(g){g.add(makeFigure())}},
- {id:"sink",cat:2,name:"Waschbecken",w:.96,d:.64,dims:"Maße folgen",build(g){g.add(box(.96,.8,.64,M.concrete));const t=new T.Group();t.position.y=.8;trough(t,.96,.16,.64,.064,.1,M.water);g.add(t);const f=new T.Mesh(new T.CylinderGeometry(.015,.015,.3,12),M.metal);f.position.set(0,1.11,-.26);const s=new T.Mesh(new T.CylinderGeometry(.012,.012,.16,12),M.metal);s.rotation.x=PI2;s.position.set(0,1.25,-.19);g.add(f,s)}},
+ {id:"sink",cat:2,name:"Waschbecken",w:.96,d:.64,dims:"96 × 64 × 96 cm",build(g){g.add(box(.96,.8,.64,M.concrete));const t=new T.Group();t.position.y=.8;trough(t,.96,.16,.64,.064,.1,M.water);g.add(t);const f=new T.Mesh(new T.CylinderGeometry(.015,.015,.3,12),M.metal);f.position.set(0,1.11,-.26);const s=new T.Mesh(new T.CylinderGeometry(.012,.012,.16,12),M.metal);s.rotation.x=PI2;s.position.set(0,1.25,-.19);g.add(f,s)}},
 ];
 const SOON_CAT=2;
 const BYID=Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
@@ -810,7 +816,18 @@ function edgeMeshes(e,grp,ei){const t0=EDGE[e.t]||EDGE.curb,t={h:e.h||t0.h,w:e.w
 function fp(o){const p=BYID[o.userData.pid],D=o.userData.dims||{},W=D.w||p.w,Dp=D.d||p.d,t=o.userData.rot%2===1;return{w:t?Dp:W,d:t?W:Dp}}
 function dimOf(o,k){const p=BYID[o.userData.pid],D=o.userData.dims||{};return D[k]||(k==="w"?p.w:k==="d"?p.d:(p.hh||p.hs||1))}
 function snapPos(o,x,z){const f=fp(o),bb=bbox(state.poly),s=(v,o0)=>o0+Math.round((v-o0)/SNAP)*SNAP;return[+(s(x-f.w/2,bb.x0)+f.w/2).toFixed(4),+(s(z-f.d/2,bb.z0)+f.d/2).toFixed(4)]}
-function blocked(o,x,z){const f=fp(o),e=1e-6;if(!rectInPoly(x,z,f.w,f.d))return true;
+/* Technikbereich: vor der Holzverkleidung frei halten */
+let blockWhy="";
+function zonesAt(o,x,z){const p=BYID[o.userData.pid];if(!p.keep)return[];const D=o.userData.dims||{},w=D.w||p.w,d=D.d||p.d,k=o.userData.rot%4,th=-k*PI2,c=Math.round(Math.cos(th)),sn=Math.round(Math.sin(th));
+  const pts=[[-w/2,d/2],[w/2,d/2],[w/2,d/2+p.keep],[-w/2,d/2+p.keep]].map(([lx,lz])=>[x+lx*c+lz*sn,z-lx*sn+lz*c]);
+  const xs=pts.map(q=>q[0]),zs=pts.map(q=>q[1]);return[{x0:Math.min(...xs),x1:Math.max(...xs),z0:Math.min(...zs),z1:Math.max(...zs)}]}
+const ovl=(a,b,e)=>a.x0<b.x1-e&&a.x1>b.x0+e&&a.z0<b.z1-e&&a.z1>b.z0+e;
+function blocked(o,x,z){const f=fp(o),e=1e-6;blockWhy="";if(!rectInPoly(x,z,f.w,f.d))return true;
+  const me={x0:x-f.w/2,x1:x+f.w/2,z0:z-f.d/2,z1:z+f.d/2};
+  if(!isP(o)){for(const q of objects){if(q===o||!q.visible)continue;for(const zn of zonesAt(q,q.position.x,q.position.z))if(ovl(me,zn,e)){blockWhy="zone";return true}}}
+  for(const zn of zonesAt(o,x,z)){const cxz=(zn.x0+zn.x1)/2,czz=(zn.z0+zn.z1)/2;if(!rectInPoly(cxz,czz,zn.x1-zn.x0,zn.z1-zn.z0)){blockWhy="zoneOut";return true}
+    for(const b0 of state.buildings){const b=normB(b0);if(ovl(zn,{x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1},e)){blockWhy="zoneMe";return true}}
+    for(const q of objects){if(q===o||!q.visible||isP(q))continue;const g=fp(q);if(ovl(zn,{x0:q.position.x-g.w/2,x1:q.position.x+g.w/2,z0:q.position.z-g.d/2,z1:q.position.z+g.d/2},e)){blockWhy="zoneMe";return true}}}
   for(const b0 of state.buildings){const b=normB(b0);if(x+f.w/2>b.x0+e&&x-f.w/2<b.x1-e&&z+f.d/2>b.z0+e&&z-f.d/2<b.z1-e)return true}
   for(const q of objects){if(q===o||!q.visible)continue;if(isP(q)&&q.userData.host===o)continue;const g=fp(q);if(Math.abs(x-q.position.x)<(f.w+g.w)/2-e&&Math.abs(z-q.position.z)<(f.d+g.d)/2-e){
     if(isP(o)&&INTER[q.userData.pid]&&hostAt(o,x,z)===q)continue;return true}}return false}
@@ -881,10 +898,14 @@ function camPose(mode){const p=state.poly||[[-4,-3],[4,-3],[4,3],[-4,3]],bb=bbox
   const narrow=innerWidth<=1099,yT=narrow?.76:.8,yB=narrow?-.62:-.84,c=camera.clone(),tgt=new T.Vector3(cx,0,cz);let lo=2,hi=400;
   for(let i=0;i<30;i++){const m=(lo+hi)/2;c.position.copy(tgt).addScaledVector(dir,m);c.lookAt(tgt);c.updateMatrixWorld();let ok=true;for(const q of pts){const v=q.clone().project(c);if(Math.abs(v.x)>.9||v.y>yT||v.y<yB||v.z>1){ok=false;break}}if(ok)hi=m;else lo=m}
   return{pos:tgt.clone().addScaledVector(dir,hi),tgt}}
+let camAnim=false;
 function setView(mode,instant){viewMode=mode;$("v3d").setAttribute("aria-pressed",mode==="3d");$("vtop").setAttribute("aria-pressed",mode==="top");
-  orbit.maxPolarAngle=mode==="top"?.0001:Math.PI*.46;applyOrbitMode();const P=camPose(mode);
-  if(instant||RM){camera.position.copy(P.pos);orbit.target.copy(P.tgt);orbit.update();return}
-  const p0=camera.position.clone(),t0=orbit.target.clone();animate(k=>{const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;camera.position.lerpVectors(p0,P.pos,e);orbit.target.lerpVectors(t0,P.tgt,e)},700)}
+  const P=camPose(mode),fin=()=>{orbit.minPolarAngle=0;orbit.maxPolarAngle=mode==="top"?.0001:Math.PI*.46;applyOrbitMode();camera.position.copy(P.pos);orbit.target.copy(P.tgt);const d=orbit.enableDamping;orbit.enableDamping=false;orbit.update();orbit.enableDamping=d;camAnim=false;needLabels=true};
+  if(instant||RM){fin();return}
+  const t0=orbit.target.clone(),s0=new T.Spherical().setFromVector3(camera.position.clone().sub(t0)),s1=new T.Spherical().setFromVector3(P.pos.clone().sub(P.tgt));
+  if(s1.phi<.01)s1.theta=s0.theta;if(s0.phi<.01)s0.theta=s1.theta;let dth=s1.theta-s0.theta;dth=Math.atan2(Math.sin(dth),Math.cos(dth));
+  camAnim=true;const tg=new T.Vector3(),off=new T.Vector3(),sp=new T.Spherical();
+  animate(k=>{const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;tg.lerpVectors(t0,P.tgt,e);sp.set(s0.radius+(s1.radius-s0.radius)*e,Math.max(.0001,s0.phi+(s1.phi-s0.phi)*e),s0.theta+dth*e);off.setFromSpherical(sp);camera.position.copy(tg).add(off);camera.lookAt(tg);if(k>=1)fin()},650)}
 $("v3d").onclick=()=>setView("3d");$("vtop").onclick=()=>setView("top");$("fit").onclick=()=>setView(viewMode);
 
 /* ---------- Werkzeuge ---------- */
@@ -991,6 +1012,7 @@ const NAMES={w:"Länge",d:"Breite",h:"Höhe"};
 function fieldH(k,label,val){return '<label class="pf">'+label+'<span class="in"><button class="st" data-step="-1" data-k="'+k+'" aria-label="'+label+' verringern">−</button><input type="number" step="8" data-k="'+k+'" value="'+val+'"><span>cm</span><button class="st" data-step="1" data-k="'+k+'" aria-label="'+label+' erhöhen">+</button></span></label>'}
 function selInfo(){const P=$("sbProps");let h="";
   if(selected){const p=BYID[selected.userData.pid],f=fp(selected);$("selname").textContent=p.name;$("seldim").textContent=Math.round(f.w*100)+" × "+Math.round(f.d*100)+" cm";
+    if(p.sizes){const cur=(selected.userData.dims&&selected.userData.dims.sz)||0;h+='<div class="pf">Größe<div class="szseg" role="group" aria-label="Größe">'+p.sizes.map((z,i)=>'<button data-size="'+i+'" aria-pressed="'+(i===cur)+'">'+sizeLbl(z)+'</button>').join("")+'</div></div>'}
     if(p.rs)Object.keys(p.rs).forEach(k=>{h+=fieldH(k,p.hs?"Höhe":NAMES[k],cm(dimOf(selected,k)))});$("rot").hidden=$("dup").hidden=false}
   else if(selB>=0){const b=state.buildings[selB];$("selname").textContent="Gebäude";$("seldim").textContent=cm(b.x1-b.x0)+" × "+cm(b.z1-b.z0)+" cm";
     h=fieldH("bw","Breite",cm(b.x1-b.x0))+fieldH("bd","Tiefe",cm(b.z1-b.z0))+fieldH("bh","Höhe",cm(b.h))+'<label class="pf">Dach<select data-sel="r">'+[["flat","Flachdach"],["gable","Satteldach"],["hip","Walmdach"],["mono","Pultdach"]].map(([v,n])=>'<option value="'+v+'"'+(b.r===v?" selected":"")+'>'+n+'</option>').join("")+'</select></label>'+(b.r!=="flat"?'<span class="pf">First<button class="tg" data-act="rd">drehen</button></span>':'');$("rot").hidden=false;$("dup").hidden=false}
@@ -1003,12 +1025,19 @@ function setDim(o,k,v){const p=BYID[o.userData.pid],rg=p.rs[k];v=Math.min(rg[1],
   if(blocked(o,x,z)){o.userData.dims=prev;toast("Dafür ist hier kein Platz.");selInfo();return}
   o.children.slice().forEach(c=>{o.remove(c);c.traverse(q=>{if(q.geometry)q.geometry.dispose()})});o.add(buildInner(p,D));o.userData.sway=null;o.traverse(c=>{if(c!==o&&c.userData.sway)o.userData.sway=c});
   setPos(o,x,z);showFrame(o,false);measures(o);selInfo();commit()}
+const sizeLbl=z=>cm(z.w)+" × "+cm(z.d)+" × "+cm(z.h)+" cm";
+function setSize(o,i){const p=BYID[o.userData.pid],z=p.sizes[i];if(!z)return;const prev=o.userData.dims,f0=fp(o),x0=o.position.x-f0.w/2,z0=o.position.z-f0.d/2;
+  o.userData.dims=i?{w:z.w,d:z.d,h:z.h,sz:i}:null;const f1=fp(o);let x=+(x0+f1.w/2).toFixed(4),zz=+(z0+f1.d/2).toFixed(4);
+  if(blocked(o,x,zz)){const fr=findFree(o,o.position.x,o.position.z);if(!fr){o.userData.dims=prev;toast("Für diese Größe ist hier kein Platz.");selInfo();return}[x,zz]=fr}
+  o.children.slice().forEach(c=>{o.remove(c);c.traverse(q=>{if(q.geometry)q.geometry.dispose()})});o.add(buildInner(p,o.userData.dims||{}));o.userData.sway=null;o.traverse(c=>{if(c!==o&&c.userData.sway)o.userData.sway=c});
+  setPos(o,x,zz);showFrame(o,false);measures(o);selInfo();commit()}
 function setProp(k,v){
+  if(selected&&k==="size"){setSize(selected,+v);return}
   if(selected){setDim(selected,k,v);return}
   if(selB>=0){const b=state.buildings[selB];if(k==="bw")b.x1=+(b.x0+Math.max(1,r2(v))).toFixed(3);else if(k==="bd")b.z1=+(b.z0+Math.max(1,r2(v))).toFixed(3);else if(k==="bh")b.h=Math.min(20,Math.max(2,r2(v)));else if(k==="r")b.r=v;else if(k==="rd")b.rd=b.rd?0:1;buildBuildings();selInfo();commit();return}
   if(selE>=0){const e=state.edges[selE];if(k==="t"){e.t=v;e.h=EDGE[v].h;e.w=EDGE[v].w}else if(k==="eh")e.h=Math.min(3,Math.max(.08,r2(v)));else if(k==="ew")e.w=Math.min(.8,Math.max(.08,r2(v)));buildEdges();frameE(e);selInfo();commit()}}
 $("sbProps").addEventListener("change",e=>{const t=e.target;if(t.dataset.sel){setProp(t.dataset.sel,t.value);return}if(t.dataset.k&&t.tagName==="INPUT")setProp(t.dataset.k,(+t.value||0)/100)});
-$("sbProps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.act){setProp(b.dataset.act);return}if(b.dataset.step){const k=b.dataset.k,inp=$("sbProps").querySelector('input[data-k="'+k+'"]');setProp(k,(+inp.value/100)+SNAP*(+b.dataset.step)*(e.shiftKey?5:1))}});
+$("sbProps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.size!==undefined){if(b.getAttribute("aria-pressed")!=="true")setProp("size",+b.dataset.size);return}if(b.dataset.act){setProp(b.dataset.act);return}if(b.dataset.step){const k=b.dataset.k,inp=$("sbProps").querySelector('input[data-k="'+k+'"]');setProp(k,(+inp.value/100)+SNAP*(+b.dataset.step)*(e.shiftKey?5:1))}});
 const frameB=b=>{if(!handleDrag||true)updateHandles(b);frame.geometry.setFromPoints([new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
 const eSel=new T.Line(new T.BufferGeometry(),new T.LineBasicMaterial({color:0x17a2b8,depthTest:false}));eSel.renderOrder=8;eSel.visible=false;scene.add(eSel);
 function frameE(e){if(!e){eSel.visible=false;return}const t=EDGE[e.t]||EDGE.curb,H=(e.h||t.h);eSel.geometry.setFromPoints(e.p.map(([x,z])=>new T.Vector3(x,heightAt(x,z)+H,z)));eSel.visible=true}
@@ -1072,7 +1101,7 @@ function handleEnd(){handleDrag=null;orbit.enabled=true;clearGuides();updateHand
 function clearSel(){disposeGroup(hG);selected=null;selB=-1;selE=-1;eSel.visible=false;showFrame(null);clearMeasures()}
 function selectB(i){clearSel();selB=i;$("selbar").classList.add("on");frameB(state.buildings[i]);selInfo()}
 function selectE(i){clearSel();selE=i;$("selbar").classList.add("on");frameE(state.edges[i]);selInfo()}
-function select(o){clearSel();selected=o;$("selbar").classList.toggle("on",!!o);selInfo();showFrame(o,false);measures(o);showHover(hovered===o?null:hovered)}
+function select(o){clearSel();selected=o;drawZones();$("selbar").classList.toggle("on",!!o);selInfo();showFrame(o,false);measures(o);showHover(hovered===o?null:hovered)}
 function pickOther(e){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children.concat(edgeG.children),false);if(!h.length)return null;const u=h[0].object.userData;return u.bld!==undefined?{b:u.bld}:u.edge!==undefined?{e:u.edge}:null}
 cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;cv.focus({preventScroll:true});
   if(calib){calibClick(e);return}
@@ -1108,7 +1137,7 @@ cv.addEventListener("pointermove",e=>{
     if(stroke&&pt&&inPoly(state.poly,pt.x,pt.z)){if(tool==="paint")paintAt(pt);else sculptAt(pt)}return}
   if(drag&&drag.b!==undefined&&e.pointerId===drag.id){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return;const b=state.buildings[drag.b],w=b.x1-b.x0,d=b.z1-b.z0;let[x0,z0]=snapG(g.x+drag.ox,g.z+drag.oz);const[dx,dz]=guideRect(x0,z0,x0+w,z0+d,{b:drag.b});x0=+(x0+dx).toFixed(3);z0=+(z0+dz).toFixed(3);
     if(x0===b.x0&&z0===b.z0)return;b.x0=x0;b.z0=z0;b.x1=+(x0+w).toFixed(3);b.z1=+(z0+d).toFixed(3);drag.moved=true;buildBuildings();return}
-  if(drag&&drag.o&&e.pointerId===drag.id){const g=groundAt(e);if(!g)return;let[x,z]=snapPos(drag.o,g.x+drag.ox,g.z+drag.oz);{const f=fp(drag.o),[dx,dz]=guideRect(x-f.w/2,z-f.d/2,x+f.w/2,z+f.d/2,{o:drag.o});x=+(x+dx).toFixed(4);z=+(z+dz).toFixed(4)}if(x===drag.o.position.x&&z===drag.o.position.z)return;const bad=blocked(drag.o,x,z);setPos(drag.o,x,z);if(!bad)drag.last=[x,z];drag.moved=true;showFrame(drag.o,bad);showFine(drag.o);measures(drag.o);if(isP(drag.o)){const h=bad?null:hostAt(drag.o,x,z);setPose(drag.o,h?INTER[h.userData.pid]:"stand");if(h)drag.o.rotation.y=h.rotation.y}else followHost(drag.o)}
+  if(drag&&drag.o&&e.pointerId===drag.id){const g=groundAt(e);if(!g)return;let[x,z]=snapPos(drag.o,g.x+drag.ox,g.z+drag.oz);{const f=fp(drag.o),[dx,dz]=guideRect(x-f.w/2,z-f.d/2,x+f.w/2,z+f.d/2,{o:drag.o});x=+(x+dx).toFixed(4);z=+(z+dz).toFixed(4)}if(x===drag.o.position.x&&z===drag.o.position.z)return;const bad=blocked(drag.o,x,z);setPos(drag.o,x,z);if(!bad)drag.last=[x,z];drag.moved=true;showFrame(drag.o,bad);showFine(drag.o);measures(drag.o);if(BYID[drag.o.userData.pid].keep||bad)drawZones(drag.o);if(isP(drag.o)){const h=bad?null:hostAt(drag.o,x,z);setPose(drag.o,h?INTER[h.userData.pid]:"stand");if(h)drag.o.rotation.y=h.rotation.y}else followHost(drag.o)}
   else if(!drag&&e.pointerType==="mouse"){const o=pick(e);cv.style.cursor=o?"grab":"default";if(o!==hovered)showHover(o)}});
 cv.addEventListener("pointerleave",()=>{$("hread").hidden=true;if(!drag)showHover(null);showRing(null);if(!rectDraft)showSq(null)});
 function endDrag(e){
@@ -1118,7 +1147,7 @@ function endDrag(e){
   if(stroke){const t=tool;stroke=null;if(t==="terrain")terrainDone();else commit();return}
   if(!drag)return;
   clearGuides();if(drag.b!==undefined){orbit.enabled=true;if(drag.moved)commit();drag=null;return}
-  if(drag.o){const o=drag.o;if(blocked(o,o.position.x,o.position.z)){setPos(o,drag.last[0],drag.last[1]);if(drag.moved)toast("Dort ist kein Platz.")}showFrame(o,false);showFine(null);measures(o);orbit.enabled=true;cv.style.cursor="grab";if(drag.moved)commit()}
+  if(drag.o){const o=drag.o;if(blocked(o,o.position.x,o.position.z)){const why=blockWhy;setPos(o,drag.last[0],drag.last[1]);if(drag.moved)toast(zoneMsg(why))}showFrame(o,false);showFine(null);measures(o);orbit.enabled=true;cv.style.cursor="grab";if(drag.moved)commit()}
   else if(drag.empty&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)select(null);drag=null}
 cv.addEventListener("pointerup",endDrag);cv.addEventListener("pointercancel",endDrag);
 
@@ -1170,7 +1199,7 @@ let TH={},CNT={},activeCat=0;
 const CATNOTE={2:"Die Outdoor-Kitchen-Serie erscheint in Kürze. Sie können sie schon einplanen.",3:"Pflanzen helfen beim Nachbauen Ihres Gartens und erscheinen nicht in der Zusammenstellung.",4:"Diese Objekte dienen der Orientierung und erscheinen nicht in der Zusammenstellung."};
 function renderTabs(){$("tabs").innerHTML=CATS.map((c,i)=>'<button class="tab" role="tab" aria-selected="'+(i===activeCat)+'" data-cat="'+i+'">'+c+''+'</button>').join("")}
 function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class="soon-note">'+CATNOTE[activeCat]+'</p>':'')+
-  PRODUCTS.filter(p=>p.cat===activeCat).map(p=>'<button class="prod" data-id="'+p.id+'" aria-label="'+p.name+' hinzufügen">'+(CNT[p.id]?'<span class="badge">'+CNT[p.id]+'</span>':'')+'<span class="ph">'+(TH[p.id]?'<img alt="" src="'+TH[p.id]+'">':'')+'</span><span class="n">'+p.name+'</span><span class="d">'+p.dims+'</span></button>').join("")}
+  PRODUCTS.filter(p=>p.cat===activeCat).map(p=>'<button class="prod" data-id="'+p.id+'" aria-label="'+p.name+' hinzufügen">'+(CNT[p.id]?'<span class="badge">'+CNT[p.id]+'</span>':'')+'<span class="ph">'+(TH[p.id]?'<img alt="" src="'+TH[p.id]+'">':'')+'</span><span class="n">'+p.name+'</span><span class="d">'+(p.sizes?p.sizes.map(z=>cm(z.w)+" × "+cm(z.d)+" cm").join("<br>"):p.dims)+'</span></button>').join("")}
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;activeCat=+b.dataset.cat;renderTabs();renderProducts()});
 $("products").addEventListener("pointerdown",e=>{const b=e.target.closest(".prod");if(b)pStart(e,b.dataset.id)});
 $("products").addEventListener("click",e=>{const b=e.target.closest(".prod");if(!b||!state.poly)return;if(innerWidth<=760){const c=viewCenter();addNear(b.dataset.id,c.x,c.z);closeSheets()}else if(e.detail===0){const c=viewCenter();addNear(b.dataset.id,c.x,c.z)}});
@@ -1179,9 +1208,10 @@ document.querySelectorAll(".modes [data-mode]").forEach(b=>b.onclick=()=>setMode
 
 /* ---------- Zusammenstellung ---------- */
 const eur=n=>n.toLocaleString("de-DE")+" €";
-function refresh(){const cnt={};objects.forEach(o=>{cnt[o.userData.pid]=(cnt[o.userData.pid]||0)+1});const chg=JSON.stringify(cnt)!==JSON.stringify(CNT);CNT=cnt;if(chg&&!pd)renderProducts();
+function refresh(){if(typeof drawZones==="function")drawZones();const cnt={};objects.forEach(o=>{cnt[o.userData.pid]=(cnt[o.userData.pid]||0)+1});const chg=JSON.stringify(cnt)!==JSON.stringify(CNT);CNT=cnt;if(chg&&!pd)renderProducts();
   const ids=PRODUCTS.filter(p=>!p.noList).map(p=>p.id).filter(id=>cnt[id]);let sum=0,open=0,n=0;
-  $("rows").innerHTML=ids.length?ids.map(id=>{const p=BYID[id],k=cnt[id];n+=k;if(p.price)sum+=p.price*k;else open++;return '<div class="row"><span><span class="q">'+k+'×</span>'+p.name+'</span><span class="p">'+(p.price?eur(p.price*k):"Preis folgt")+'</span></div>'}).join(""):'<p class="empty">Noch nichts geplant. Ziehen Sie ein Produkt in Ihren Garten.</p>';
+  const lines=[];ids.forEach(id=>{const p=BYID[id];if(!p.sizes){lines.push({p,k:cnt[id],lbl:""});return}const bySz={};objects.forEach(o=>{if(o.userData.pid!==id)return;const z=(o.userData.dims&&o.userData.dims.sz)||0;bySz[z]=(bySz[z]||0)+1});Object.keys(bySz).sort().forEach(z=>lines.push({p,k:bySz[z],lbl:sizeLbl(p.sizes[z])}))});
+  $("rows").innerHTML=lines.length?lines.map(({p,k,lbl})=>{n+=k;if(p.price)sum+=p.price*k;else open++;return '<div class="row"><span><span class="q">'+k+'×</span>'+p.name+(lbl?'<br><small class="sz">'+lbl+'</small>':'')+'</span><span class="p">'+(p.price?eur(p.price*k):"Preis folgt")+'</span></div>'}).join(""):'<p class="empty">Noch nichts geplant. Ziehen Sie ein Produkt in Ihren Garten.</p>';
   $("sum").textContent=eur(sum);$("sumnote").textContent=open?"Ohne Produkte, deren Preis noch folgt. Inkl. MwSt., zzgl. Lieferung.":"Preise inkl. MwSt., zzgl. Lieferung.";
   $("poolnote").hidden=!cnt.pool;$("cnt").textContent=n;hint(!!state.poly&&!objects.length&&!drawing&&!state.paint.length&&!state.buildings.length&&!state.edges.length&&!Object.keys(state.heights).length);updateGardenInfo()}
 function hint(show){$("hint").classList.toggle("hide",!show)}
@@ -1193,7 +1223,14 @@ const dec=s=>decodeURIComponent(escape(atob(s.replace(/-/g,"+").replace(/_/g,"/"
 function persist(s){try{localStorage.setItem("calvera-planer-v6",s)}catch(e){}try{history.replaceState(null,"","#p="+enc(s))}catch(e){}}
 const hist=[],fut=[];let cur=null;
 function updUndo(){$("undo").disabled=!hist.length;$("redo").disabled=!fut.length}
-function commit(){syncPersons();refresh();const s=JSON.stringify(snap());if(s===cur)return;if(cur!==null){hist.push(cur);if(hist.length>60)hist.shift();fut.length=0}cur=s;persist(s);updUndo()}
+const ZMSG={zone:"Vor der Holzverkleidung des Lounge Pools liegt die Technik. Dort muss 1 m frei bleiben.",zoneMe:"Vor der Holzverkleidung des Lounge Pools muss 1 m frei bleiben. Dort steht noch etwas.",zoneOut:"Vor der Holzverkleidung des Lounge Pools muss 1 m Platz im Garten frei bleiben, für die Technik."};
+function zoneMsg(w){return ZMSG[w]||"Dort ist kein Platz."}
+const zoneG=new T.Group();scene.add(zoneG);
+const zoneTex=(()=>{const c=document.createElement("canvas");c.width=c.height=64;const g=c.getContext("2d");g.strokeStyle="rgba(200,140,40,.9)";g.lineWidth=7;for(let i=-64;i<128;i+=22){g.beginPath();g.moveTo(i,64);g.lineTo(i+64,0);g.stroke()}const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t})();
+function drawZones(active){disposeGroup(zoneG);objects.forEach(o=>{if(!o.visible)return;zonesAt(o,o.position.x,o.position.z).forEach(zn=>{const w=zn.x1-zn.x0,d=zn.z1-zn.z0,y=heightAt((zn.x0+zn.x1)/2,(zn.z0+zn.z1)/2)+.025,hot=active===o||selected===o;
+    const tx=zoneTex.clone();tx.needsUpdate=true;tx.repeat.set(w/.36,d/.36);const m=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({map:tx,transparent:true,opacity:hot?.75:.35,depthWrite:false}));m.rotation.x=-PI2;m.position.set((zn.x0+zn.x1)/2,y,(zn.z0+zn.z1)/2);m.renderOrder=2;zoneG.add(m);
+    const l=new T.LineLoop(new T.BufferGeometry().setFromPoints([new T.Vector3(zn.x0,y,zn.z0),new T.Vector3(zn.x1,y,zn.z0),new T.Vector3(zn.x1,y,zn.z1),new T.Vector3(zn.x0,y,zn.z1)]),new T.LineBasicMaterial({color:0xc88c28,transparent:true,opacity:hot?1:.6}));zoneG.add(l)})})}
+function commit(){syncPersons();refresh();drawZones();const s=JSON.stringify(snap());if(s===cur)return;if(cur!==null){hist.push(cur);if(hist.length>60)hist.shift();fut.length=0}cur=s;persist(s);updUndo()}
 function applySnap(o,keepView){setTimeout(()=>{syncPersons()},0);for(const q of objects.slice())removeObject(q);select(null);state.poly=o.poly||null;state.ground=o.g||"lawn";state.house=false;state.buildings=(o.b||[]).map(normB);
   state.paint=(o.pt||[]).filter(a=>a.length===5).map(a=>[PAINTS[a[0]]||"lawn",a[1]/100,a[2]/100,a[3]/100,a[4]/100]);state.heights=o.hm||{};state.edges=o.e||[];
   buildGarden();renderGroundButtons($("grounds"),state.ground);if(state.poly)(o.items||[]).forEach(i=>{if(!BYID[i.id])return;const q=addObject(i.id,i.x,i.z,i.r||0,i.dm);if(blocked(q,q.position.x,q.position.z))removeObject(q)});refresh();if(!keepView)setView(viewMode,true)}
@@ -1320,7 +1357,7 @@ let lastW=innerWidth,lastCam="";addEventListener("resize",()=>{if((lastW<=760)!=
       const dr=-.96+Math.sin(t*.25+ph)*.1;root.position.set(dr*.7071,.64+Math.sin(c*Math.PI*2)*.02,dr*.7071);R.head.rotation.x=-.55+w*.1}
     else if(o.userData.pose==="lie"&&!RM){R.chest.rotation.x=.6+Math.sin(t*1.1+ph)*.006}
     else if(o.userData.pose==="stand"&&!RM){R.chest.rotation.z=Math.sin(t*.7+ph)*.012;R.head.rotation.y=Math.sin(t*.35+ph)*.25}})}
-  orbit.update();renderer.render(scene,camera);
+  if(!camAnim)orbit.update();renderer.render(scene,camera);
   const ck=camera.position.x.toFixed(3)+camera.position.y.toFixed(3)+camera.position.z.toFixed(3);if(ck!==lastCam){lastCam=ck;updateCompass()}
   if(mLabels.length||drawLabels.length||rectLabels.length){const w=cv.clientWidth,h=cv.clientHeight;mLabels.forEach(l=>placeLabel(l,w,h));drawLabels.forEach(l=>placeLabel(l,w,h));rectLabels.forEach(l=>placeLabel(l,w,h))}})(performance.now());
 
