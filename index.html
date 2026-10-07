@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Garten planen | CALVERA LIVING</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Planen Sie Ihren Garten mit Lounge Pool, Pflanztrögen und Sitzblöcken aus Beton – in 3D und maßstabsgetreu.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -299,6 +300,12 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .chips button{border:1px solid var(--line);background:#fff;padding:6px 7px;font-size:11px;cursor:pointer;font-variant-numeric:tabular-nums}
 .chips button:hover{border-color:var(--petrol);color:var(--petrol)}
 .hread{position:absolute;pointer-events:none;background:var(--petrol);color:#fff;font-size:11px;padding:3px 7px;transform:translate(14px,-130%);white-space:nowrap;z-index:6}
+.filebtn{cursor:pointer}
+.calbar{position:absolute;left:50%;top:64px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(5,73,88,.12);padding:14px 16px;z-index:9;display:flex;flex-direction:column;gap:10px;width:min(440px,calc(100% - 24px))}
+.calbar p{margin:0;font-size:13px}
+.calbar .row2{display:flex;gap:10px;align-items:flex-end}
+.calbar .pf input{width:90px}
+.calbar .ghost.pri{background:var(--petrol);color:#fff;border-color:var(--petrol)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -323,6 +330,8 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   <symbol id="i-hill" viewBox="0 0 24 24"><path d="M2 19l6-9 4 5 3-4 7 8z"/></symbol>
   <symbol id="i-edge" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><rect x="2" y="16" width="3" height="3"/><rect x="19" y="5" width="3" height="3"/></symbol>
   <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M3 12h7v8M10 12V4M14 4v6h7"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
   <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
 </svg>
@@ -364,7 +373,21 @@ input[type=range]{accent-color:var(--petrol);width:100%}
           <button class="tool" data-tool="paint" aria-pressed="false"><svg class="icon"><use href="#i-brush"/></svg>Pinsel</button>
           <button class="tool" data-tool="terrain" aria-pressed="false"><svg class="icon"><use href="#i-hill"/></svg>Gelände</button>
           <button class="tool" data-tool="edge" aria-pressed="false"><svg class="icon"><use href="#i-edge"/></svg>Kanten</button>
+          <button class="tool" data-tool="garden" aria-pressed="false"><svg class="icon"><use href="#i-move"/></svg>Fläche</button>
+          <button class="tool" data-tool="plan" aria-pressed="false"><svg class="icon"><use href="#i-plan"/></svg>Plan</button>
           <button class="tool" data-tool="build" aria-pressed="false"><svg class="icon"><use href="#i-house"/></svg>Gebäude</button>
+        </div>
+        <div class="topt" id="optGarden" hidden><p class="tip">Ziehen Sie die Gartenfläche an die richtige Stelle, zum Beispiel passend zu Ihrem hinterlegten Plan. Produkte, Beläge, Gelände und Kanten wandern mit, Gebäude bleiben stehen.</p></div>
+        <div class="topt" id="optPlan" hidden>
+          <label class="ghost wide filebtn"><input type="file" id="planFile" accept="image/*,application/pdf" hidden><svg class="icon"><use href="#i-plan"/></svg><span id="planBtnTxt">Plan hochladen (Bild oder PDF)</span></label>
+          <div id="planOpts" hidden>
+            <label class="chk"><input type="checkbox" id="planVis" checked> Plan anzeigen</label>
+            <div class="rng wide"><label for="planOp">Deckkraft</label><input type="range" id="planOp" min="0.15" max="1" step="0.05" value="0.7"><output id="planOpO"></output></div>
+            <div class="rng wide"><label for="planRot">Drehung</label><input type="range" id="planRot" min="-180" max="180" step="0.5" value="0"><output id="planRotO"></output></div>
+            <button class="ghost wide" id="planCal">Maßstab festlegen</button>
+            <p class="tip">Mit gedrückter Maustaste verschieben Sie den Plan. Für den richtigen Maßstab zwei Punkte mit bekanntem Abstand anklicken, zum Beispiel eine Hauswand.</p>
+            <button class="linkbtn" id="planDel">Plan entfernen</button>
+          </div>
         </div>
         <div class="topt" id="optSelect"><p class="tip">Produkte anklicken, verschieben und drehen. Wählen Sie ein Werkzeug, um den Garten selbst zu gestalten.</p></div>
         <div class="topt" id="optPaint" hidden>
@@ -437,6 +460,11 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   <div class="stage" id="stage">
     <div class="measures" id="measures"></div>
     <div class="hread" id="hread" hidden></div>
+    <div class="calbar" id="calbar" hidden>
+      <p id="caltxt">Klicken Sie zwei Punkte auf dem Plan an, deren Abstand Sie kennen.</p>
+      <div class="row2" id="calIn" hidden><label class="pf">Abstand<span class="in"><input type="number" id="calDist" min="1" step="1"><span>cm</span></span></label><button class="ghost pri" id="calOk">Übernehmen</button></div>
+      <button class="linkbtn" id="calCancel">Abbrechen</button>
+    </div>
     <div class="compass" id="compass" title="Norden" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/><path id="cneedle" d="M20 5l5 15h-10z"/><text x="20" y="31" text-anchor="middle">N</text></svg></div>
     <div class="toolchip" id="toolchip" hidden><span id="toolname"></span><button id="toolOff">Beenden</button></div>
     <div class="overlay-top" id="otop">
@@ -479,6 +507,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
     <div class="drawbar" id="drawbar" hidden>
       <p id="drawtxt">Tippen oder klicken Sie die Ecken Ihres Gartens nacheinander an. Zum Abschließen den ersten Punkt erneut anklicken.</p>
       <div class="row2">
+        <button class="ghost" id="drawCal" hidden>Maßstab</button>
         <button class="ghost" id="drawUndo">Letzten Punkt entfernen</button>
         <button class="ghost" id="drawCancel">Abbrechen</button>
         <button class="ghost pri" id="drawDone" disabled>Fertig</button>
@@ -533,6 +562,11 @@ input[type=range]{accent-color:var(--petrol);width:100%}
           <label class="fld">Aussparung Tiefe<span class="inp"><input type="number" id="lcd" min="1" max="38" step="0.08" value="4"><span>m</span></span></label>
         </div>
         <p class="drawinfo" id="fDraw" hidden>Sie zeichnen die Fläche gleich direkt im Planer: Ecken nacheinander anklicken, zum Schließen den ersten Punkt erneut wählen. Längen werden live angezeigt, gerade Kanten rasten automatisch ein.</p>
+        <div class="gr-wrap">
+          <p class="label">Plan hinterlegen <span style="text-transform:none;letter-spacing:0;font-weight:300">(optional)</span></p>
+          <p class="tip" style="margin:8px 0 10px">Haben Sie einen Lageplan oder eine Skizze? Dann legen Sie ihn als Vorlage darunter und richten den Garten genau danach aus.</p>
+          <label class="ghost wide filebtn" style="margin-top:0"><input type="file" id="planFileW" accept="image/*,application/pdf" hidden><svg class="icon"><use href="#i-plan"/></svg><span id="planBtnTxtW">Plan hochladen (Bild oder PDF)</span></label>
+        </div>
         <div class="gr-wrap">
           <p class="label">Untergrund</p>
           <div class="grounds" id="wizGrounds"></div>
@@ -841,7 +875,8 @@ function updateCompass(){const v=new T.Vector3();camera.getWorldDirection(v);con
 /* ---------- Kamera ---------- */
 let orbit,viewMode="3d";
 function camPose(mode){const p=state.poly||[[-4,-3],[4,-3],[4,3],[-4,3]],bb=bbox(p),cx=(bb.x0+bb.x1)/2,cz=(bb.z0+bb.z1)/2,pts=[];
-  p.forEach(([x,z])=>{pts.push(new T.Vector3(x,0,z),new T.Vector3(x,1,z))});state.buildings.map(normB).forEach(b=>{const H=b.h+(b.r==="flat"?0:2);pts.push(new T.Vector3(b.x0,H,b.z0),new T.Vector3(b.x1,H,b.z1),new T.Vector3(b.x0,0,b.z1),new T.Vector3(b.x1,0,b.z0))});
+  p.forEach(([x,z])=>{pts.push(new T.Vector3(x,0,z),new T.Vector3(x,1,z))});if(plan&&plan.vis&&(tool==="plan"||calib||planFit)){const W2=plan.w*plan.mpp/2,H2=plan.h*plan.mpp/2,a=plan.rot*Math.PI/180,c=Math.cos(a),sn=Math.sin(a);[[-W2,-H2],[W2,-H2],[W2,H2],[-W2,H2]].forEach(([u,v])=>pts.push(new T.Vector3(plan.cx+u*c+v*sn,0,plan.cz-u*sn+v*c)))}
+  state.buildings.map(normB).forEach(b=>{const H=b.h+(b.r==="flat"?0:2);pts.push(new T.Vector3(b.x0,H,b.z0),new T.Vector3(b.x1,H,b.z1),new T.Vector3(b.x0,0,b.z1),new T.Vector3(b.x1,0,b.z0))});
   const dir=mode==="top"?new T.Vector3(0,1,.0001).normalize():(camera.aspect<.8?new T.Vector3(.18,1.05,.7):new T.Vector3(.55,.62,.85)).normalize();
   const narrow=innerWidth<=1099,yT=narrow?.76:.8,yB=narrow?-.62:-.84,c=camera.clone(),tgt=new T.Vector3(cx,0,cz);let lo=2,hi=400;
   for(let i=0;i<30;i++){const m=(lo+hi)/2;c.position.copy(tgt).addScaledVector(dir,m);c.lookAt(tgt);c.updateMatrixWorld();let ok=true;for(const q of pts){const v=q.clone().project(c);if(Math.abs(v.x)>.9||v.y>yT||v.y<yB||v.z>1){ok=false;break}}if(ok)hi=m;else lo=m}
@@ -854,10 +889,10 @@ $("v3d").onclick=()=>setView("3d");$("vtop").onclick=()=>setView("top");$("fit")
 
 /* ---------- Werkzeuge ---------- */
 let tool="select",paintMat="bed",brushS=.8,paintMode="brush",rectDraft=null,tMode="set",tSize=.8,tStr=4,tTarget=.4,tShape="rect",tEdge="step",edgeType="curb",edgeDraft=null;
-const TOOLN={paint:"Malen",terrain:"Gelände",edge:"Kanten",build:"Gebäude"};
+const TOOLN={paint:"Malen",terrain:"Gelände",edge:"Kanten",build:"Gebäude",garden:"Fläche verschieben",plan:"Plan bearbeiten"};
 function applyOrbitMode(){const t=tool!=="select";orbit.enableRotate=viewMode!=="top"&&!t;orbit.mouseButtons={LEFT:t?null:T.MOUSE.ROTATE,MIDDLE:T.MOUSE.DOLLY,RIGHT:T.MOUSE.PAN};orbit.touches={ONE:t?null:T.TOUCH.ROTATE,TWO:T.TOUCH.DOLLY_PAN}}
-function setTool(t){clearGuides();$("hread").hidden=true;if(edgeDraft&&t!=="edge")edgeFinish();tool=t;document.querySelectorAll(".tool").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===t));
-  ["Select","Paint","Terrain","Edge","Build"].forEach(n=>$("opt"+n).hidden=("opt"+n).toLowerCase()!=="opt"+t);
+function setTool(t){clearGuides();if(calib)endCalib();$("hread").hidden=true;if(edgeDraft&&t!=="edge")edgeFinish();tool=t;document.querySelectorAll(".tool").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===t));
+  ["Select","Paint","Terrain","Edge","Build","Garden","Plan"].forEach(n=>$("opt"+n).hidden=("opt"+n).toLowerCase()!=="opt"+t);
   $("toolchip").hidden=t==="select";$("toolname").textContent=(TOOLN[t]||"")+" aktiv";if(t!=="select"){select(null);showHover(null);hint(false)}else refresh();brushRing.visible=false;showSq(null);rectDraft=null;applyOrbitMode();cv.style.cursor=t==="select"?"default":"crosshair"}
 document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>setTool(b.dataset.tool));$("toolOff").onclick=()=>setTool("select");
 const PAINTS=["lawn","deck","gravel","tiles","paver","bed"];
@@ -974,16 +1009,77 @@ function setProp(k,v){
   if(selE>=0){const e=state.edges[selE];if(k==="t"){e.t=v;e.h=EDGE[v].h;e.w=EDGE[v].w}else if(k==="eh")e.h=Math.min(3,Math.max(.08,r2(v)));else if(k==="ew")e.w=Math.min(.8,Math.max(.08,r2(v)));buildEdges();frameE(e);selInfo();commit()}}
 $("sbProps").addEventListener("change",e=>{const t=e.target;if(t.dataset.sel){setProp(t.dataset.sel,t.value);return}if(t.dataset.k&&t.tagName==="INPUT")setProp(t.dataset.k,(+t.value||0)/100)});
 $("sbProps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.act){setProp(b.dataset.act);return}if(b.dataset.step){const k=b.dataset.k,inp=$("sbProps").querySelector('input[data-k="'+k+'"]');setProp(k,(+inp.value/100)+SNAP*(+b.dataset.step)*(e.shiftKey?5:1))}});
-const frameB=b=>{frame.geometry.setFromPoints([new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
+const frameB=b=>{if(!handleDrag||true)updateHandles(b);frame.geometry.setFromPoints([new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
 const eSel=new T.Line(new T.BufferGeometry(),new T.LineBasicMaterial({color:0x17a2b8,depthTest:false}));eSel.renderOrder=8;eSel.visible=false;scene.add(eSel);
 function frameE(e){if(!e){eSel.visible=false;return}const t=EDGE[e.t]||EDGE.curb,H=(e.h||t.h);eSel.geometry.setFromPoints(e.p.map(([x,z])=>new T.Vector3(x,heightAt(x,z)+H,z)));eSel.visible=true}
-function clearSel(){selected=null;selB=-1;selE=-1;eSel.visible=false;showFrame(null);clearMeasures()}
+/* ---------- Plan als Vorlage ---------- */
+let planFit=false,plan=null,planMesh=null,planDrag=null,calib=null,gardenDrag=null,handleDrag=null;
+const calG=new T.Group();scene.add(calG);
+function planUI(){$("planOpts").hidden=!plan;$("planBtnTxt").textContent=plan?"Anderen Plan hochladen":"Plan hochladen (Bild oder PDF)";$("planBtnTxtW").textContent=plan?"Plan hinterlegt ✓ · anderen wählen":"Plan hochladen (Bild oder PDF)";
+  if(plan){$("planVis").checked=plan.vis;$("planOp").value=plan.op;$("planOpO").textContent=Math.round(plan.op*100)+" %";$("planRot").value=plan.rot;$("planRotO").textContent=plan.rot+"°"}$("drawCal").hidden=!plan}
+function planApply(){if(!plan){if(planMesh){scene.remove(planMesh);planMesh.material.map.dispose();planMesh.material.dispose();planMesh.geometry.dispose();planMesh=null}return}
+  if(!planMesh){const tx=new T.TextureLoader().load(plan.url);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;planMesh=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:tx,transparent:true,depthWrite:false,toneMapped:false}));planMesh.rotation.order="YXZ";planMesh.renderOrder=1;scene.add(planMesh)}
+  planMesh.scale.set(plan.w*plan.mpp,plan.h*plan.mpp,1);planMesh.rotation.set(-PI2,plan.rot*Math.PI/180,0);planMesh.position.set(plan.cx,.018,plan.cz);planMesh.material.opacity=plan.op;planMesh.visible=plan.vis}
+function savePlan(){try{if(plan)localStorage.setItem("calvera-plan",JSON.stringify(plan));else localStorage.removeItem("calvera-plan")}catch(e){toast("Der Plan ist zu groß zum Speichern und bleibt nur bis zum Neuladen erhalten.")}}
+function loadPlanFile(file){if(!file)return;const done=(url,w,h)=>{const bb=state.poly?bbox(state.poly):{x0:-5,x1:5,z0:-4,z1:4};const old=planMesh;if(old){scene.remove(old);planMesh=null}
+    plan={url,w,h,cx:(bb.x0+bb.x1)/2,cz:(bb.z0+bb.z1)/2,mpp:Math.max(bb.x1-bb.x0,8)*1.6/w,rot:0,op:.7,vis:true,cal:false};planApply();savePlan();planUI();if(!$("wiz").hidden){toast("Plan hinterlegt. Den Maßstab legen Sie im nächsten Schritt fest.");return}toast("Plan hinterlegt. Legen Sie jetzt den Maßstab fest.");setTimeout(startCalib,300)};
+  const fromCanvas=c=>done(c.toDataURL("image/jpeg",.85),c.width,c.height);
+  if(file.type==="application/pdf"){toast("PDF wird gelesen …");loadPdfJs().then(lib=>file.arrayBuffer().then(buf=>lib.getDocument({data:buf}).promise).then(pdf=>pdf.getPage(1)).then(pg=>{const v0=pg.getViewport({scale:1}),sc=Math.min(4,2400/Math.max(v0.width,v0.height)),v=pg.getViewport({scale:sc}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);return pg.render({canvasContext:ctx,viewport:v}).promise.then(()=>fromCanvas(c))})).catch(()=>toast("Das PDF konnte nicht gelesen werden. Versuchen Sie es als Bild (JPG oder PNG)."));return}
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,2400/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,0,0,c.width,c.height);fromCanvas(c)};im.onerror=()=>toast("Diese Datei konnte nicht gelesen werden.");im.src=r.result};r.readAsDataURL(file)}
+let pdfP=null;function loadPdfJs(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);if(pdfP)return pdfP;pdfP=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";sc.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)};sc.onerror=rej;document.head.appendChild(sc)});return pdfP}
+$("planFile").addEventListener("change",e=>{loadPlanFile(e.target.files[0]);e.target.value=""});
+$("planFileW").addEventListener("change",e=>{loadPlanFile(e.target.files[0]);e.target.value="";setTimeout(()=>{if(!$("wiz").hidden)planUI()},50)});
+$("planVis").addEventListener("change",e=>{if(!plan)return;plan.vis=e.target.checked;planApply();savePlan()});
+$("planOp").addEventListener("input",e=>{if(!plan)return;plan.op=+e.target.value;planApply();planUI()});$("planOp").addEventListener("change",savePlan);
+$("planRot").addEventListener("input",e=>{if(!plan)return;plan.rot=+e.target.value;planApply();planUI()});$("planRot").addEventListener("change",savePlan);
+$("planDel").onclick=()=>{plan=null;planApply();savePlan();planUI();toast("Plan entfernt.")};
+$("planCal").onclick=()=>startCalib();$("drawCal").onclick=()=>startCalib();
+function startCalib(){if(!plan)return;if(!plan.vis){plan.vis=true;planApply();planUI()}calib={pts:[]};$("calbar").hidden=false;$("calIn").hidden=true;$("caltxt").textContent="Klicken Sie zwei Punkte auf dem Plan an, deren Abstand Sie kennen, zum Beispiel die Enden einer Hauswand.";if(!drawing&&viewMode!=="top")setView("top");calRender()}
+function endCalib(){if(placePending&&calib&&!plan.cal){placePending=false}calib=null;$("calbar").hidden=true;calRender()}
+function calPt(e){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());return g?[g.x,g.z]:null}
+function calRender(cur){disposeGroup(calG);if(!calib)return;const p=calib.pts.concat(cur&&calib.pts.length===1?[cur]:[]);p.forEach(([x,z])=>{const m=new T.Mesh(new T.RingGeometry(.08,.14,24),new T.MeshBasicMaterial({color:0xe0552a,depthTest:false}));m.rotation.x=-PI2;m.position.set(x,.05,z);m.renderOrder=9;calG.add(m)});
+  if(p.length===2){const l=new T.Line(new T.BufferGeometry().setFromPoints(p.map(([x,z])=>new T.Vector3(x,.05,z))),new T.LineBasicMaterial({color:0xe0552a,depthTest:false}));l.renderOrder=9;calG.add(l)}}
+function calibClick(e){const q=calPt(e);if(!q)return;if(calib.pts.length>=2)calib.pts=[];calib.pts.push(q);calRender();if(calib.pts.length===2){$("caltxt").textContent="Wie lang ist diese Strecke in Wirklichkeit?";$("calIn").hidden=false;setTimeout(()=>$("calDist").focus(),30)}}
+$("calOk").onclick=()=>{const cmv=+$("calDist").value;if(!calib||calib.pts.length<2||!(cmv>0)){toast("Bitte einen Abstand in cm eingeben.");return}const[a,b]=calib.pts,d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(d<.01)return;const f=(cmv/100)/d;
+  plan.mpp*=f;plan.cx=a[0]+(plan.cx-a[0])*f;plan.cz=a[1]+(plan.cz-a[1])*f;plan.cal=true;planApply();savePlan();endCalib();toast("Maßstab übernommen.");if(placePending){placePending=false;placeOnPlan();return}if(!drawing){planFit=true;setView("top");planFit=false}};
+$("calDist").addEventListener("keydown",e=>{if(e.key==="Enter")$("calOk").click()});$("calCancel").onclick=endCalib;
+function planDown(e){if(!planMesh||!plan.vis)return false;setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObject(planMesh);if(!h.length)return false;planDrag={ox:plan.cx-h[0].point.x,oz:plan.cz-h[0].point.z,id:e.pointerId};orbit.enabled=false;cv.setPointerCapture(e.pointerId);return true}
+function planMove(e){const g=calPt(e);if(!g)return;plan.cx=+(g[0]+planDrag.ox).toFixed(3);plan.cz=+(g[1]+planDrag.oz).toFixed(3);planApply()}
+
+/* ---------- Fläche verschieben ---------- */
+function gardenDown(e){const g=calPt(e);if(!g||!inPoly(state.poly,g[0],g[1]))return false;gardenDrag={s:g,dx:0,dz:0,id:e.pointerId};orbit.enabled=false;cv.setPointerCapture(e.pointerId);return true}
+function gardenMove(e){const g=calPt(e);if(!g)return;gardenDrag.dx=r2(g[0]-gardenDrag.s[0]);gardenDrag.dz=r2(g[1]-gardenDrag.s[1]);[gardenG,world,edgeG].forEach(o=>o.position.set(gardenDrag.dx,0,gardenDrag.dz));outer.visible=false}
+function gardenEnd(){const{dx,dz}=gardenDrag;gardenDrag=null;orbit.enabled=true;[gardenG,world,edgeG].forEach(o=>o.position.set(0,0,0));outer.visible=true;if(!dx&&!dz)return;shiftGarden(dx,dz)}
+function shiftGarden(dx,dz){
+  const f=v=>+v.toFixed(4);state.poly=state.poly.map(([x,z])=>[f(x+dx),f(z+dz)]);state.paint=state.paint.map(p=>[p[0],f(p[1]+dx),f(p[2]+dz),f(p[3]+dx),f(p[4]+dz)]);state.edges.forEach(ed=>{ed.p=ed.p.map(([x,z])=>[f(x+dx),f(z+dz)])});
+  objects.forEach(o=>{o.position.x=f(o.position.x+dx);o.position.z=f(o.position.z+dz)});buildGarden();objHeights();let n=0;objects.forEach(o=>{if(!isP(o)&&blocked(o,o.position.x,o.position.z))n++});commit();if(n)toast("Achtung: "+n+(n===1?" Produkt überschneidet":" Produkte überschneiden")+" sich jetzt mit einem Gebäude.")}
+
+/* ---------- Gebäude ziehen (Push & Pull) ---------- */
+const hG=new T.Group();scene.add(hG);const hMat=new T.MeshBasicMaterial({color:0x054958,depthTest:false}),hMatH=new T.MeshBasicMaterial({color:0x17a2b8,depthTest:false});
+function roofTop(b){if(b.r==="flat")return .16;const across=b.rd?b.x1-b.x0:b.z1-b.z0;return b.r==="mono"?(across+.6)*Math.tan(12*Math.PI/180):(across/2+.3)*Math.tan(35*Math.PI/180)}
+function updateHandles(b){disposeGroup(hG);if(!b)return;const cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,y=Math.min(1.2,b.h/2);
+  [["x0",b.x0-.18,y,cz],["x1",b.x1+.18,y,cz],["z0",cx,y,b.z0-.18],["z1",cx,y,b.z1+.18],["h",cx,b.h+roofTop(b)+.35,cz]].forEach(([k,x,yy,z])=>{const m=new T.Mesh(k==="h"?new T.ConeGeometry(.14,.28,4):new T.BoxGeometry(.24,.24,.24),hMat);m.position.set(x,yy,z);if(k==="h")m.rotation.y=Math.PI/4;else m.rotation.y=k[0]==="x"?0:PI2;m.renderOrder=10;m.userData.hk=k;hG.add(m)})}
+function handleTry(e){if(selB<0||!hG.children.length)return false;setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(hG.children,false);if(!h.length)return false;const k=h[0].object.userData.hk,b=state.buildings[selB];
+  handleDrag={k,id:e.pointerId,b,top:roofTop(b)};h[0].object.material=hMatH;orbit.enabled=false;cv.setPointerCapture(e.pointerId);return true}
+function handleMove(e){const{k,b}=handleDrag;setNdc(e);ray.setFromCamera(ndc,camera);
+  if(k==="h"){const c=new T.Vector3((b.x0+b.x1)/2,0,(b.z0+b.z1)/2),n=new T.Vector3();camera.getWorldDirection(n);n.y=0;if(n.lengthSq()<1e-6)return;n.normalize();const pl=new T.Plane().setFromNormalAndCoplanarPoint(n,c),p=new T.Vector3();if(!ray.ray.intersectPlane(pl,p))return;
+    const nh=Math.min(20,Math.max(2,r2(p.y-handleDrag.top-.35)));if(nh===b.h)return;b.h=nh}
+  else{const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return;let[x,z]=snapG(g.x,g.z);[x,z]=guidePoint(x,z,{b:selB});
+    if(k==="x0")b.x0=Math.min(x,+(b.x1-1).toFixed(3));else if(k==="x1")b.x1=Math.max(x,+(b.x0+1).toFixed(3));else if(k==="z0")b.z0=Math.min(z,+(b.z1-1).toFixed(3));else b.z1=Math.max(z,+(b.z0+1).toFixed(3))}
+  buildBuildings();selInfo()}
+function handleEnd(){handleDrag=null;orbit.enabled=true;clearGuides();updateHandles(selB>=0?state.buildings[selB]:null);commit()}
+
+function clearSel(){disposeGroup(hG);selected=null;selB=-1;selE=-1;eSel.visible=false;showFrame(null);clearMeasures()}
 function selectB(i){clearSel();selB=i;$("selbar").classList.add("on");frameB(state.buildings[i]);selInfo()}
 function selectE(i){clearSel();selE=i;$("selbar").classList.add("on");frameE(state.edges[i]);selInfo()}
 function select(o){clearSel();selected=o;$("selbar").classList.toggle("on",!!o);selInfo();showFrame(o,false);measures(o);showHover(hovered===o?null:hovered)}
 function pickOther(e){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children.concat(edgeG.children),false);if(!h.length)return null;const u=h[0].object.userData;return u.bld!==undefined?{b:u.bld}:u.edge!==undefined?{e:u.edge}:null}
 cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;cv.focus({preventScroll:true});
+  if(calib){calibClick(e);return}
   if(drawing){drawClick(e);return}
+  if(tool==="select"&&handleTry(e))return;
+  if(tool==="plan"){if(plan)planDown(e);else toast("Laden Sie zuerst einen Plan hoch.");return}
+  if(tool==="garden"){if(state.poly)gardenDown(e);return}
   if(tool!=="select"&&state.poly){const pt=groundAt(e);if(!pt)return;
     if(tool==="edge"){if(e.altKey){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(edgeG.children,false);if(h.length){state.edges.splice(h[0].object.userData.edge,1);buildEdges();commit();toast("Kante entfernt.")}return}
       const q=edgePoint(pt);if(!edgeDraft)edgeDraft={t:edgeType,p:[q]};else{const l=edgeDraft.p[edgeDraft.p.length-1],f=edgeDraft.p[0];if(Math.hypot(q[0]-l[0],q[1]-l[1])<.05){edgeFinish();clearGuides();return}if(edgeDraft.p.length>=2&&q[0]===f[0]&&q[1]===f[1]){edgeDraft.p.push(q);edgeFinish();clearGuides();toast("Kante geschlossen.");return}edgeDraft.p.push(q)}edgeDraftRender();return}
@@ -998,7 +1094,10 @@ cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)r
   drag={empty:true,x:e.clientX,y:e.clientY}});
 cv.addEventListener("dblclick",()=>{if(tool==="edge")edgeFinish()});
 cv.addEventListener("pointermove",e=>{
+  if(handleDrag){handleMove(e);return}if(planDrag){planMove(e);return}if(gardenDrag){gardenMove(e);return}
+  if(calib){if(calib.pts.length===1){const q=calPt(e);if(q)calRender(q)}return}
   if(drawing){drawMove(e);return}
+  if(tool==="plan"||tool==="garden"){cv.style.cursor="move";return}
   if(tool!=="select"&&state.poly){const pt=groundAt(e);
     if(tool==="edge"){showRing(null);if(edgeDraft&&pt)edgeDraftRender(edgePoint(pt));return}
     if(tool==="terrain"){const hr=$("hread");if(pt&&inPoly(state.poly,pt.x,pt.z)){const r=cv.getBoundingClientRect(),hv2=Math.round(heightAt(pt.x,pt.z)*100);hr.hidden=false;hr.style.left=(e.clientX-r.left)+"px";hr.style.top=(e.clientY-r.top)+"px";hr.textContent=(rectDraft?"Ziel "+(tTarget>=0?"+":"")+Math.round(tTarget*100):"Höhe "+(hv2>0?"+":"")+hv2)+" cm"}else hr.hidden=true}
@@ -1013,6 +1112,7 @@ cv.addEventListener("pointermove",e=>{
   else if(!drag&&e.pointerType==="mouse"){const o=pick(e);cv.style.cursor=o?"grab":"default";if(o!==hovered)showHover(o)}});
 cv.addEventListener("pointerleave",()=>{$("hread").hidden=true;if(!drag)showHover(null);showRing(null);if(!rectDraft)showSq(null)});
 function endDrag(e){
+  if(handleDrag){handleEnd();return}if(planDrag){planDrag=null;orbit.enabled=true;savePlan();return}if(gardenDrag){gardenEnd();return}
   if(rectDraft){const t=tool,a=rectDraft.a;rectDraft=null;draftBox.visible=false;clearRectLabels();showSq(null);clearGuides();let g=null;if(t==="build"){setNdc(e);ray.setFromCamera(ndc,camera);g=ray.ray.intersectPlane(groundPlane,new T.Vector3())}else g=groundAt(e);if(!g)return;const r=normRect(a,guidePoint(...snapG(g.x,g.z)));clearGuides();
     if(r[2]-r[0]<.07||r[3]-r[1]<.07)return;if(t==="terrain"){applyArea(r);terrainDone()}else if(t==="build"){state.buildings.push({x0:r[0],z0:r[1],x1:r[2],z1:r[3],h:bHv,r:$("bR").value,rd:(r[2]-r[0])>=(r[3]-r[1])?0:1});buildBuildings();const n=objects.filter(o=>blocked(o,o.position.x,o.position.z)).length;commit();if(n)toast("Achtung: "+n+(n===1?" Produkt steht":" Produkte stehen")+" im neuen Gebäude.")}else{paintRect(r);commit()}return}
   if(stroke){const t=tool;stroke=null;if(t==="terrain")terrainDone();else commit();return}
@@ -1139,7 +1239,11 @@ document.querySelectorAll(".shape").forEach(b=>b.onclick=()=>{wiz.shape=b.datase
 ["rw","rd","lw","ld","lcw","lcd"].forEach(id=>$(id).addEventListener("input",wizRender));
 $("wizGrounds").addEventListener("click",e=>{const b=e.target.closest(".gr");if(!b)return;wiz.ground=b.dataset.g;wizRender()});
 $("wizCancel").onclick=closeWiz;$("editGarden").onclick=()=>{closeSheets();openWiz()};
-$("wizGo").onclick=()=>{if(wiz.shape==="draw"){closeWiz();drawStart();return}const p=wizPoly();if(!Array.isArray(p))return;closeWiz();setGardenPoly(p,wiz.ground,wiz.house)};
+let placePending=false;
+function placeOnPlan(){if(!plan||!state.poly)return;const bb=bbox(state.poly),dx=r2(plan.cx-(bb.x0+bb.x1)/2),dz=r2(plan.cz-(bb.z0+bb.z1)/2);if(dx||dz)shiftGarden(dx,dz);
+  setMode("design");setTool("garden");planFit=true;setView("top");planFit=false;toast("Ziehen Sie die Gartenfläche an die richtige Stelle auf dem Plan.")}
+$("wizGo").onclick=()=>{if(wiz.shape==="draw"){closeWiz();drawStart();return}const p=wizPoly();if(!Array.isArray(p))return;closeWiz();setGardenPoly(p,wiz.ground,wiz.house);
+  if(plan){if(!plan.cal){placePending=true;setTimeout(startCalib,500)}else setTimeout(placeOnPlan,500)}};
 function setGardenPoly(p,ground,house){const np=p.map(([x,z])=>[+x.toFixed(4),+z.toFixed(4)]);if(JSON.stringify(np)!==JSON.stringify(state.poly))state.heights={};state.poly=np;state.ground=ground;state.house=false;buildGarden();renderGroundButtons($("grounds"),state.ground);
   let lost=0;for(const o of objects.slice()){if(blocked(o,o.position.x,o.position.z)){const f=findFree(o,o.position.x,o.position.z);if(f)setPos(o,f[0],f[1]);else{removeObject(o);lost++}}else setPos(o,o.position.x,o.position.z)}
   select(null);setView("3d");commit();if(lost)toast(lost+(lost===1?" Objekt passte":" Objekte passten")+" nicht mehr in den Garten und "+(lost===1?"wurde":"wurden")+" entfernt.")}
@@ -1149,11 +1253,11 @@ let drawing=null,drawLabels=[];const dGroup=new T.Group();scene.add(dGroup);
 const dMat=new T.LineBasicMaterial({color:0x054958}),dPrev=new T.LineDashedMaterial({color:0x054958,dashSize:.15,gapSize:.1});
 const dDot=new T.MeshBasicMaterial({color:0x054958}),dDot0=new T.MeshBasicMaterial({color:0xffffff});
 let helpGrid=null;
-function drawStart(){if(tool!=="select")setTool("select");drawing={pts:[],cur:null};select(null);world.visible=false;gardenG.visible=false;edgeG.visible=false;
-  helpGrid=new T.GridHelper(40,40,0xc9c7c2,0xd8d6d1);helpGrid.position.y=.002;scene.add(helpGrid);
-  const g2=new T.GridHelper(40,8,0x9e9a93,0x9e9a93);g2.position.y=.003;helpGrid.add(g2);
+function drawStart(){if(tool!=="select")setTool("select");if(plan){plan.vis=true;planApply();planUI();if(!plan.cal)setTimeout(startCalib,350)}drawing={pts:[],cur:null};select(null);world.visible=false;gardenG.visible=false;edgeG.visible=false;
+  helpGrid=new T.GridHelper(60,60,0xc9c7c2,0xd8d6d1);helpGrid.position.y=.002;if(plan){helpGrid.position.x=Math.round(plan.cx);helpGrid.position.z=Math.round(plan.cz)}scene.add(helpGrid);
+  const g2=new T.GridHelper(60,12,0x9e9a93,0x9e9a93);g2.position.y=.003;helpGrid.add(g2);
   $("drawbar").hidden=false;$("otop").style.visibility="hidden";$("mbar").style.visibility="hidden";hint(false);
-  viewMode="top";orbit.enableRotate=false;orbit.maxPolarAngle=.0001;camera.position.set(0,34,.01);orbit.target.set(0,0,0);orbit.update();drawRender()}
+  viewMode="top";orbit.enableRotate=false;orbit.maxPolarAngle=.0001;camera.position.set(0,34,.01);orbit.target.set(0,0,0);if(plan){planFit=true;const P=camPose("top");planFit=false;camera.position.copy(P.pos);orbit.target.copy(P.tgt)}orbit.update();drawRender()}
 function drawPoint(e){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return null;let x=Math.round(g.x/SNAP)*SNAP,z=Math.round(g.z/SNAP)*SNAP;const p=drawing.pts;
   if(p.length){const[lx,lz]=p[p.length-1],dx=x-lx,dz=z-lz,ang=Math.abs(Math.atan2(dz,dx)*180/Math.PI)%90;if(ang<7||ang>83){if(Math.abs(dx)>Math.abs(dz))z=lz;else x=lx}
     if(p.length>=2){const[fx,fz]=p[0];if(Math.abs(x-fx)<.25)x=fx;if(Math.abs(z-fz)<.25)z=fz}}
@@ -1174,7 +1278,7 @@ function drawRender(){dGroup.children.slice().forEach(c=>{dGroup.remove(c);if(c.
   if(cur){const m=new T.Mesh(new T.RingGeometry(.1,.16,24),dDot);m.rotation.x=-PI2;m.position.set(cur[0],y+.004,cur[1]);dGroup.add(m)}
   $("drawDone").disabled=p.length<3;$("drawtxt").textContent=p.length<3?"Tippen oder klicken Sie die Ecken Ihres Gartens nacheinander an ("+p.length+" von mindestens 3).":"Zum Abschließen den ersten Punkt erneut anklicken oder auf „Fertig“."+" Fläche: "+areaOf(p).toLocaleString("de-DE",{maximumFractionDigits:1})+" m²";needLabels=true}
 function drawFinish(){const p=drawing&&drawing.pts;if(!p||p.length<3)return;const a=areaOf(p);if(a<2){toast("Die Fläche ist zu klein.");return}
-  const bb=bbox(p),cx=r2((bb.x0+bb.x1)/2),cz=r2((bb.z0+bb.z1)/2);const poly=p.map(([x,z])=>[x-cx,z-cz]);drawEnd(true);setGardenPoly(poly,wiz.ground,wiz.house)}
+  const poly=p.map(([x,z])=>[x,z]);drawEnd(true);setGardenPoly(poly,wiz.ground,wiz.house)}
 function drawEnd(ok){drawing=null;dGroup.children.slice().forEach(c=>{dGroup.remove(c);if(c.geometry)c.geometry.dispose()});clearDrawLabels();if(helpGrid){scene.remove(helpGrid);helpGrid=null}
   world.visible=true;gardenG.visible=true;edgeG.visible=true;$("drawbar").hidden=true;$("otop").style.visibility="";$("mbar").style.visibility="";
   if(!ok){if(state.poly){setView("3d");refresh()}else openWiz()}}
@@ -1198,6 +1302,7 @@ $("reset").onclick=resetAll;$("reset2").onclick=resetAll;
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();needLabels=true}
 new ResizeObserver(resize).observe(stage);resize();
 let saved=null;try{const h=location.hash.match(/#p=([\w-]+)/);saved=h?JSON.parse(dec(h[1])):JSON.parse(localStorage.getItem("calvera-planer-v6")||"null")}catch(e){saved=null}
+try{plan=JSON.parse(localStorage.getItem("calvera-plan")||"null")}catch(e){plan=null}planApply();planUI();
 loadOpts();renderPaintMats();$("brushO").textContent=fmtLen(brushS);$("tSizeO").textContent=fmtLen(tSize*2);tUI();
 renderGroundButtons($("grounds"),state.ground);
 try{TH=thumbs()}catch(e){}
