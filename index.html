@@ -646,6 +646,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (function(){
 "use strict";
@@ -706,6 +707,11 @@ function bedCanvas(){const[c,g]=cvs(512),r=rnd(55);g.fillStyle="#4b3b2e";g.fillR
 function stoneCanvas(){const[c,g]=cvs(512),r=rnd(61);g.fillStyle="#d7d2c9";g.fillRect(0,0,512,512);for(let y=0;y<512;y+=64){const off=(y/64)%2?64:0;for(let x=-128;x<512;x+=128){const t=r()*14-7;g.fillStyle="rgb("+(196+t)+","+(190+t)+","+(180+t)+")";g.fillRect(x+off+2,y+2,124,60)}}return c}
 const GROUNDS=[{id:"lawn",name:"Rasen",c:noiseCanvas(512,"#6f8a55",.16,0,5),size:2.5},{id:"deck",name:"Holzdeck",c:deckCanvas(),size:1.28},{id:"gravel",name:"Kies",c:gravelCanvas(),size:.9},{id:"tiles",name:"Platten",c:tileCanvas(),size:1.28},{id:"bed",name:"Beet",c:bedCanvas(),size:1.2},{id:"paver",name:"Pflaster",c:stoneCanvas(),size:1.28}];
 GROUNDS.forEach(gr=>{gr.t=tex(gr.c,1);gr.r=gr.id==="deck"?.7:gr.id==="tiles"?.85:1;const s=document.createElement("canvas");s.width=s.height=96;s.getContext("2d").drawImage(gr.c,0,0,96,96);gr.url=s.toDataURL("image/jpeg",.8)});
+const MODEL_SC={},MODEL_P={};
+function modelUrl(n){return(window.MODEL_DATA&&window.MODEL_DATA[n])||("models/"+n+".glb")}
+function loadModel(n){if(MODEL_P[n])return MODEL_P[n];MODEL_P[n]=new Promise((res,rej)=>{if(!T.GLTFLoader){rej("kein Lader");return}new T.GLTFLoader().load(modelUrl(n),g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;if(o.material&&o.material.isMeshPhysicalMaterial){const a=o.material,b=new T.MeshStandardMaterial({name:a.name,color:a.color,map:a.map,normalMap:a.normalMap,aoMap:a.aoMap,roughnessMap:a.roughnessMap,metalnessMap:a.metalnessMap,roughness:a.roughness,metalness:a.metalness,transparent:a.transparent,opacity:a.opacity,alphaTest:a.alphaTest,side:a.side});o.material=b;a.dispose()}if(o.material&&o.material.name&&/water/i.test(o.material.name)){o.material.transparent=true;o.material.opacity=.8;o.receiveShadow=false}}});MODEL_SC[n]=g.scene;res(g.scene)},undefined,rej)});return MODEL_P[n]}
+function modelInto(g,n,w,h,d){if(MODEL_SC[n]){g.add(MODEL_SC[n].clone(true));return}const ph=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color:0xcfcac2,transparent:true,opacity:.5}));ph.position.y=h/2;g.add(ph);
+  loadModel(n).then(sc=>{g.remove(ph);ph.geometry.dispose();g.add(sc.clone(true));if(typeof onModelLoaded==="function")onModelLoaded(n)}).catch(()=>{if(typeof toast==="function")toast("Das 3D-Modell konnte nicht geladen werden.")})}
 function jitter(geo,a){const p=geo.attributes.position;for(let i=0;i<p.count;i++){p.setXYZ(i,p.getX(i)+(Math.random()-.5)*a,p.getY(i)+(Math.random()-.5)*a,p.getZ(i)+(Math.random()-.5)*a)}geo.computeVertexNormals();return geo}
 function makeFigure(){const mat=new T.MeshStandardMaterial({color:0xd9d2c7,roughness:.65,metalness:0});
   const cap=(r,L)=>{const m=new T.Mesh(new T.CapsuleGeometry(r,L,6,16),mat);m.castShadow=true;return m};
@@ -738,6 +744,7 @@ const PRODUCTS=[
    if(op.includes("cushion"))[-.55,.55].forEach(x=>{const c=new T.Mesh(new T.CapsuleGeometry(.11,.62,8,20),M.cushion);c.rotation.z=PI2;c.scale.set(1,1,.92);c.position.set(x,.96+.1,-1.24+.1);c.castShadow=true;g.add(c)});
    if(op.includes("cover")){const cv2=box(2.5,.05,2.5,M.poolCover,0,.96,0);g.add(cv2);[-.62,0,.62].forEach(x=>g.add(box(.012,.052,2.46,M.frame,x,.962,0)))}
    if(op.includes("heater")){const hb=box(.16,.42,.32,M.heater,1.24+.08,.22,.6);g.add(hb);const ld=box(.004,.05,.05,new T.MeshBasicMaterial({color:0x3fd27a}),1.24+.162,.52,.68);g.add(ld)}}},
+ {id:"pool3",cat:0,rs:{sink:[0,1]},water:()=>.85,name:"Lounge Pool (3D-Modell, Test)",w:2.48,d:2.48,price:9990,dims:"",build(g){modelInto(g,"lounge-pool",2.48,1,2.48)}},
  {id:"pool2",cat:0,name:"Pool mit Technikraum",w:6.88,d:2.96,sizes:[{w:6.88,d:2.96,h:1.36,price:34900},{w:7.92,d:2.96,h:1.36,price:39900}],opts:[{id:"heater",n:"Durchlauferhitzer",p:1890}],rs:{sink:[0,1.36]},hatch:1,water:D=>(D.h||1.36)-.12,poolOff:()=>-.96,dims:"",build(g,D){const W=D.w||6.88,Dd=D.d||2.96,H=D.h||1.36,t=.2,tech=1.92,pl=W-tech,xd=-W/2+pl;
    g.add(box(W,t,Dd,M.concrete),box(W,H,t,M.concrete,0,0,-Dd/2+t/2),box(W,H,t,M.concrete,0,0,Dd/2-t/2),box(t,H,Dd-2*t,M.concrete,-W/2+t/2,0,0),box(t,H,Dd-2*t,M.concrete,W/2-t/2,0,0),box(t,H,Dd-2*t,M.concrete,xd,0,0));
    const px0=-W/2+t,px1=xd-t/2,wv=new T.Mesh(new T.BoxGeometry(px1-px0,.02,Dd-2*t),M.water);wv.position.set((px0+px1)/2,H-.12,0);wv.receiveShadow=true;g.add(wv);
@@ -911,7 +918,7 @@ function blocked(o,x,z){const f=fp(o),e=1e-6;blockWhy="";if(!rectInPoly(x,z,f.w,
     if(isP(o)&&INTER[q.userData.pid]&&hostAt(o,x,z)===q)continue;return true}}return false}
 function sinkOf(o){const D=o.userData.dims;return(D&&D.sink)||0}
 function setPos(o,x,z){o.position.set(x,heightAt(x,z)-sinkOf(o),z)}
-const INTER={pool:"swim",pool2:"swim",lounger:"lie",seat:"sit"};
+const INTER={pool:"swim",pool2:"swim",pool3:"swim",lounger:"lie",seat:"sit"};
 const isP=o=>o.userData.pid==="person";
 function hostAt(o,x,z){for(const q of objects){if(q===o||!q.visible||!INTER[q.userData.pid])continue;if(((q.userData.dims&&q.userData.dims.op)||[]).includes("cover"))continue;const g=fp(q);if(Math.abs(x-q.position.x)<g.w/2-.02&&Math.abs(z-q.position.z)<g.d/2-.02){if(objects.some(p=>p!==o&&isP(p)&&p.userData.host===q))continue;return q}}return null}
 function rigOf(o){let r=null;o.traverse(c=>{if(c.userData.rig)r=c});return r}
@@ -1350,7 +1357,7 @@ function thumbs(){const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuf
   for(const p of PRODUCTS){const g=makeProduct(p);s.add(g);const b=new T.Box3().setFromObject(g),sz=b.getSize(new T.Vector3()),ct=b.getCenter(new T.Vector3()),rad=sz.length()/2;
     c.position.copy(ct).addScaledVector(new T.Vector3(1.25,.95,1.6).normalize(),rad*3.3);c.lookAt(ct);r.render(s,c);out[p.id]=r.domElement.toDataURL("image/jpeg",.88);s.remove(g)}
   r.dispose();if(r.forceContextLoss)r.forceContextLoss();return out}
-let TH={},CNT={},activeCat=0;
+let TH={},CNT={},activeCat=0;let thumbT=null;function onModelLoaded(){clearTimeout(thumbT);thumbT=setTimeout(()=>{try{TH=thumbs();renderProducts()}catch(e){}},50)}
 const CATNOTE={2:"Die Outdoor-Kitchen-Serie erscheint in Kürze. Sie können sie schon einplanen.",3:"Pflanzen helfen beim Nachbauen Ihres Gartens und erscheinen nicht in der Zusammenstellung.",4:"Diese Objekte dienen der Orientierung und erscheinen nicht in der Zusammenstellung."};
 function renderTabs(){$("tabs").innerHTML=CATS.map((c,i)=>'<button class="tab" role="tab" aria-selected="'+(i===activeCat)+'" data-cat="'+i+'">'+c+''+'</button>').join("")}
 function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class="soon-note">'+CATNOTE[activeCat]+'</p>':'')+
