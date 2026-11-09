@@ -373,6 +373,48 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 /* Zusammenstellung */
 .row .p{font-variant-numeric:tabular-nums;color:var(--strong)}
 .total b{font-size:20px;font-variant-numeric:tabular-nums}
+/* ---------- Menü als schwebende Elemente über der 3D-Ansicht (ab Tablet) ----------
+   Produkte: einklappbare Leiste unten. Gestalten/Einstellungen: Karte links. --dockH setzt das Skript,
+   damit Auswahlleiste, Kompass usw. über der Leiste bleiben. */
+.dtog{display:none}
+@media (min-width:761px){
+  .planner{grid-template-columns:minmax(0,1fr) 340px}
+  #pLeft{position:absolute;z-index:6;background:rgba(255,255,255,.97);border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,40,40,.12);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  #pLeft[data-mode="prod"]{left:16px;right:calc(340px + 16px);bottom:16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"modes chips tog" "list list list"}
+  #pLeft[data-mode="prod"] .modes{grid-area:modes;border-bottom:0;padding:0 0 0 20px!important;gap:22px;justify-content:flex-start}
+  #pLeft[data-mode="prod"] #paneProd{display:contents}
+  #pLeft[data-mode="prod"] .side-head{grid-area:chips;padding:0 0 0 22px;align-self:center;min-width:0}
+  #pLeft[data-mode="prod"] #tabs{margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #pLeft[data-mode="prod"] #tabs::-webkit-scrollbar{display:none}
+  #pLeft[data-mode="prod"] .dtog{grid-area:tog;display:inline-flex;align-items:center;justify-content:center;width:46px;border:0;border-left:1px solid var(--line);background:none;cursor:pointer;color:var(--text);transition:color .2s}
+  #pLeft[data-mode="prod"] .dtog:hover{color:var(--petrol)}
+  #pLeft[data-mode="prod"] .dtog .icon{transition:transform .25s}
+  #pLeft.min .dtog .icon{transform:rotate(180deg)}
+  #pLeft[data-mode="prod"] .products{grid-area:list;display:flex;overflow-x:auto;overflow-y:hidden;gap:16px;padding:16px 20px 16px;border-top:1px solid var(--line);scrollbar-width:thin}
+  #pLeft.min .products{display:none}
+  #pLeft[data-mode="prod"] .products::-webkit-scrollbar{height:6px}
+  #pLeft[data-mode="prod"] .prod{flex:0 0 124px;touch-action:pan-x}
+  #pLeft[data-mode="prod"] .prod .ph{margin-bottom:9px}
+  #pLeft[data-mode="prod"] .prod .n{font-size:12.5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #pLeft[data-mode="prod"] .prod .d{font-size:11px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #pLeft[data-mode="prod"] .prod .pr{margin-top:3px;font-size:11.5px}
+  #pLeft[data-mode="prod"] .soon-note{flex:0 0 180px;margin:0;align-self:flex-start;font-size:11.5px;line-height:1.55}
+  /* Gestalten / Einstellungen: Karte links */
+  #pLeft:not([data-mode="prod"]){left:16px;top:66px;bottom:auto;max-height:calc(100% - 82px);width:320px;display:flex;flex-direction:column}
+  #pLeft:not([data-mode="prod"]) .pane{flex:0 1 auto}
+  .planner[data-lmode="design"] .compass,.planner[data-lmode="set"] .compass{left:352px}
+  /* Elemente über der Leiste */
+  .selbar{bottom:calc(var(--dockH,0px) + 16px)}
+  .compass{bottom:calc(var(--dockH,0px) + 16px)}
+  .drawbar,.eyehint{bottom:calc(var(--dockH,0px) + 16px)}
+}
+@media (min-width:761px) and (max-width:1099px){
+  .planner{grid-template-columns:minmax(0,1fr)}
+  #pLeft[data-mode="prod"]{right:16px}
+  .mbar{bottom:calc(var(--dockH,0px) + 16px)}
+  .selbar{bottom:calc(var(--dockH,0px) + 76px)}
+  .compass{bottom:calc(var(--dockH,0px) + 16px)}
+}
 @media (max-width:760px){.intro{padding:22px 20px 20px}.intro h1{font-size:26px}.intro p{font-size:13px;line-height:1.55}.prod .ph::after{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -385,6 +427,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   <symbol id="i-del" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
@@ -419,13 +462,14 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 </section>
 
 <section class="planner" id="planner" aria-label="Garten-Planer">
-  <aside class="side left" id="pLeft" aria-label="Produkte und Gestaltung">
+  <aside class="side left" id="pLeft" data-mode="prod" aria-label="Produkte und Gestaltung">
     <div class="sheet-head"><p class="label">Planen</p><button data-close="pLeft" aria-label="Schließen"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="modes" role="tablist" aria-label="Bereich">
       <button role="tab" data-mode="prod" aria-selected="true">Produkte</button>
       <button role="tab" data-mode="design" aria-selected="false">Gestalten</button>
       <button role="tab" data-mode="set" aria-selected="false">Einstellungen</button>
     </div>
+    <button class="dtog" id="dockTog" aria-label="Produktleiste einklappen" aria-expanded="true" title="Produktleiste ein-/ausklappen"><svg class="icon"><use href="#i-chev"/></svg></button>
     <div class="pane" id="paneProd">
       <div class="side-head"><div class="tabs" role="tablist" id="tabs"></div></div>
       <div class="products" id="products" role="tabpanel"></div>
@@ -905,19 +949,19 @@ const ROUND=new Set();function box(w,h,d,mat,x,y,z){const mn=Math.min(w,h,d),rg=
    Mit Boden: Wasser (Standard), Erde mit Pflanzen, Kies, leer. Ohne Boden: Erde mit Pflanzen (Standard), Erde, Kies, Kies mit Gräsern. */
 const FILLS={water:"Wasser",plants:"Erde mit Pflanzen",soil:"Erde",gravel:"Kies",gravelGrass:"Kies mit Gräsern",none:"Leer"};
 const FILL_FLOOR=["water","plants","gravel","none"],FILL_OPEN=["plants","soil","gravel","gravelGrass"];
-let gravelMat=null;
+let gravelMat=null,mulchMat=null;
 function fillPlane(w,d,y,mat,rep){const geo=new T.PlaneGeometry(w,d);if(rep){const uv=geo.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*w/rep,uv.getY(i)*d/rep)}const m=new T.Mesh(geo,mat);m.rotation.x=-PI2;m.position.y=y;m.receiveShadow=true;return m}
 function troughFill(g,w,d,h,kind){if(!kind||kind==="none")return;const t=.08,iw=w-2*t,id=d-2*t,L=Math.max(iw,id),along=w>=d,wide=Math.min(w,d)>.6;
   if(kind==="water"){g.add(fillPlane(iw,id,h-.06,M.water));return}
   if(kind==="gravel"||kind==="gravelGrass"){if(!gravelMat)gravelMat=new T.MeshStandardMaterial({map:groundOf("gravel").t,roughness:1});g.add(fillPlane(iw,id,h-.04,gravelMat,.9))}
-  else g.add(fillPlane(iw,id,h-.05,M.soil));
+  else{if(!mulchMat)mulchMat=new T.MeshStandardMaterial({map:groundOf("bed").t,roughness:1});g.add(fillPlane(iw,id,h-.05,mulchMat,1.2))}
   if(kind==="plants")plantBed(g,iw,id,h-.05,Math.round(w*131+d*71));
   if(kind==="gravelGrass"){const R=rnd(Math.round(w*97+d*13)),n=Math.max(2,Math.round(L/.3)),bed=new T.Group();bed.position.y=h-.04;g.add(bed);
     for(let i=0;i<n;i++){const u=-L/2+L*(i+.5)/n+(R()-.5)*.06,c=grassClump(.07,.45+R()*.2,R);c.position.set(along?u:0,0,along?0:u);bed.add(c)}}}
 /* Füllung eines Trogs: in der Produktübersicht (Vorschaubild) leer, im Garten gewählt oder Standard */
 const fillOf=(p,D)=>D&&D._thumb?"none":(D&&D.fill)||p.fills[0];
 /* ---------- Bepflanzung (Tröge) ----------
-   Ruhig und rhythmisch: Kugeln (Buchs) und Grasbüschel im Wechsel, darunter flache Polster als grüner Teppich.
+   Ruhig und rhythmisch: Kugeln (Buchs) und Grasbüschel im Wechsel auf Rindenmulch.
    Leichte Größenunterschiede sind pro Trog fest (gleiche Planung = gleiches Bild). */
 const PM={grass:new T.MeshStandardMaterial({color:VC.straw,roughness:.95,side:T.DoubleSide}),grass2:new T.MeshStandardMaterial({color:VC.straw2,roughness:.95,side:T.DoubleSide})};
 const PG={blades:[0,1,2].map(k=>{const g=new T.PlaneGeometry(.024,1,1,6),p=g.attributes.position;for(let i=0;i<p.count;i++){const t=p.getY(i)+.5;p.setXYZ(i,p.getX(i)*(1-t*.9),t,t*t*(.12+k*.08))}g.computeVertexNormals();return g})};
@@ -927,10 +971,6 @@ function grassClump(r,h,R){const g=new T.Group();g.userData.sway=1;const n=46,ma
   for(let i=0;i<n;i++){const b=pmesh(PG.blades[i%3],mat),a=i/n*Math.PI*2*7.3,hh=h*(.7+R()*.35);b.castShadow=false;b.rotation.order="YXZ";b.rotation.y=a;b.rotation.x=-(.04+R()*.16);b.scale.set(1,hh,hh);const d=r*Math.sqrt(R());b.position.set(Math.sin(a)*d,0,Math.cos(a)*d);g.add(b)}return g}
 function plantBed(g,iw,id,y,seed){const R=rnd(seed),bed=new T.Group();bed.position.y=y;g.add(bed);const along=iw>=id,L=along?iw:id,W=along?id:iw,wide=W>.6;
   const put=(o,u,v)=>{o.position.set(along?u:v,0,along?v:u);bed.add(o)};
-  /* flache Polster als Grundbepflanzung */
-  const nc=Math.max(2,Math.round(L/.14)),rowsC=wide?3:2;for(let i=0;i<nc;i++)for(let j=0;j<rowsC;j++){const r=Math.min(.12,W/(rowsC*1.3))*(.95+R()*.2);
-    const cl=(x,m)=>Math.max(-m,Math.min(m,x)),q=r*1.15;
-    put(new T.Group().add(vball(VC.cover,q,r*.36,q,0,r*.08)),cl(-L/2+L*(i+.5)/nc+(j%2?L/nc/2:0)-L/nc/4,L/2-q),cl(-W/2+W*(j+.5)/rowsC,W/2-q))}
   /* Kugeln und Gräser im Wechsel, bei breiten Trögen zwei versetzte Reihen */
   const rows=wide?2:1,step=wide?.42:.3,n=Math.max(2,Math.round(L/step));
   for(let j=0;j<rows;j++)for(let i=0;i<n;i++){const u=-L/2+L*(i+.5)/n,v=rows>1?(j?W/4:-W/4):0,ball=(i+j)%2===0;
@@ -1578,8 +1618,16 @@ function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class=
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;activeCat=+b.dataset.cat;renderTabs();renderProducts()});
 $("products").addEventListener("pointerdown",e=>{const b=e.target.closest(".prod");if(b)pStart(e,b.dataset.id)});
 $("products").addEventListener("click",e=>{const b=e.target.closest(".prod");if(!b||!state.poly)return;if(innerWidth<=760){const c=viewCenter();addNear(b.dataset.id,c.x,c.z);closeSheets()}else if(e.detail===0){const c=viewCenter();addNear(b.dataset.id,c.x,c.z)}});
-function setMode(m){document.querySelectorAll(".modes [data-mode]").forEach(b=>b.setAttribute("aria-selected",b.dataset.mode===m));$("paneProd").hidden=m!=="prod";$("paneDesign").hidden=m!=="design";$("paneSet").hidden=m!=="set";if(m!=="design"&&tool!=="select")setTool("select")}
+function setMode(m){const pl=$("pLeft");if(m==="prod"&&pl.dataset.mode==="prod"&&innerWidth>760){toggleDock();return}pl.dataset.mode=m;pl.classList.remove("min");$("dockTog").setAttribute("aria-expanded","true");$("planner").dataset.lmode=m;
+  document.querySelectorAll(".modes [data-mode]").forEach(b=>b.setAttribute("aria-selected",b.dataset.mode===m));$("paneProd").hidden=m!=="prod";$("paneDesign").hidden=m!=="design";$("paneSet").hidden=m!=="set";if(m!=="design"&&tool!=="select")setTool("select")}
 document.querySelectorAll(".modes [data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+/* Produktleiste: ein-/ausklappen, Höhe für die schwebenden Elemente bereitstellen, Mausrad scrollt waagerecht */
+function toggleDock(){const pl=$("pLeft"),min=pl.classList.toggle("min");$("dockTog").setAttribute("aria-expanded",String(!min));$("dockTog").setAttribute("aria-label",min?"Produktleiste ausklappen":"Produktleiste einklappen")}
+$("dockTog").onclick=toggleDock;
+function dockH(){const pl=$("pLeft"),h=innerWidth>760&&pl.dataset.mode==="prod"?pl.offsetHeight+16:0;$("planner").style.setProperty("--dockH",h+"px")}
+if(window.ResizeObserver)new ResizeObserver(dockH).observe($("pLeft"));addEventListener("resize",dockH);
+new MutationObserver(dockH).observe($("pLeft"),{attributes:true,attributeFilter:["data-mode","class"]});
+$("products").addEventListener("wheel",e=>{const el=$("products");if(innerWidth>760&&$("pLeft").dataset.mode==="prod"&&Math.abs(e.deltaY)>Math.abs(e.deltaX)&&el.scrollWidth>el.clientWidth){el.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 
 /* ---------- Zusammenstellung ---------- */
 const eur=n=>n.toLocaleString("de-DE")+" €";
