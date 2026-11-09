@@ -14,7 +14,12 @@
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:#fff;color:var(--text);font-family:Montserrat,"Segoe UI",Helvetica,Arial,sans-serif;font-weight:300;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
-button,input{font:inherit;color:inherit}
+button,input,select,option,textarea{font:inherit;color:inherit}
+/* Auswahllisten: Seitenschrift, eckig, eigener Pfeil statt Browser-Standard */
+select{-webkit-appearance:none;appearance:none;border-radius:0;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235E5952' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center/14px;padding-right:28px!important;cursor:pointer}
+select:hover{border-color:rgba(5,73,88,.45)!important}
+select:focus{outline:none;border-color:var(--petrol)!important}
+option{font-family:Montserrat,"Segoe UI",Helvetica,Arial,sans-serif;font-size:13px;color:var(--strong);background:#fff}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--petrol);outline-offset:2px}
 svg.icon{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
