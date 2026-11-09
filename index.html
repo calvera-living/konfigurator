@@ -378,22 +378,34 @@ input[type=range]{accent-color:var(--petrol);width:100%}
    damit Auswahlleiste, Kompass usw. über der Leiste bleiben. */
 .dtog{display:none}
 @media (min-width:761px){
-  .planner{grid-template-columns:minmax(0,1fr) 340px}
-  #pLeft{position:absolute;z-index:6;background:rgba(255,255,255,.97);border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,40,40,.12);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-  #pLeft[data-mode="prod"]{left:16px;right:calc(340px + 16px);bottom:16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"modes chips tog" "list list list"}
-  #pLeft[data-mode="prod"] .modes{grid-area:modes;border-bottom:0;padding:0 0 0 20px!important;gap:22px;justify-content:flex-start}
+  .planner{grid-template-columns:minmax(0,1fr) 340px;height:calc(100svh - var(--head));max-height:none;border-top:0}
+  #pLeft{position:absolute;z-index:6;background:rgba(255,255,255,.96);border:1px solid rgba(226,224,220,.9);box-shadow:0 24px 60px rgba(30,40,40,.14),0 2px 6px rgba(30,40,40,.04);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  #pLeft[data-mode="prod"]{left:calc((100% - 340px) / 2);transform:translateX(-50%);width:min(calc(100% - 340px - 40px),960px);bottom:20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"modes chips tog" "list list list"}
+  #pLeft[data-mode="prod"] .modes{grid-area:modes;border-bottom:0;padding:0 0 0 22px!important;gap:22px;justify-content:flex-start}
   #pLeft[data-mode="prod"] #paneProd{display:contents}
-  #pLeft[data-mode="prod"] .side-head{grid-area:chips;padding:0 0 0 22px;align-self:center;min-width:0}
+  #pLeft[data-mode="prod"] .side-head{grid-area:chips;padding:0 0 0 20px;margin-left:20px;border-left:1px solid var(--line);align-self:center;min-width:0}
+  #pLeft[data-mode="prod"] .prod .ph{background:radial-gradient(ellipse at 50% 62%,#fbfbfa 0%,#f1f0ed 72%,#ebeae6 100%);transition:transform .25s ease,box-shadow .25s ease,outline-color .25s}
+  #pLeft[data-mode="prod"] .prod:hover .ph{transform:translateY(-3px);box-shadow:0 12px 24px rgba(30,40,40,.1)}
+  #pLeft[data-mode="prod"] .prod:hover img{transform:scale(1.04)}
   #pLeft[data-mode="prod"] #tabs{margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
   #pLeft[data-mode="prod"] #tabs::-webkit-scrollbar{display:none}
   #pLeft[data-mode="prod"] .dtog{grid-area:tog;display:inline-flex;align-items:center;justify-content:center;width:46px;border:0;border-left:1px solid var(--line);background:none;cursor:pointer;color:var(--text);transition:color .2s}
   #pLeft[data-mode="prod"] .dtog:hover{color:var(--petrol)}
   #pLeft[data-mode="prod"] .dtog .icon{transition:transform .25s}
   #pLeft.min .dtog .icon{transform:rotate(180deg)}
-  #pLeft[data-mode="prod"] .products{grid-area:list;display:flex;overflow-x:auto;overflow-y:hidden;gap:16px;padding:16px 20px 16px;border-top:1px solid var(--line);scrollbar-width:thin}
-  #pLeft.min .products{display:none}
-  #pLeft[data-mode="prod"] .products::-webkit-scrollbar{height:6px}
-  #pLeft[data-mode="prod"] .prod{flex:0 0 124px;touch-action:pan-x}
+  /* Produktreihe: ohne Scrollbalken, seitenweise über Pfeile (am Tablet auch wischen) */
+  #pLeft[data-mode="prod"] .products{grid-area:list;display:flex;overflow-x:auto;overflow-y:hidden;gap:20px;padding:20px 24px 18px;border-top:1px solid var(--line);scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding:0 24px}
+  #pLeft[data-mode="prod"] .products::-webkit-scrollbar{display:none}
+  #pLeft.min .products,#pLeft.min .pnav{display:none!important}
+  #pLeft[data-mode="prod"] .prod{flex:0 0 132px;width:132px;min-width:0;scroll-snap-align:start;touch-action:pan-x}
+  #pLeft[data-mode="prod"] .soon-note{display:none}
+  .prod .pr.none{color:var(--text);font-weight:400;opacity:.75}
+  .pnav{display:none}
+  #pLeft[data-mode="prod"] .pnav:not([hidden]){grid-area:list;align-self:start;margin-top:63px;z-index:2;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(30,40,40,.12);cursor:pointer;color:var(--strong);transition:color .2s,border-color .2s,box-shadow .2s}
+  #pLeft[data-mode="prod"] .pnav:hover{color:var(--petrol);border-color:rgba(5,73,88,.45)}
+  #pLeft[data-mode="prod"] .pnav.prev{justify-self:start;margin-left:8px}
+  #pLeft[data-mode="prod"] .pnav.next{justify-self:end;margin-right:8px}
+  #pLeft[data-mode="prod"] .pnav.next .icon{transform:rotate(180deg)}
   #pLeft[data-mode="prod"] .prod .ph{margin-bottom:9px}
   #pLeft[data-mode="prod"] .prod .n{font-size:12.5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #pLeft[data-mode="prod"] .prod .d{font-size:11px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -408,9 +420,14 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   .compass{bottom:calc(var(--dockH,0px) + 16px)}
   .drawbar,.eyehint{bottom:calc(var(--dockH,0px) + 16px)}
 }
+/* knappe Breiten: Kategorien in eigener Zeile, damit nichts abgeschnitten wird */
+@media (min-width:1100px) and (max-width:1279px),(min-width:761px) and (max-width:839px){
+  #pLeft[data-mode="prod"]{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"modes tog" "chips chips" "list list"}
+  #pLeft[data-mode="prod"] .side-head{border-left:0;margin:0;padding:0 22px 14px}
+}
 @media (min-width:761px) and (max-width:1099px){
   .planner{grid-template-columns:minmax(0,1fr)}
-  #pLeft[data-mode="prod"]{right:16px}
+  #pLeft[data-mode="prod"]{left:50%;width:calc(100% - 32px)}
   .mbar{bottom:calc(var(--dockH,0px) + 16px)}
   .selbar{bottom:calc(var(--dockH,0px) + 76px)}
   .compass{bottom:calc(var(--dockH,0px) + 16px)}
@@ -456,10 +473,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   <a class="cta-top" href="https://www.calvera-living.de/" data-advice>Beratung anfragen</a>
 </header>
 
-<section class="intro">
-  <h1>Garten planen</h1>
-  <p>Legen Sie Ihren Garten an, platzieren Sie Pool, Pflanztröge und Sitzblöcke und sehen Sie maßstabsgetreu, wie alles zusammen wirkt.</p>
-</section>
+<h1 class="sr">Garten planen</h1>
 
 <section class="planner" id="planner" aria-label="Garten-Planer">
   <aside class="side left" id="pLeft" data-mode="prod" aria-label="Produkte und Gestaltung">
@@ -473,6 +487,8 @@ input[type=range]{accent-color:var(--petrol);width:100%}
     <div class="pane" id="paneProd">
       <div class="side-head"><div class="tabs" role="tablist" id="tabs"></div></div>
       <div class="products" id="products" role="tabpanel"></div>
+      <button class="pnav prev" id="pPrev" aria-label="Vorherige Produkte" hidden><svg class="icon"><use href="#i-back"/></svg></button>
+      <button class="pnav next" id="pNext" aria-label="Weitere Produkte" hidden><svg class="icon"><use href="#i-back"/></svg></button>
     </div>
     <div class="pane scroll" id="paneDesign" hidden>
       <div class="blk">
@@ -604,7 +620,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
     <div class="help" id="help" hidden>
       <p class="label">So geht's</p>
       <dl>
-        <dt>Ziehen</dt><dd>Produkt aus der Liste in den Garten</dd>
+        <dt>Ziehen</dt><dd>Produkt aus der Leiste in den Garten</dd>
         <dt>Klick</dt><dd>Objekt auswählen und verschieben</dd>
         <dt><kbd>R</kbd></dt><dd>Drehen</dd>
         <dt><kbd>D</kbd></dt><dd>Duplizieren</dd>
@@ -614,7 +630,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
         <dt>Rechte Maustaste</dt><dd>Ansicht verschieben</dd>
       </dl>
     </div>
-    <div class="hintbox hide" id="hint"><b>Ihr Garten ist bereit.</b>Ziehen Sie Produkte aus der Liste hinein. Alles rastet im 8-cm-Raster ein und passt bündig aneinander.</div>
+    <div class="hintbox hide" id="hint"><b>Ihr Garten ist bereit.</b>Ziehen Sie Produkte aus der Leiste hinein oder klicken Sie sie an. Alles rastet im 8-cm-Raster ein und passt bündig aneinander.</div>
     <div class="selbar" id="selbar" role="toolbar" aria-label="Auswahl">
       <div class="sb-main">
         <span class="nm"><span id="selname"></span><small id="seldim"></small></span>
@@ -1604,18 +1620,21 @@ function pUp(){removeEventListener("pointermove",pMove);showFine(null);const p=p
 function pCancel(){removeEventListener("pointermove",pMove);if(pd&&pd.o){removeObject(pd.o);select(null)}pd=null}
 
 /* Vorschaubilder */
-function thumbs(){const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setSize(300,300);r.outputEncoding=T.sRGBEncoding;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=.95;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
-  const s=new T.Scene();thumbScene=s;s.background=new T.Color(0xefefee);s.add(new T.HemisphereLight(0xf3f5f2,0x70685a,.6));const l=new T.DirectionalLight(0xfff1dc,1.5);l.position.set(4,8,5);l.castShadow=true;l.shadow.mapSize.set(1024,1024);Object.assign(l.shadow.camera,{left:-4,right:4,top:4,bottom:-4});s.add(l);
-  const fl=new T.Mesh(new T.PlaneGeometry(20,20),new T.ShadowMaterial({opacity:.16}));fl.rotation.x=-PI2;fl.receiveShadow=true;s.add(fl);const c=new T.PerspectiveCamera(30,1,.05,100),out={};
+function thumbs(){const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,alpha:true});r.setClearColor(0x000000,0);r.setSize(300,300);r.outputEncoding=T.sRGBEncoding;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=.95;
+  const s=new T.Scene();thumbScene=s;s.add(new T.HemisphereLight(0xf3f5f2,0x70685a,.6));const l=new T.DirectionalLight(0xfff1dc,1.5);l.position.set(4,8,5);l.castShadow=true;l.shadow.mapSize.set(1024,1024);Object.assign(l.shadow.camera,{left:-4,right:4,top:4,bottom:-4});s.add(l);
+  const c=new T.PerspectiveCamera(30,1,.05,200),out={},dir=new T.Vector3(1.25,.95,1.6).normalize(),v=new T.Vector3();
   for(const p of PRODUCTS){const g=makeProduct(p,p.fills?{_thumb:1}:null);s.add(g);const b=new T.Box3().setFromObject(g),sz=b.getSize(new T.Vector3()),ct=b.getCenter(new T.Vector3()),rad=sz.length()/2;
-    c.position.copy(ct).addScaledVector(new T.Vector3(1.25,.95,1.6).normalize(),rad*3.3);c.lookAt(ct);r.render(s,c);out[p.id]=r.domElement.toDataURL("image/jpeg",.88);s.remove(g)}
+    /* einheitlich rahmen: Abstand so wählen, dass jedes Produkt gleich viel vom Bild füllt (ohne Bodenschatten) */
+    let d=rad*3.3;for(let k=0;k<4;k++){c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);c.updateMatrixWorld();let mx=0;
+      for(let q=0;q<8;q++){v.set(q&1?b.max.x:b.min.x,q&2?b.max.y:b.min.y,q&4?b.max.z:b.min.z).project(c);mx=Math.max(mx,Math.abs(v.x),Math.abs(v.y))}d*=mx/.74}
+    c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);r.render(s,c);out[p.id]=r.domElement.toDataURL("image/png");s.remove(g)}
   r.dispose();if(r.forceContextLoss)r.forceContextLoss();return out}
 let TH={},CNT={},activeCat=0;let thumbT=null;function onModelLoaded(){clearTimeout(thumbT);thumbT=setTimeout(()=>{try{TH=thumbs();renderProducts()}catch(e){}},50)}
 const CATNOTE={2:"Pflanzen helfen beim Nachbauen Ihres Gartens und erscheinen nicht in der Zusammenstellung.",3:"Diese Objekte dienen der Orientierung und erscheinen nicht in der Zusammenstellung."};
 function renderTabs(){$("tabs").innerHTML=CATS.map((c,i)=>'<button class="tab" role="tab" aria-selected="'+(i===activeCat)+'" data-cat="'+i+'">'+c+''+'</button>').join("")}
 function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class="soon-note">'+CATNOTE[activeCat]+'</p>':'')+
-  PRODUCTS.filter(p=>p.cat===activeCat).map(p=>'<button class="prod" data-id="'+p.id+'" aria-label="'+p.name+' hinzufügen">'+(CNT[p.id]?'<span class="badge">'+CNT[p.id]+'</span>':'')+'<span class="ph">'+(TH[p.id]?'<img alt="" src="'+TH[p.id]+'">':'')+'</span><span class="n">'+p.name+'</span><span class="d">'+(p.noList?p.dims:p.sizes?p.sizes.map(z=>cm(z.w)+" × "+cm(z.d)+" cm").join("<br>"):cm(p.w)+" × "+cm(p.d)+(p.h?" × "+cm(p.h):"")+" cm")+'</span>'+(basePrice(p)?'<span class="pr">'+(p.sizes||p.opts?"ab ":"")+eur(basePrice(p))+'</span>':'')+'</button>').join("")}
-$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;activeCat=+b.dataset.cat;renderTabs();renderProducts()});
+  PRODUCTS.filter(p=>p.cat===activeCat).map(p=>'<button class="prod" data-id="'+p.id+'" aria-label="'+p.name+' hinzufügen">'+(CNT[p.id]?'<span class="badge">'+CNT[p.id]+'</span>':'')+'<span class="ph">'+(TH[p.id]?'<img alt="" src="'+TH[p.id]+'">':'')+'</span><span class="n">'+p.name+'</span><span class="d">'+(p.noList?p.dims:p.sizes?p.sizes.map(z=>cm(z.w)+" × "+cm(z.d)+" cm").join("<br>"):cm(p.w)+" × "+cm(p.d)+(p.h?" × "+cm(p.h):"")+" cm")+'</span>'+(basePrice(p)?'<span class="pr">'+(p.sizes||p.opts?"ab ":"")+eur(basePrice(p))+'</span>':'<span class="pr none">'+(p.noList?"Planungshilfe":"Preis folgt")+'</span>')+'</button>').join("")}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;activeCat=+b.dataset.cat;renderTabs();renderProducts();$("products").scrollLeft=0;updNav()});
 $("products").addEventListener("pointerdown",e=>{const b=e.target.closest(".prod");if(b)pStart(e,b.dataset.id)});
 $("products").addEventListener("click",e=>{const b=e.target.closest(".prod");if(!b||!state.poly)return;if(innerWidth<=760){const c=viewCenter();addNear(b.dataset.id,c.x,c.z);closeSheets()}else if(e.detail===0){const c=viewCenter();addNear(b.dataset.id,c.x,c.z)}});
 function setMode(m){const pl=$("pLeft");if(m==="prod"&&pl.dataset.mode==="prod"&&innerWidth>760){toggleDock();return}pl.dataset.mode=m;pl.classList.remove("min");$("dockTog").setAttribute("aria-expanded","true");$("planner").dataset.lmode=m;
@@ -1624,9 +1643,16 @@ document.querySelectorAll(".modes [data-mode]").forEach(b=>b.onclick=()=>setMode
 /* Produktleiste: ein-/ausklappen, Höhe für die schwebenden Elemente bereitstellen, Mausrad scrollt waagerecht */
 function toggleDock(){const pl=$("pLeft"),min=pl.classList.toggle("min");$("dockTog").setAttribute("aria-expanded",String(!min));$("dockTog").setAttribute("aria-label",min?"Produktleiste ausklappen":"Produktleiste einklappen")}
 $("dockTog").onclick=toggleDock;
-function dockH(){const pl=$("pLeft"),h=innerWidth>760&&pl.dataset.mode==="prod"?pl.offsetHeight+16:0;$("planner").style.setProperty("--dockH",h+"px")}
+function dockH(){const pl=$("pLeft"),h=innerWidth>760&&pl.dataset.mode==="prod"?pl.offsetHeight+20:0;$("planner").style.setProperty("--dockH",h+"px")}
 if(window.ResizeObserver)new ResizeObserver(dockH).observe($("pLeft"));addEventListener("resize",dockH);
 new MutationObserver(dockH).observe($("pLeft"),{attributes:true,attributeFilter:["data-mode","class"]});
+/* Pfeile: nur zeigen, wenn es in die Richtung weitergeht; ein Klick blättert eine Seite weiter */
+function updNav(){const el=$("products"),on=innerWidth>760&&$("pLeft").dataset.mode==="prod";$("pPrev").hidden=!on||el.scrollLeft<=4;$("pNext").hidden=!on||el.scrollLeft+el.clientWidth>=el.scrollWidth-4}
+function pageProds(dir){const el=$("products"),step=Math.max(152,Math.floor((el.clientWidth-48+20)/152)*152);el.scrollBy({left:dir*step,behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}
+$("pPrev").onclick=()=>pageProds(-1);$("pNext").onclick=()=>pageProds(1);
+$("products").addEventListener("scroll",updNav,{passive:true});addEventListener("resize",updNav);
+new MutationObserver(updNav).observe($("products"),{childList:true});
+new MutationObserver(updNav).observe($("pLeft"),{attributes:true,attributeFilter:["data-mode","class"]});setTimeout(updNav,0);
 $("products").addEventListener("wheel",e=>{const el=$("products");if(innerWidth>760&&$("pLeft").dataset.mode==="prod"&&Math.abs(e.deltaY)>Math.abs(e.deltaX)&&el.scrollWidth>el.clientWidth){el.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 
 /* ---------- Zusammenstellung ---------- */
