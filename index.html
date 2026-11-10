@@ -1075,7 +1075,7 @@ function foliage(cards,kind,ctr,R){const pos=[],nor=[],uv=[],col=[],useC=!!ctr,C
 /* ---------- Rinde, Äste ---------- */
 const BARK_T=(()=>{const[c]=pixCanvas(512,(x,y)=>{const a=1-Math.abs(2*nz(NF1,x*4,y)-1),b=1-Math.abs(2*nz(NF2,x*8,y*2)-1),f=.46+.42*Math.pow(a,1.6)+.16*b+(Math.random()-.5)*.07;return[98*f,90*f,80*f]});
   const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.encoding=T.sRGBEncoding;t.anisotropy=4;return t})();
-const BARK={plain:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.014,roughness:.95,vertexColors:true}),olive:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.016,color:0xd6d0c5,roughness:.95,vertexColors:true})};
+const BARK={plain:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.014,roughness:.95,vertexColors:true}),olive:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.016,color:0xf2ede4,roughness:.95,vertexColors:true})};
 /* gebogene, sich verjüngende Röhre in gemeinsame Arrays schreiben (für zusammengefasste Ast-Geometrie) */
 function tubeInto(A,pts,r0,r1,rad,flare){const curve=new T.CatmullRomCurve3(pts),L=curve.getLength(),seg=Math.max(2,Math.round(L*(rad>6?9:5))),fr=curve.computeFrenetFrames(seg,false),base=A.pos.length/3,circ=Math.max(1,Math.round(2*Math.PI*r0*2.5));
   for(let i=0;i<=seg;i++){const t=i/seg,P=curve.getPointAt(t),N=fr.normals[i],B=fr.binormals[i],r=(r0+(r1-r0)*t)*(flare?1+.75*Math.exp(-Math.max(0,t*L-.15)*6):1);
@@ -1088,11 +1088,16 @@ function arraysMesh(A,mat){const geo=new T.BufferGeometry();geo.setAttribute("po
 /* ---------- Wachstum ----------
    S: {trunk:[Länge,Radius,Neigung], lv:[{n,ang,len,rad,tmin}], up:[...], wob:[...], leaf:{kind,per,size,from}, bark}
    Jede Ebene erzeugt Kinder entlang des Elternastes (Goldener-Winkel-Verteilung), Richtungen mit Schwerkraft/Lichtstreben. */
-function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[],col:[]},leaves=[],RAD=[11,7,5,4,3];
+function growTree(S,R,probe){const A={pos:[],nor:[],uv:[],idx:[],col:[]},leaves=[],RAD=[11,7,5,4,3],E=S.shape;
+  /* Formschnitt: Hüll-Ellipsoid mit leichten Wölbungen; Äste und Laub werden hineingezogen (wie ein gepflegter Kronenschnitt) */
+  const hsh=(x,y,z)=>{const s=Math.sin(x*127.1+y*311.7+z*74.7)*43758.5;return s-Math.floor(s)};
+  const envE=(o)=>{const a=Math.atan2(o.z,o.x),b=Math.atan2(o.y,Math.hypot(o.x,o.z));return 1+E.lump*(Math.sin(a*3+E.ph)*Math.cos(b*2)+.6*Math.sin(a*5-b*3+E.ph*1.7))};
+  const envD=(p)=>{const o=new V3((p.x-E.cx)/E.rh,(p.y-E.cy)/E.ry,(p.z-E.cz)/E.rh);return[o,o.length(),envE(o)]};
+  const clampIn=(p,k)=>{if(!E)return p;const[o,d,e]=envD(p);if(d>e*k){o.multiplyScalar(e*k/d);p.set(E.cx+o.x*E.rh,E.cy+o.y*E.ry,E.cz+o.z*E.rh)}return p};
   const pointAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f)),k=f-i;return pts[i].clone().lerp(pts[i+1],k)};
   const dirAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f));return pts[i+1].clone().sub(pts[i]).normalize()};
   function grow(P,D,len,r0,lvl){const last=lvl===S.lv.length,steps=lvl===0?6:last?2:3,pts=[P.clone()];let p=P.clone(),d=D.clone();
-    for(let s=0;s<steps;s++){d.add(new V3(R()-.5,(R()-.5)*.5,R()-.5).multiplyScalar(S.wob[lvl]||.2)).addScaledVector(UP,S.up[lvl]||0).normalize();p=p.clone().addScaledVector(d,len/steps);pts.push(p)}
+    for(let s=0;s<steps;s++){d.add(new V3(R()-.5,(R()-.5)*.5,R()-.5).multiplyScalar(S.wob[lvl]||.2)).addScaledVector(UP,S.up[lvl]||0).normalize();p=p.clone().addScaledVector(d,len/steps);if(lvl>0&&E)clampIn(p,1.02);pts.push(p)}
     const r1=last?Math.max(.004,r0*.35):r0*.62;tubeInto(A,pts,r0,r1,RAD[lvl]||3,lvl===0);
     if(last||lvl>=S.leaf.from){const al=S.leaf.along||.55,n=last?S.leaf.per:Math.round(S.leaf.per*(S.leaf.mul||.4));for(let i=0;i<n;i++){const t=last?.15+.85*R():al+(1-al)*R(),q=pointAt(pts,t),dd=dirAt(pts,t),o=new V3(R()-.5,R()-.5,R()-.5).multiplyScalar(S.leaf.size*.6);
       leaves.push([q.x+o.x,q.y+o.y,q.z+o.z,S.leaf.size*(.75+R()*.5),dd])}}
@@ -1103,6 +1108,12 @@ function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[],col:[]},leaves=[],RAD
     /* Mitteltrieb: setzt den Ast nach oben fort und füllt die Kronenmitte (verhindert eine V-förmig offene Krone) */
     if(L.leader){const top=pts[pts.length-1],cd=dirAt(pts,.95).addScaledVector(UP,.6).normalize();grow(top,cd,len*L.leader,Math.max(.006,r1*1.1),lvl+1)}}
   const tilt=S.trunk[2]||0,td=new V3((R()-.5)*2*tilt,1,(R()-.5)*2*tilt).normalize();grow(new V3(0,-.15,0),td,S.trunk[0]+.15,S.trunk[1],0);
+  if(probe)return leaves;
+  if(E){/* Laub in die Hülle ziehen (außen leicht unregelmäßig), dann die Außenschale gleichmäßig verdichten */
+    leaves.forEach(l=>{const p=new V3(l[0],l[1],l[2]),h=hsh(l[0],l[1],l[2]);clampIn(p,.94+.3*h*h);l[0]=p.x;l[1]=p.y;l[2]=p.z});
+    const nAdd=Math.round(leaves.length*(E.fill||.3));for(let i=0;i<nAdd;i++){const u=R()*2-1,a=R()*6.283,s=Math.sqrt(1-u*u),o=new V3(s*Math.cos(a),u*(u<0?.85:1),s*Math.sin(a));
+      if(o.y<-.55)continue;const k=envE(o)*(.8+.18*R()),p=new V3(E.cx+o.x*E.rh*k,E.cy+o.y*E.ry*k,E.cz+o.z*E.rh*k);
+      leaves.push([p.x,p.y,p.z,S.leaf.size*(.75+R()*.5),new V3(o.x,o.y+.5,o.z).normalize()])}}
   /* Kronenmitte und Ausdehnung für weiche Schattierung */
   const C=new V3();leaves.forEach(l=>C.add(new V3(l[0],l[1],l[2])));C.divideScalar(Math.max(1,leaves.length));let mx=.01;leaves.forEach(l=>mx=Math.max(mx,Math.hypot(l[0]-C.x,l[1]-C.y,l[2]-C.z)));
   const cards=leaves.map(([x,y,z,s,dd])=>{const o=new V3(x-C.x,y-C.y,z-C.z),od=o.length()/mx,n=o.clone().normalize().multiplyScalar(.6).add(new V3(R()-.5,R()-.5,R()-.5)).addScaledVector(UP,.35),
@@ -1112,7 +1123,13 @@ function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[],col:[]},leaves=[],RAD
 const AO_M=(()=>{const[c,g]=cvs(128),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,"rgba(0,0,0,.5)");gr.addColorStop(.45,"rgba(0,0,0,.24)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);
   return new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})})(),AO_G=new T.PlaneGeometry(1,1);
 function aoDisc(sx,sz,op){const m=new T.Mesh(AO_G,op&&op<1?AO_M.clone():AO_M);if(op&&op<1)m.material.opacity=op;m.rotation.x=-PI2;m.scale.set(sx,sz,1);m.position.y=.006;m.raycast=()=>{};m.renderOrder=-2;return m}
-function treeFrom(g,S,seed){const R=rnd(seed),t=growTree(S,R),sw=new T.Group();sw.userData.sway=1;sw.userData.swayAmp=.2;sw.add(t.leaves);g.add(t.wood,sw);
+function treeFrom(g,S,seed){
+  /* Formschnitt-Hülle aus einem Probelauf ableiten: runde Krone mit 85 % der natürlichen Ausdehnung (gleiche Zufallsfolge) */
+  if(S.prune){const L=growTree(S,rnd(seed),true),q=(arr,p)=>{arr.sort((a,b)=>a-b);return arr[Math.min(arr.length-1,Math.floor(arr.length*p))]};
+    let cx=0,cz=0;L.forEach(l=>{cx+=l[0];cz+=l[2]});cx/=L.length;cz/=L.length;
+    const top=q(L.map(l=>l[1]),.97),bot=q(L.map(l=>l[1]),.03),P=S.prune;
+    S={...S,shape:{cx,cz,cy:(top+bot)/2+(P.dy||0),ry:(top-bot)/2*(P.v||1),rh:q(L.map(l=>Math.hypot(l[0]-cx,l[2]-cz)),.92)*(P.h||1),lump:P.lump||.05,ph:seed%7,fill:P.fill}}}
+  const R=rnd(seed),t=growTree(S,R),sw=new T.Group();sw.userData.sway=1;sw.userData.swayAmp=.2;sw.add(t.leaves);g.add(t.wood,sw);
   /* Bodenschatten: kräftig am Stammfuß, weich und breit unter der Krone */
   const tr=S.trunk[1];g.add(aoDisc(tr*8,tr*8),aoDisc(t.mx*1.7,t.mx*1.7,.45))}
 /* Kranz aus feinem Rasengras (Rasenfarben), z. B. um Stammfüße; dist(a,R) liefert den Abstand je Richtung */
@@ -1120,11 +1137,11 @@ function baseGrass(R,dist,n){const list=[];for(let i=0;i<n;i++){const a=R()*6.28
     list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a:a+(R()-.5)*1.5,len:.035+R()*.06,lean:.5+R()*.8,w:.007+R()*.005,seg:3,c0:[.24*dk,.32*dk,.14*dk],c1:[.36*dk,.45*dk,.22*dk]})}
   const m=strands(list);m.castShadow=false;return m}
 /* Laubbaum (Ahorn-Typ): kräftiger Stamm, 6 Hauptäste aus der oberen Stammhälfte, breite, unregelmäßige Krone */
-function deciduousTree(g){treeFrom(g,{trunk:[2.6,.21,.1],lv:[{n:5,ang:.6,len:.58,rad:.66,tmin:.56,leader:.62},{n:5,ang:.62,len:.56,rad:.62,tmin:.14,leader:.45},{n:3,ang:.7,len:.55,rad:.65,tmin:.2}],
-  up:[.1,.07,.06,.02],wob:[.08,.28,.26,.3],leaf:{kind:"broad",per:26,size:.55,from:1,along:.18,mul:.9}},4501)}
+function deciduousTree(g){treeFrom(g,{trunk:[2.6,.21,.1],lv:[{n:7,ang:.74,len:.6,rad:.66,tmin:.26,leader:.6},{n:5,ang:.62,len:.56,rad:.62,tmin:.14,leader:.45},{n:3,ang:.7,len:.55,rad:.65,tmin:.2}],
+  up:[.1,.07,.06,.02],wob:[.08,.28,.26,.3],leaf:{kind:"broad",per:26,size:.55,from:1,along:.18,mul:.9},prune:{lump:.11,fill:.2,v:1.05,h:1.12,dy:-.12}},4501)}
 /* Olivenbaum: kurzer, knorriger und geneigter Stamm, früh verzweigt, schirmartige lockere Krone, helle Rinde */
-function oliveTree(g){treeFrom(g,{trunk:[1.05,.13,.08],lv:[{n:4,ang:.55,len:.85,rad:.62,tmin:.6,leader:.5},{n:5,ang:.72,len:.55,rad:.58,tmin:.25},{n:4,ang:.8,len:.5,rad:.6,tmin:.18}],
-  up:[.08,.08,.04,0],wob:[.12,.22,.26,.3],leaf:{kind:"olive",per:30,size:.46,from:1,along:.3,mul:.7},bark:BARK.olive},2601)}
+function oliveTree(g){treeFrom(g,{trunk:[1.05,.14,.08],lv:[{n:4,ang:.55,len:.85,rad:.62,tmin:.6,leader:.5},{n:5,ang:.72,len:.55,rad:.58,tmin:.25},{n:4,ang:.8,len:.5,rad:.6,tmin:.18}],
+  up:[.08,.08,.04,0],wob:[.12,.22,.26,.3],leaf:{kind:"olive",per:30,size:.46,from:1,along:.3,mul:.7},bark:BARK.olive,prune:{lump:.15,fill:.18,v:.92,h:1.04}},2601)}
 /* Säulenbaum, in Form geschnitten (wie Säulen-Hainbuche in gepflegten Anlagen): freier, gerader Stamm,
    darüber eine dichte, glatte Spitzkrone – unten am breitesten, oben spitz zulaufend. Gleiche Technik wie die
    Hecke: dunkle Grundform (Drehkörper) + tausende kleine 3D-Blätter (InstancedMesh, ein Zeichenaufruf). */
@@ -1283,7 +1300,7 @@ const PRODUCTS=[
  {id:"troughS",cat:1,name:"Kleiner Trog",w:1.44,d:.48,h:.48,price:590,fills:FILL_FLOOR,build(g,D){modelInto(g,"troughS",1.44,.48,.48);troughFill(g,1.44,.48,.48,fillOf(this,D))}},
  {id:"troughL",cat:1,name:"Großer Trog",w:1.44,d:.96,h:.96,price:1190,fills:FILL_FLOOR,build(g,D){modelInto(g,"troughL",1.44,.96,.96);troughFill(g,1.44,.96,.96,fillOf(this,D))}},
  {id:"bench",cat:1,name:"Sitzbank",w:3.44,d:1.2,h:1.12,price:2490,build(g){modelInto(g,"bench",3.44,1.12,1.2)}},
- {id:"block196",cat:1,name:"Sitzblock lang",w:1.96,d:.48,h:.32,build(g){modelInto(g,"block196",1.96,.32,.48)}},
+ {id:"block196",cat:1,name:"Sitzblock lang",w:1.96,d:.48,h:.32,price:999,build(g){modelInto(g,"block196",1.96,.32,.48)}},
  {id:"olive",cat:2,noList:true,plant:true,hs:2.6,rs:{h:[1.2,5.2]},name:"Olivenbaum",w:.48,d:.48,dims:"ca. 2,6 m hoch",build(g){oliveTree(g)}},
  {id:"tree",cat:2,noList:true,plant:true,hs:4.5,rs:{h:[2,9]},name:"Laubbaum",w:.64,d:.64,dims:"ca. 4,5 m hoch",build(g){deciduousTree(g)}},
  {id:"column",cat:2,noList:true,plant:true,hs:3.5,rs:{h:[1.5,7]},name:"Säulenbaum",w:.48,d:.48,dims:"ca. 3,5 m hoch",build(g){columnTree(g)}},
