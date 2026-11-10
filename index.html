@@ -356,16 +356,6 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .pdfview iframe{flex:1;border:0;width:100%;background:transparent}
 /* Beispielgärten im Startfenster */
 .wiz-ex{grid-column:1/-1}
-.exs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.ex{border:1px solid var(--line);background:#fff;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s,transform .2s}
-.ex:hover,.ex:focus-visible{border-color:rgba(5,73,88,.5);box-shadow:0 12px 28px rgba(30,40,40,.1);transform:translateY(-2px)}
-.ex svg{display:block;width:100%;height:auto;background:#eef1ec}
-.ex-t{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px;min-width:0}
-.ex-t b{display:block;font-weight:400;color:var(--strong);font-size:14px;line-height:1.3}
-.ex-t small{display:block;font-size:12px;line-height:1.5}
-.wiz-or{display:flex;align-items:center;gap:14px;margin:24px 0 2px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
-.wiz-or::before,.wiz-or::after{content:"";flex:1;height:1px;background:var(--line)}
-@media (max-width:760px){.exs{grid-template-columns:1fr}.exs{gap:10px}.ex{flex-direction:row;align-items:stretch}.ex svg{width:112px;height:auto;flex:none;align-self:stretch;object-fit:cover}.ex-t{justify-content:center;padding:10px 14px;gap:3px}.ex-t b{font-size:14px}.ex-t small{font-size:12px;line-height:1.45}}
 /* ---------- Feinschliff Oberfläche ---------- */
 .intro{padding:30px 24px 28px}
 .intro h1{font-size:clamp(26px,2.9vw,38px);letter-spacing:.12em}
@@ -404,6 +394,16 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 /* Zusammenstellung */
 .row .p{font-variant-numeric:tabular-nums;color:var(--strong)}
 .total b{font-size:20px;font-variant-numeric:tabular-nums}
+.total b.bump{animation:sumBump .6s ease}
+@keyframes sumBump{0%{color:var(--strong)}25%{color:var(--petrol);transform:translateY(-1px)}100%{color:var(--strong);transform:none}}
+/* Präsentationsmodus: nur die 3D-Ansicht im Vollbild, Kamera dreht langsam */
+.stage.present{position:fixed;inset:0;z-index:300;width:100vw;height:100vh;height:100dvh}
+.stage.present>:not(canvas):not(.pexit):not(.pbrand){display:none!important}
+.pexit{display:none;position:absolute;right:20px;bottom:20px;z-index:5;background:rgba(255,255,255,.88);border:1px solid rgba(5,73,88,.2);color:var(--petrol);font:inherit;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 16px;cursor:pointer;opacity:0;transition:opacity .4s;backdrop-filter:blur(6px)}
+.stage.present .pexit{display:block}.stage.present.ui .pexit{opacity:1}
+.pbrand{position:absolute;left:24px;bottom:22px;z-index:5;width:150px;fill:#fff;opacity:.95;pointer-events:none;display:none;filter:drop-shadow(0 1px 6px rgba(0,0,0,.35))}
+.stage.present .pbrand{display:block}
+@media (prefers-reduced-motion:reduce){.total b.bump{animation:none}}
 /* ---------- Menü als schwebende Elemente über der 3D-Ansicht (ab Tablet) ----------
    Produkte: einklappbare Leiste unten. Gestalten/Einstellungen: Karte links. --dockH setzt das Skript,
    damit Auswahlleiste, Kompass usw. über der Leiste bleiben. */
@@ -626,6 +626,8 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   </aside>
 
   <div class="stage" id="stage">
+    <button class="pexit" id="pexit" type="button">Präsentation beenden</button>
+    <svg class="pbrand logo" viewBox="0 0 841.89 218.25" aria-hidden="true"><use href="#logo"/></svg>
     <div class="measures" id="measures"></div>
     <div class="hread" id="hread" hidden></div>
     <div class="eyehint" id="eyehint" hidden><span class="d-only">Ziehen zum Umschauen · Klicken zum Hingehen · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> zum Gehen · Mausrad zoomt</span><span class="m-only2">Wischen zum Umschauen · Tippen zum Hingehen</span><button id="eyeOff">Beenden</button></div>
@@ -639,6 +641,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
       <div class="ctrl">
         <div class="seg" role="group" aria-label="Ansicht"><button id="v3d" class="vi" aria-pressed="true" title="3D-Ansicht" aria-label="3D-Ansicht"><svg class="icon"><use href="#i-cube"/></svg></button><button id="vtop" class="vi" aria-pressed="false" title="Draufsicht" aria-label="Draufsicht"><svg class="icon"><use href="#i-top"/></svg></button><button id="veye" class="vi" aria-pressed="false" title="Augenhöhe: durch den Garten gehen" aria-label="Augenhöhe"><svg class="icon"><use href="#i-eye"/></svg></button></div>
         <button class="ghost ic" id="fit" title="Ansicht zentrieren" aria-label="Ansicht zentrieren"><svg class="icon"><use href="#i-fit"/></svg></button>
+        <button class="ghost ic" id="present" title="Präsentation: Vollbild mit langsamer Kamerafahrt" aria-label="Präsentation starten"><svg class="icon" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/><path d="M10.2 9.3v5.4l4.6-2.7z"/></svg></button>
         <div class="compass" id="compass" title="Norden – Ausrichtung unter Einstellungen" aria-hidden="true"><svg viewBox="0 0 40 40"><g id="cneedle"><text x="20" y="9" text-anchor="middle">N</text><path class="n" d="M20 11l4 10h-8z"/><path class="s" d="M20 33l-4-12h8z"/></g></svg></div>
       </div>
       <div class="ctrl">
@@ -703,6 +706,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
       <div class="minor">
         <button id="share"><svg class="icon"><use href="#i-link"/></svg>Link kopieren</button>
         <button id="shot"><svg class="icon"><use href="#i-img"/></svg>Als PDF</button>
+        <button id="shareImg"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Bild teilen</button>
         <button id="reset2">Neu beginnen</button>
       </div>
     </div>
@@ -717,9 +721,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
     <div class="wiz-in">
       <div class="wiz-ex">
         <h2 id="wizTitle">Ihr Garten</h2>
-        <p class="sub">Starten Sie mit einem Beispielgarten und passen Sie ihn an – oder legen Sie Ihre eigene Fläche an.</p>
-        <div class="exs" id="wizEx" role="group" aria-label="Beispielgärten"></div>
-        <p class="wiz-or"><span>oder eigene Fläche anlegen</span></p>
+        <p class="sub">Legen Sie die Form und Größe Ihrer Gartenfläche fest – alles Weitere planen Sie danach direkt in 3D.</p>
       </div>
       <div>
         <p class="label" style="margin-bottom:14px">Form der Fläche</p>
@@ -832,7 +834,10 @@ function concreteCanvas(n,base,seed){const r=rnd(seed),[c,g]=pixCanvas(n,(x,y)=>
   for(let i=0;i<n/14;i++){const x=r()*n,y=r()*n,rad=(1.8+r()*2.2)*n/1024;wrapDraw(n,x,y,8,(X,Y)=>{g.fillStyle="rgba(255,255,255,.18)";g.beginPath();g.arc(X+.6,Y+.8,rad,0,7);g.fill();g.fillStyle="rgba(45,40,36,.55)";g.beginPath();g.arc(X,Y,rad,0,7);g.fill()})}
   return c}
 const M={
-  concrete:new T.MeshStandardMaterial({map:tex(concreteCanvas(1024,[184,179,171],11),1),roughness:.88}),
+  concrete:(()=>{const c=concreteCanvas(1024,[184,179,171],11),t=tex(c,1);
+    /* Relief (Poren, leichte Wolkigkeit) und fleckige Rauheit aus derselben Textur – wirkt wie echter Sichtbeton */
+    const b=new T.CanvasTexture(c);b.wrapS=b.wrapT=T.RepeatWrapping;b.anisotropy=4;
+    return new T.MeshStandardMaterial({map:t,bumpMap:b,bumpScale:.012,roughnessMap:b,roughness:1.25,metalness:0})})(),
   water:new T.MeshStandardMaterial({color:0x2c7884,roughness:.02,metalness:.15,transparent:true,opacity:.78,envMapIntensity:1.9,normalMap:waterNormals(),normalScale:new T.Vector2(.55,.55)}),
   soil:new T.MeshStandardMaterial({color:0x4a3b2f,roughness:1}),
   leaf:new T.MeshStandardMaterial({color:0x5a7548,roughness:.9}),
@@ -879,6 +884,7 @@ function deckCanvas(){const n=1024,rows=8,pw=n/rows,gap=5,r=rnd(21),R=[];
     const de=Math.min(u-row.cuts[s],(s+1<row.cuts.length?row.cuts[s+1]:n)-u),col=row.cols[s];
     let f=.8+.3*nz(NF2,x*.5+s*97+ri*41,y*4+s*53)+.14*(nz(NF1,x*2+s*31,y*16)-.5);
     if(v<2||v>pw-gap-3)f*=.86;if(de<2)f*=.4;else if(de<4)f*=.8;return[col[0]*f,col[1]*f,col[2]*f]})[0]}
+/* Kies (ursprüngliche Version – vom Nutzer nach mehreren Versuchen ausdrücklich zurückgewünscht) */
 function gravelCanvas(){const n=1024,r=rnd(33),[c,g]=pixCanvas(n,(x,y)=>{const f=.75+.35*nz(NF1,x*2,y*2);return[112*f,104*f,93*f]});
   const pal=[[200,193,181],[172,165,154],[214,208,198],[150,143,132],[188,176,155],[160,150,136]];
   for(let i=0;i<17000;i++){const x=r()*n,y=r()*n,rx=4+r()*6.5,ry=rx*(.6+r()*.35),rot=r()*3.2,p=pal[r()*pal.length|0],k=.88+r()*.22;
@@ -891,10 +897,19 @@ function tileCanvas(){const n=1024,s=n/2,r=rnd(44),tone=[.97+r()*.07,.95+r()*.07
     const u=x%s,v=y%s;if(u<2||v<2||u>s-3||v>s-3)return[146,140,131];
     const t=tone[(x<s?0:1)+(y<s?0:2)],f=t*(.91+.11*nz(NF1,x/2,y/2)+.05*nz(NF2,x*2,y*2)+(r()-.5)*.04)*(u<4||v<4?1.03:u>s-6||v>s-6?.93:1);return[184*f,178*f,169*f]});
   for(let i=0;i<2600;i++){g.fillStyle="rgba(70,64,58,"+(.15+r()*.3)+")";g.beginPath();g.arc(r()*n,r()*n,.5+r()*1.1,0,7);g.fill()}return c}
-function bedCanvas(){const n=1024,r=rnd(55),[c,g]=pixCanvas(n,(x,y)=>{const f=.7+.5*nz(NF1,x*2,y*2);return[66*f,51*f,39*f]});
-  const pal=[[112,82,56],[92,66,46],[134,101,70],[60,44,32],[150,118,84]];
-  for(let i=0;i<13000;i++){const x=r()*n,y=r()*n,w=5+r()*12,h=2+r()*3.5,a=r()*3.2,p=pal[r()*pal.length|0];
-    wrapDraw(n,x,y,16,(X,Y)=>{g.save();g.translate(X,Y);g.rotate(a);g.fillStyle="rgba(20,14,10,.4)";g.fillRect(-w/2+1,-h/2+1.5,w,h);g.fillStyle="rgb("+p+")";g.fillRect(-w/2,-h/2,w,h);g.restore()})}
+/* Beet: lockere, feinkrümelige Gartenerde (wie Nutzer-Referenzfoto) – warmbraun, feines Korn, viele kleine Krümel,
+   einzelne größere Klumpen mit Licht oben links und Schatten, wenige helle Fasern/Halmreste */
+function bedCanvas(){const n=1024,r=rnd(55),[c,g]=pixCanvas(n,(x,y)=>{const a=nz(NF1,x*2,y*2),b=nz(NF2,x*12,y*12),f=.72+.4*a+.18*b+(r()-.5)*.22;return[66*f,50*f,39*f]});
+  const pal=[[88,67,52],[78,59,46],[98,75,58],[70,53,42],[108,84,66],[84,64,50]];
+  const clump=(X,Y,rx,ry,rot,pts)=>{g.beginPath();pts.forEach(([a,k],i)=>{const px=Math.cos(a)*rx*k,py=Math.sin(a)*ry*k,cx=X+px*Math.cos(rot)-py*Math.sin(rot),cy=Y+px*Math.sin(rot)+py*Math.cos(rot);i?g.lineTo(cx,cy):g.moveTo(cx,cy)});g.closePath()};
+  const layer=(cnt,s0,s1,dk)=>{for(let i=0;i<cnt;i++){const x=r()*n,y=r()*n,rx=s0+r()*(s1-s0),ry=rx*(.6+r()*.4),rot=r()*3.2,p=pal[r()*pal.length|0],k=dk*(.85+r()*.3),m=6+(r()*4|0),pts=[];
+      for(let j=0;j<m;j++)pts.push([j/m*6.283+(r()-.5)*.6,.7+r()*.45]);const col=[p[0]*k|0,p[1]*k|0,p[2]*k|0];
+      wrapDraw(n,x,y,s1*1.6+4,(X,Y)=>{g.fillStyle="rgba(22,14,9,.5)";clump(X+rx*.18+.8,Y+ry*.25+1.2,rx,ry,rot,pts);g.fill();
+        const gr=g.createRadialGradient(X-rx*.35,Y-ry*.4,0,X,Y,rx*1.1);gr.addColorStop(0,"rgb("+Math.min(255,col[0]*1.12|0)+","+Math.min(255,col[1]*1.12|0)+","+Math.min(255,col[2]*1.12|0)+")");gr.addColorStop(.65,"rgb("+col+")");gr.addColorStop(1,"rgb("+(col[0]*.72|0)+","+(col[1]*.72|0)+","+(col[2]*.72|0)+")");
+        g.fillStyle=gr;clump(X,Y,rx,ry,rot,pts);g.fill()})}};
+  layer(24000,.8,2.2,.85);layer(8000,2,4.5,.95);layer(600,5,11,1);
+  /* feine Fasern / Halmreste */
+  for(let i=0;i<420;i++){const x=r()*n,y=r()*n,L=6+r()*16,a=r()*6.3;wrapDraw(n,x,y,24,(X,Y)=>{g.strokeStyle="rgba("+(128+r()*30|0)+","+(104+r()*24|0)+","+(80+r()*18|0)+",.45)";g.lineWidth=.7+r()*.6;g.beginPath();g.moveTo(X,Y);g.quadraticCurveTo(X+Math.cos(a+.4)*L*.5,Y+Math.sin(a+.4)*L*.5,X+Math.cos(a)*L,Y+Math.sin(a)*L);g.stroke()})}
   return c}
 /* Pflaster 32 × 16 cm im Läuferverband mit gefasten Kanten */
 function stoneCanvas(){const n=1024,rh=n/8,sw=n/4,r=rnd(61),T0=[];for(let i=0;i<40;i++)T0.push([.93+r()*.12,r()]);
@@ -903,10 +918,9 @@ function stoneCanvas(){const n=1024,rh=n/8,sw=n/4,r=rnd(61),T0=[];for(let i=0;i<
     const[t,h]=T0[ri*4+ci],e=Math.min(u,v,sw-u,rh-v),b=e<8?.8+.2*e/8:1,f=t*b*(.92+.1*nz(NF1,x/2,y/2)+.05*nz(NF2,x*2,y*2)+(r()-.5)*.04);
     return h>.75?[210*f,200*f,184*f]:[206*f,200*f,192*f]})[0]}
 const GROUNDS=[{id:"lawn",name:"Rasen",c:lawnCanvas(),size:2.5},{id:"deck",name:"Holzdeck",c:deckCanvas(),size:1.28},{id:"gravel",name:"Kies",c:gravelCanvas(),size:.9},{id:"tiles",name:"Platten",c:tileCanvas(),size:1.28},{id:"bed",name:"Beet",c:bedCanvas(),size:1.2},{id:"paver",name:"Pflaster",c:stoneCanvas(),size:1.28}];
-GROUNDS.forEach(gr=>{gr.t=tex(gr.c,1);gr.r=gr.id==="deck"?.7:gr.id==="tiles"?.85:1;
-  /* Vorschaubild: Ausschnitt ca. 60 cm, in zwei Schritten verkleinert (sonst flimmert es) */
-  const part=Math.min(gr.c.width,Math.round(gr.c.width*.6/gr.size)),[m,mg]=cvs(192);mg.imageSmoothingQuality="high";mg.drawImage(gr.c,0,0,part,part,0,0,192,192);
-  const[s,sg]=cvs(96);sg.imageSmoothingQuality="high";sg.drawImage(m,0,0,96,96);gr.url=s.toDataURL("image/jpeg",.85)});
+function groundThumb(gr){const part=Math.min(gr.c.width,Math.round(gr.c.width*.6/gr.size)),[m,mg]=cvs(192);mg.imageSmoothingQuality="high";mg.drawImage(gr.c,0,0,part,part,0,0,192,192);
+  const[s,sg]=cvs(96);sg.imageSmoothingQuality="high";sg.drawImage(m,0,0,96,96);gr.url=s.toDataURL("image/jpeg",.85)}
+GROUNDS.forEach(gr=>{gr.t=tex(gr.c,1);gr.r=gr.id==="deck"?.7:gr.id==="tiles"?.85:1;groundThumb(gr)});
 const MODEL_SC={},MODEL_P={},FILE_P={};
 /* Produkte aus der Sammeldatei models/produkte.glb (CAD-Export „Produktübersicht“).
    id = Anfang des Knotennamens (GUID aus dem CAD), rot = beim Import um 90° drehen (lange Seite in X). */
@@ -931,11 +945,14 @@ function modelUrl(n){return(window.MODEL_DATA&&window.MODEL_DATA[n])||("models/"
 /* Materialrolle am Materialnamen erkennen. CAD-Namen: „C25/30“ (Betongüte) und „MR 2.4“ = Beton,
    „Luft“ = Wasserkörper im Becken, „Undefined“ = rote Hilfskörper/Aussparungen (ausblenden), „EPS …“ = Düsen. */
 function roleOf(nm){return/water|wasser|^luft/i.test(nm)?"water":/concrete|beton|^C\d{2}\/\d{2}|^MR\s?\d/i.test(nm)?"concrete":/wood|holz|plank|plywood/i.test(nm)?"wood":/^undefined$/i.test(nm)?"hide":/^EPS/i.test(nm)?"dark":null}
+const EDGE_M=new T.LineBasicMaterial({color:0xf4f1ea,transparent:true,opacity:.55,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
 function prepMesh(o){if(!o.isMesh||!o.material)return;const role=roleOf(o.material.name||"");
   if(role==="hide"){o.visible=false;return}
   o.castShadow=o.receiveShadow=true;
   if(role==="dark"){o.material=M.dark;return}
-  if(role){boxUV(o,role==="wood"?1.28:1.6);o.material=role==="water"?M.water:role==="wood"?M.clad:M.concrete;o.userData.role=role;if(role==="water")o.castShadow=false;return}
+  if(role){boxUV(o,role==="wood"?1.28:1.6);o.material=role==="water"?M.water:role==="wood"?M.clad:M.concrete;o.userData.role=role;if(role==="water")o.castShadow=false;
+    /* gebrochene Betonkanten: feine helle Lichtkante entlang aller Außenkanten (wie eine kleine Fase, die das Licht fängt) */
+    if(role==="concrete"){const e=new T.LineSegments(new T.EdgesGeometry(o.geometry,28),EDGE_M);e.raycast=()=>{};e.renderOrder=1;o.add(e)}return}
   if(o.material.isMeshPhysicalMaterial){const a=o.material,b=new T.MeshStandardMaterial({name:a.name,color:a.color,map:a.map,normalMap:a.normalMap,aoMap:a.aoMap,roughnessMap:a.roughnessMap,metalnessMap:a.metalnessMap,roughness:a.roughness,metalness:a.metalness,transparent:a.transparent,opacity:a.opacity,alphaTest:a.alphaTest,side:a.side});o.material=b;a.dispose()}}
 function loadFile(f){if(FILE_P[f])return FILE_P[f];return FILE_P[f]=new Promise((res,rej)=>{if(!T.GLTFLoader){rej("kein Lader");return}new T.GLTFLoader().load(modelUrl(f),g=>{g.scene.updateMatrixWorld(true);g.scene.traverse(prepMesh);res(g.scene)},undefined,rej)})}
 /* Ein Produkt aus der Sammeldatei herauslösen: Knoten suchen, bis zur obersten Ebene hochgehen,
@@ -960,8 +977,7 @@ function addCaustics(g,model){const ws=[];model.traverse(o=>{if(o.isMesh&&o.user
   g.updateMatrixWorld(true);const inv=new T.Matrix4().copy(g.matrixWorld).invert(),b=new T.Box3();
   ws.forEach(w=>{w.geometry.computeBoundingBox();b.union(w.geometry.boundingBox.clone().applyMatrix4(new T.Matrix4().multiplyMatrices(inv,w.matrixWorld)))});
   /* der Wasserkörper reicht genau bis zum Beckenboden: dessen Unterkante ist die Bodenhöhe */
-  const ctr=b.getCenter(new T.Vector3()),fy=b.min.y+.012,w=b.max.x-b.min.x-.04,d=b.max.z-b.min.z-.04;if(w<.3||d<.3)return;
-  CAUSM.forEach((m,i)=>{const geo=new T.PlaneGeometry(w,d),uv=geo.attributes.uv,k=i?1.4:.95;for(let j=0;j<uv.count;j++)uv.setXY(j,uv.getX(j)*w/k,uv.getY(j)*d/k);
+  const ctr=b.getCenter(new T.Vector3()),fy=b.min.y+.012,w=b.max.x-b.min.x-.04,d=b.max.z-b.min.z-.04;if(w<.3||d<.3)return;  CAUSM.forEach((m,i)=>{const geo=new T.PlaneGeometry(w,d),uv=geo.attributes.uv,k=i?1.4:.95;for(let j=0;j<uv.count;j++)uv.setXY(j,uv.getX(j)*w/k,uv.getY(j)*d/k);
     const pl=new T.Mesh(geo,m);pl.rotation.x=-PI2;pl.position.set(ctr.x,fy+i*.004,ctr.z);pl.renderOrder=-1;pl.raycast=()=>{};g.add(pl)})}
 function modelInto(g,n,w,h,d){if(MODEL_SC[n]){const m=MODEL_SC[n].clone(true);g.add(m);addCaustics(g,m);return}const ph=loadingBox(w,h,d);g.add(ph);
   loadModel(n).then(sc=>{g.remove(ph);ph.geometry.dispose();ph.material.dispose();const m=sc.clone(true);g.add(m);addCaustics(g,m);let r=g;while(r.parent)r=r.parent;if(r.isScene&&r!==thumbScene)fadeIn(m);if(typeof onModelLoaded==="function")onModelLoaded(n)}).catch(()=>{
@@ -1260,7 +1276,7 @@ let gravelMat=null,mulchMat=null;
 function fillPlane(w,d,y,mat,rep){const geo=new T.PlaneGeometry(w,d);if(rep){const uv=geo.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*w/rep,uv.getY(i)*d/rep)}const m=new T.Mesh(geo,mat);m.rotation.x=-PI2;m.position.y=y;m.receiveShadow=true;return m}
 function troughFill(g,w,d,h,kind){if(!kind||kind==="none")return;const t=.08,iw=w-2*t,id=d-2*t,L=Math.max(iw,id),along=w>=d,wide=Math.min(w,d)>.6;
   if(kind==="water"){g.add(fillPlane(iw,id,h-.06,M.water));return}
-  if(kind==="gravel"||kind==="gravelGrass"){if(!gravelMat)gravelMat=new T.MeshStandardMaterial({map:groundOf("gravel").t,roughness:1});g.add(fillPlane(iw,id,h-.04,gravelMat,.9))}
+  if(kind==="gravel"||kind==="gravelGrass"){if(!gravelMat)gravelMat=new T.MeshStandardMaterial({map:groundOf("gravel").t,roughness:1});g.add(fillPlane(iw,id,h-.04,gravelMat,groundOf("gravel").size))}
   else{if(!mulchMat)mulchMat=new T.MeshStandardMaterial({map:groundOf("bed").t,roughness:1});g.add(fillPlane(iw,id,h-.05,mulchMat,1.2))}
   if(kind==="plants")plantBed(g,iw,id,h-.05,Math.round(w*131+d*71));
   if(kind==="gravelGrass"){const R=rnd(Math.round(w*97+d*13)),n=Math.max(2,Math.round(L/.3)),bed=new T.Group();bed.position.y=h-.04;g.add(bed);
@@ -1314,7 +1330,17 @@ const PRODUCTS=[
 ];
 const SOON_CAT=2;
 const BYID=Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
-function buildInner(p,dims){const inner=new T.Group();p.build(inner,dims||{});if(p.hs&&dims&&dims.h)inner.scale.setScalar(dims.h/p.hs);return inner}
+function buildInner(p,dims){const inner=new T.Group();p.build(inner,dims||{});if(p.hs&&dims&&dims.h)inner.scale.setScalar(dims.h/p.hs);
+  if(!p.plant&&!p.noList&&p.w&&p.d){const D=dims||{};inner.add(contactShadow(D.w||p.w,D.d||p.d,(D.sink||0)+.004))}return inner}
+/* Kontaktschatten: weicher dunkler Saum genau an der Standfläche, damit schwere Betonteile auf dem Boden „sitzen“.
+   Rechteck-Abstandsfeld im Shader: schmaler dunkler Kern an der Kante plus breiter, sehr weicher Auslauf. */
+const CONTACT_G=new T.PlaneGeometry(1,1);
+function contactShadow(w,d,y){const sp=.45,m=new T.ShaderMaterial({transparent:true,depthWrite:false,fog:false,polygonOffset:true,polygonOffsetFactor:-2,
+    uniforms:{hs:{value:new T.Vector2(w/2,d/2)},full:{value:new T.Vector2(w+sp*2,d+sp*2)}},
+    vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    fragmentShader:"uniform vec2 hs;uniform vec2 full;varying vec2 vUv;void main(){vec2 p=(vUv-.5)*full,q=abs(p)-hs;float sd=length(max(q,0.))+min(max(q.x,q.y),0.);"+
+      "float a=.5*exp(-max(sd,0.)/.035)+.2*(1.-smoothstep(0.,.42,sd));gl_FragColor=vec4(0.,0.,0.,a*step(-.02,sd)+.55*step(sd,-.02));}"}),
+    s=new T.Mesh(CONTACT_G,m);s.rotation.x=-PI2;s.scale.set(w+sp*2,d+sp*2,1);s.position.y=y;s.renderOrder=1;s.raycast=()=>{};s.userData.contact=true;return s}
 function makeProduct(p,dims){const g=new T.Group();g.add(buildInner(p,dims));g.userData.pid=p.id;if(dims&&Object.keys(dims).length)g.userData.dims={...dims};return g}
 
 /* ---------- Szene ---------- */
@@ -1348,6 +1374,11 @@ function makeEnv(top,hor,gnd){try{const es=new T.Scene(),pm=new T.PMREMGenerator
     fragmentShader:"uniform vec3 top;uniform vec3 hor;uniform vec3 gnd;varying vec3 p;void main(){float h=p.y;vec3 c=h>0.?mix(hor,top,pow(h,.6)):mix(hor,gnd,pow(-h,.4));gl_FragColor=vec4(c,1.);}"})));
   const tx=pm.fromScene(es,.02).texture;pm.dispose();return tx}catch(e){return null}}
 scene.environment=makeEnv([.25,.3,.37],[.36,.37,.36],[.13,.12,.09]);
+/* Wasser spiegelt den echten Himmel (mit Wolken): einmalige Umgebungskarte aus dem Himmels-Shader */
+try{const es=new T.Scene(),pm=new T.PMREMGenerator(renderer);es.add(new T.Mesh(new T.SphereGeometry(500,48,24),SKYM));
+  /* untere Halbkugel hell wie der Horizontdunst – eine dunkle Fläche erschien sonst als dunkle Flecken in den Wellen */
+  es.add(new T.Mesh(new T.SphereGeometry(450,32,16,0,Math.PI*2,Math.PI/2+.02,Math.PI/2),new T.MeshBasicMaterial({color:new T.Color().setRGB(.62,.74,.8),side:T.BackSide})));
+  const tx=pm.fromScene(es,0,.1,1000).texture;pm.dispose();M.water.envMap=tx;M.water.envMapIntensity=.75;M.water.needsUpdate=true}catch(e){}
 const camera=new T.PerspectiveCamera(38,1,.1,2600);
 const hemi=new T.HemisphereLight(0xf4f1ea,0x7d6a4f,.5);scene.add(hemi);
 const sun=new T.DirectionalLight(0xfff1dc,1.5);sun.castShadow=true;{const q=innerWidth>1000?4096:2048;sun.shadow.mapSize.set(q,q)}sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;scene.add(sun,sun.target);
@@ -1356,7 +1387,11 @@ function meadowCanvas(){const dk=[92,116,78],lt=[124,144,98];return pixCanvas(51
 /* Wiesentextur in Metern (Kachel 7 m); Kreisflächen bekommen Meter-UVs wie die Fläche mit Loch (ShapeGeometry) */
 const meadowTex=tex(meadowCanvas(),1/7);
 function circleM(){const g=new T.CircleGeometry(1000,96),uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*2000-1000,uv.getY(i)*2000-1000);return g}
-const outer=new T.Mesh(circleM(),new T.MeshStandardMaterial({map:meadowTex,roughness:1}));outer.rotation.x=-PI2;outer.position.y=-.02;outer.receiveShadow=true;scene.add(outer);
+const outer=new T.Mesh(circleM(),new T.MeshStandardMaterial({map:meadowTex,roughness:1,polygonOffset:true,polygonOffsetFactor:2,polygonOffsetUnits:2}));outer.rotation.x=-PI2;outer.position.y=-.004;outer.receiveShadow=true;scene.add(outer);
+/* Polygon um d nach innen versetzen (Gehrung an den Ecken, begrenzt), Umlaufsinn egal */
+function insetPoly(p,d){let A=0;for(let i=0;i<p.length;i++){const[a,b]=p[i],[c,e]=p[(i+1)%p.length];A+=a*e-c*b}const s=A>0?1:-1;
+  return p.map((q,i)=>{const pr=p[(i-1+p.length)%p.length],nx=p[(i+1)%p.length],e1=[q[0]-pr[0],q[1]-pr[1]],e2=[nx[0]-q[0],nx[1]-q[1]],l1=Math.hypot(...e1)||1,l2=Math.hypot(...e2)||1,
+    n1=[-e1[1]/l1*s,e1[0]/l1*s],n2=[-e2[1]/l2*s,e2[0]/l2*s],k=Math.max(.35,1+n1[0]*n2[0]+n1[1]*n2[1]);return[q[0]+(n1[0]+n2[0])/k*d,q[1]+(n1[1]+n2[1])/k*d]})}
 
 const gardenG=new T.Group(),edgeG=new T.Group(),bldG=new T.Group();scene.add(gardenG,edgeG,bldG);
 
@@ -1392,9 +1427,15 @@ let P_=null;// {canvas,ctx,ppm,bb,tex}
 function polyPath(ctx){const{bb,ppm}=P_;ctx.beginPath();state.poly.forEach(([x,z],i)=>{const X=(x-bb.x0)*ppm,Y=(z-bb.z0)*ppm;i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath()}
 const patCache={};
 function pattern(id){const g=groundOf(id),k=P_.ppm*g.size/g.c.width,key=id+"_"+k.toFixed(4);if(patCache[key])return patCache[key];const p=P_.ctx.createPattern(g.c,"repeat");if(p.setTransform)p.setTransform(new DOMMatrix().scale(k));return patCache[key]=p}
-function dab(id,x0,z0,x1,z1){const{ctx,bb,ppm}=P_,pz=P_.ppmz||ppm;ctx.save();polyPath(ctx);ctx.clip();ctx.fillStyle=pattern(id);ctx.fillRect((x0-bb.x0)*ppm,(z0-bb.z0)*pz,(x1-x0)*ppm,(z1-z0)*pz);ctx.restore()}
-function repaint(){const{ctx,canvas}=P_;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();polyPath(ctx);ctx.fillStyle=pattern(state.ground);ctx.fill();ctx.restore();state.paint.forEach(s=>dab(s[0],s[1],s[2],s[3],s[4]));
-  {const{bb,ppm}=P_,pz=P_.ppmz||ppm;objects.forEach(o=>{if(sinkOf(o)<=0||!o.visible)return;const f=fp(o);ctx.clearRect((o.position.x-f.w/2-bb.x0)*ppm,(o.position.z-f.d/2-bb.z0)*pz,f.w*ppm,f.d*pz)})}
+/* Maskenfarbe je Belag: [Maske A/B, Kanal] → im Shader die volle Auflösung des Belags */
+const MASKC={lawn:[0,"#f00"],deck:[0,"#0f0"],gravel:[0,"#00f"],tiles:[1,"#f00"],bed:[1,"#0f0"],paver:[1,"#00f"]};
+function maskDo(id,fn){if(!P_.mA)return;const m=MASKC[id]||MASKC.lawn;[P_.mA,P_.mB].forEach((M,i)=>{M.ctx.save();M.ctx.fillStyle=m[0]===i?m[1]:"#000";fn(M.ctx);M.ctx.restore();M.tex.needsUpdate=true})}
+function dab(id,x0,z0,x1,z1){const{ctx,bb,ppm}=P_,pz=P_.ppmz||ppm;ctx.save();polyPath(ctx);ctx.clip();ctx.fillStyle=pattern(id);ctx.fillRect((x0-bb.x0)*ppm,(z0-bb.z0)*pz,(x1-x0)*ppm,(z1-z0)*pz);ctx.restore();
+  maskDo(id,c=>{polyPath(c);c.clip();c.fillRect((x0-bb.x0)*ppm,(z0-bb.z0)*pz,(x1-x0)*ppm,(z1-z0)*pz)})}
+function repaint(){const{ctx,canvas}=P_;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();polyPath(ctx);ctx.fillStyle=pattern(state.ground);ctx.fill();ctx.restore();
+  if(P_.mA){P_.mA.ctx.clearRect(0,0,canvas.width,canvas.height);P_.mB.ctx.clearRect(0,0,canvas.width,canvas.height)}maskDo(state.ground,c=>{polyPath(c);c.fill()});
+  state.paint.forEach(s=>dab(s[0],s[1],s[2],s[3],s[4]));
+  {const{bb,ppm}=P_,pz=P_.ppmz||ppm;objects.forEach(o=>{if(sinkOf(o)<=0||!o.visible)return;const f=fp(o),R=[(o.position.x-f.w/2-bb.x0)*ppm,(o.position.z-f.d/2-bb.z0)*pz,f.w*ppm,f.d*pz];ctx.clearRect(...R);if(P_.mA){P_.mA.ctx.clearRect(...R);P_.mB.ctx.clearRect(...R)}})}
   P_.tex.needsUpdate=true}
 
 /* ---------- Garten bauen ---------- */
@@ -1429,14 +1470,28 @@ function buildBuildings(){disposeGroup(bldG);state.buildings=state.buildings.map
   if(selB>=0&&selB<state.buildings.length)frameB(state.buildings[selB])}
 function disposeGroup(g){g.children.slice().forEach(c=>{g.remove(c);c.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material.map&&o.material.map.isCanvasTexture&&o.material.userData.own)o.material.map.dispose()})})}
 function buildGarden(){disposeGroup(gardenG);T_=null;P_=null;gardenMesh=null;const p=state.poly;if(!p){outer.geometry.dispose();outer.geometry=circleM();buildEdges();return}
-  {const sh=new T.Shape();sh.absarc(0,0,1000,0,Math.PI*2,false);const hole=new T.Path(p.map(([x,z])=>new T.Vector2(x,-z)));sh.holes.push(hole);outer.geometry.dispose();outer.geometry=new T.ShapeGeometry(sh,96)}
+  /* Loch der Wiese 6 cm kleiner als der Garten: die Wiese läuft unter den Gartenrand, sonst sieht man schräg in einen Spalt (Himmel) */
+  {const sh=new T.Shape();sh.absarc(0,0,1000,0,Math.PI*2,false);const hole=new T.Path(insetPoly(p,.06).map(([x,z])=>new T.Vector2(x,-z)));sh.holes.push(hole);outer.geometry.dispose();outer.geometry=new T.ShapeGeometry(sh,96)}
   const G=terrainGrid(),bb=G.bb;
   /* Nebel nur als leichter Dunst in der Ferne: setzt weit hinter dem Garten ein und ist vor dem Bodenrand (1 km) ganz dicht */
   {const R=Math.hypot(bb.w,bb.d);scene.fog.near=Math.max(90,R*3);scene.fog.far=scene.fog.near+600}
   /* Auflösung der Bodentextur: Desktop bis 4096 px Kantenlänge, mobil 2048 px */
   const maxPx=innerWidth>760&&renderer.capabilities.maxTextureSize>=4096?4096:2048,ppm=Math.min(220,maxPx/Math.max(bb.w,bb.d)),cw=Math.ceil(bb.w*ppm),ch=Math.ceil(bb.d*ppm),canvas=document.createElement("canvas");canvas.width=cw;canvas.height=ch;
   const tex=new T.CanvasTexture(canvas);tex.encoding=T.sRGBEncoding;tex.anisotropy=8;P_={canvas,ctx:canvas.getContext("2d"),ppm:cw/bb.w,bb,tex};P_.ppmz=ch/bb.d;
-  const geo=new T.PlaneGeometry(bb.w,bb.d,G.nx,G.nz);const mat=new T.MeshStandardMaterial({map:tex,roughness:.95,transparent:true,alphaTest:.5});mat.userData.own=true;
+  /* kein Relief (bumpMap) auf dem Boden: machte den Kies fleckig und unruhig (vom Nutzer abgelehnt) */
+  const geo=new T.PlaneGeometry(bb.w,bb.d,G.nx,G.nz);const mat=new T.MeshStandardMaterial({map:tex,roughness:.95,transparent:true,alphaTest:.5});
+  /* Beläge in voller Auflösung: die Malfläche hat nur ca. 4–5 mm/px (Kiesel wurden zu Brei). Daher zwei Maskenbilder
+     (A: Rasen/Holzdeck/Kies, B: Platten/Beet/Pflaster als R/G/B-Gewichte) und im Shader die echten Belagtexturen in
+     Metern gekachelt mischen. Die Malfläche selbst liefert nur noch Alpha (Gartenform) und ist Rückfall. */
+  const mk=()=>{const c=document.createElement("canvas");c.width=cw;c.height=ch;const t=new T.CanvasTexture(c);t.anisotropy=4;return{canvas:c,ctx:c.getContext("2d"),tex:t}};
+  P_.mA=mk();P_.mB=mk();
+  {const G6=["lawn","deck","gravel","tiles","bed","paver"].map(groundOf),U={gA:{value:P_.mA.tex},gB:{value:P_.mB.tex},gbb:{value:new T.Vector2(bb.w,bb.d)},gsA:{value:new T.Vector3(G6[0].size,G6[1].size,G6[2].size)},gsB:{value:new T.Vector3(G6[3].size,G6[4].size,G6[5].size)}};
+    G6.forEach((g6,i)=>{g6.t.anisotropy=8;U["gt"+i]={value:g6.t}});
+    mat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);sh.fragmentShader=sh.fragmentShader.replace("#include <map_pars_fragment>","#include <map_pars_fragment>\nuniform sampler2D gA;uniform sampler2D gB;uniform vec2 gbb;uniform vec3 gsA;uniform vec3 gsB;uniform sampler2D gt0;uniform sampler2D gt1;uniform sampler2D gt2;uniform sampler2D gt3;uniform sampler2D gt4;uniform sampler2D gt5;")
+      .replace("#include <map_fragment>","#include <map_fragment>\n{vec4 mA=texture2D(gA,vUv),mB=texture2D(gB,vUv);float ws=mA.r+mA.g+mA.b+mB.r+mB.g+mB.b;if(ws>.02){vec2 wp=vec2(vUv.x*gbb.x,-(1.-vUv.y)*gbb.y);vec3 c=vec3(0.);"+
+        "c+=mA.r*texture2D(gt0,wp/gsA.x).rgb+mA.g*texture2D(gt1,wp/gsA.y).rgb+mA.b*texture2D(gt2,wp/gsA.z).rgb;"+
+        "c+=mB.r*texture2D(gt3,wp/gsB.x).rgb+mB.g*texture2D(gt4,wp/gsB.y).rgb+mB.b*texture2D(gt5,wp/gsB.z).rgb;"+
+        "diffuseColor.rgb=mix(diffuseColor.rgb,c/ws,clamp(ws,0.,1.));}}")}}mat.userData.own=true;
   gardenMesh=new T.Mesh(geo,mat);gardenMesh.rotation.x=-PI2;gardenMesh.position.set((bb.x0+bb.x1)/2,0,(bb.z0+bb.z1)/2);gardenMesh.receiveShadow=true;gardenG.add(gardenMesh);
   const W=G.nx+1,N=W*(G.nz+1),h=new Float32Array(N),inside=new Uint8Array(N);
   for(let iz=0;iz<=G.nz;iz++)for(let ix=0;ix<=G.nx;ix++){const x=bb.x0+ix*G.cx,z=bb.z0+iz*G.cz;inside[iz*W+ix]=inPoly(p,x,z)?1:0}
@@ -1461,9 +1516,23 @@ function renderGroundButtons(el,cur,list){el.innerHTML=(list||GROUNDS).map(g=>'<
 /* ---------- Kanten ---------- */
 const EDGE={curb:{h:.08,w:.08,m:"curb",n:"Rasenkante"},kerb:{h:.24,w:.16,m:"edgeHi",n:"Hochbord"},wall:{h:.56,w:.24,m:"wallM",n:"Mauer"}};
 function buildEdges(){disposeGroup(edgeG);state.edges.forEach((e,ei)=>edgeMeshes(e,edgeG,ei))}
-function edgeMeshes(e,grp,ei){const t0=EDGE[e.t]||EDGE.curb,t={h:e.h||t0.h,w:e.w||t0.w,m:t0.m},pts=e.p;for(let i=0;i+1<pts.length;i++){const[a,b]=pts[i],[c,d]=pts[i+1],L=Math.hypot(c-a,d-b);if(L<.02)continue;const n=Math.max(1,Math.round(L/.48));
-  for(let k=0;k<n;k++){const u=(k+.5)/n,x=a+(c-a)*u,z=b+(d-b)*u,y=heightAt(x,z);const m=new T.Mesh(new T.BoxGeometry(L/n-.006,t.h,t.w),M[t.m]);m.position.set(x,y-.02+t.h/2,z);m.rotation.y=-Math.atan2(d-b,c-a);m.castShadow=m.receiveShadow=true;m.userData.edge=ei;grp.add(m)}
-  if(i>0){const y=heightAt(a,b),j=new T.Mesh(new T.BoxGeometry(t.w,t.h,t.w),M[t.m]);j.position.set(a,y-.02+t.h/2,b);j.castShadow=true;j.userData.edge=ei;grp.add(j)}}}
+/* Kantenmaterialien: alle drei in Betonoptik wie die CALVERA-Produkte (heller Sichtbeton mit Poren, je Element
+   3 leichte Tonvarianten). Elemente 1 m lang mit feiner Fuge, Kanten leicht gerundet (fangen das Licht). */
+const EDGE_MS=(()=>{const mk=(canvas,rough,bump)=>{const t=tex(canvas,1),b=new T.CanvasTexture(canvas);b.wrapS=b.wrapT=T.RepeatWrapping;
+    return[.95,1,1.05].map(k=>new T.MeshStandardMaterial({map:t,bumpMap:b,bumpScale:bump,roughnessMap:b,roughness:rough,color:new T.Color().setRGB(k,k,k*.99)}))};
+  return{curb:mk(concreteCanvas(1024,[172,168,161],71),1.3,.012),edgeHi:mk(concreteCanvas(1024,[180,176,169],72),1.28,.012),wallM:mk(concreteCanvas(1024,[184,179,171],74),1.25,.012)}})();
+/* Quader mit Welt-UVs (1 Kachel = 1 m), Muster läuft über Stöße hinweg weiter (Versatz s0 entlang der Kante) */
+function edgeBox(L,h,w,s0,round){const geo=round&&T.RoundedBoxGeometry?new T.RoundedBoxGeometry(L,h,w,2,round):new T.BoxGeometry(L,h,w);
+  const p=geo.attributes.position,nr=geo.attributes.normal,uv=geo.attributes.uv;
+  for(let i=0;i<p.count;i++){const x=p.getX(i)+s0,y=p.getY(i),z=p.getZ(i),ax=Math.abs(nr.getX(i)),ay=Math.abs(nr.getY(i)),az=Math.abs(nr.getZ(i));
+    if(ay>=ax&&ay>=az)uv.setXY(i,x,z);else if(ax>=az)uv.setXY(i,z,y);else uv.setXY(i,x,y)}uv.needsUpdate=true;
+  return geo}
+function edgeMeshes(e,grp,ei){const t0=EDGE[e.t]||EDGE.curb,t={h:e.h||t0.h,w:e.w||t0.w,m:t0.m},pts=e.p,R=rnd(ei*97+7),rd=Math.min(t.m==="wallM"?.015:.012,t.h*.15,t.w*.15);let s0=0;
+  const put=(geo,mat,x,y,z,rot)=>{const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.y=rot;m.castShadow=m.receiveShadow=true;m.userData.edge=ei;grp.add(m);return m};
+  for(let i=0;i+1<pts.length;i++){const[a,b]=pts[i],[c,d]=pts[i+1],L=Math.hypot(c-a,d-b);if(L<.02)continue;const n=Math.max(1,Math.round(L)),rot=-Math.atan2(d-b,c-a);
+    for(let k=0;k<n;k++){const u=(k+.5)/n,x=a+(c-a)*u,z=b+(d-b)*u,y=heightAt(x,z);put(edgeBox(L/n-.006,t.h,t.w,s0+k*L/n,rd),EDGE_MS[t.m][(R()*3)|0],x,y-.02+t.h/2,z,rot)}
+    s0+=L;
+    if(i>0){const y=heightAt(a,b);put(edgeBox(t.w,t.h,t.w,0,rd),EDGE_MS[t.m][1],a,y-.02+t.h/2,b,0)}}}
 
 /* ---------- Objekte ---------- */
 function fp(o){const p=BYID[o.userData.pid],D=o.userData.dims||{},W=D.w||p.w,Dp=D.d||p.d,t=o.userData.rot%2===1;return{w:t?Dp:W,d:t?W:Dp}}
@@ -1511,16 +1580,33 @@ function findFree(o,cx,cz){const bb=bbox(state.poly);for(let rad=0;rad<120;rad++
 /* Animationen */
 const anims=[];const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function animate(fn,dur){if(RM){fn(1);return}anims.push({fn,t0:performance.now(),dur})}
-function dropIn(o){o.userData.anim=true;const y0=.5;animate(k=>{const e=1-Math.pow(1-k,3),base=heightAt(o.position.x,o.position.z)-sinkOf(o);o.position.y=base+y0*(1-e);const s=.92+.08*e;o.scale.set(s,s,s);if(k>=1){o.userData.anim=false;o.position.y=base}},320)}
+/* Absetzen: kurz einschweben, dann federt das Produkt beim Aufsetzen sanft nach (leicht gestaucht, schwingt aus) */
+function dropIn(o){o.userData.anim=true;const y0=.32,L=.38;animate(k=>{const base=heightAt(o.position.x,o.position.z)-sinkOf(o);
+    if(k<L){const f=k/L,e=f*f*(3-2*f);o.position.y=base+y0*(1-e);o.scale.set(1,1,1)}
+    else{const t=(k-L)/(1-L),sp=Math.exp(-4.5*t)*Math.sin(t*13);o.position.y=base;o.scale.set(1+.022*sp,1-.045*sp,1+.022*sp)}
+    if(k>=1){o.userData.anim=false;o.position.y=base;o.scale.set(1,1,1)}},640)}
+/* Entfernen: weich ausblenden und leicht schrumpfen */
+function fadeOut(o,done){o.traverse(c=>{if(c.userData.contact)c.visible=false});const list=[];
+  o.traverse(c=>{if(c.material&&!c.material.hasOwnProperty("onBeforeCompile")&&!c.material.isShaderMaterial){const orig=c.material,m=orig.clone();m.transparent=true;c.material=m;list.push([m,orig.transparent?orig.opacity:1])}});
+  animate(k=>{const e=k*k,s=1-.18*e;o.scale.set(s,s,s);list.forEach(([m,op])=>m.opacity=op*(1-e));if(k>=1){list.forEach(([m])=>m.dispose());done()}},260)}
 
 /* Rahmen, Hover, Raster */
 const mkFrame=c=>{const l=new T.LineLoop(new T.BufferGeometry(),new T.LineBasicMaterial({color:c,transparent:true}));l.visible=false;scene.add(l);return l};
-const frame=mkFrame(0x054958),hoverFrame=mkFrame(0xffffff);
-const fill=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({color:0x054958,transparent:true,opacity:.12,depthWrite:false}));fill.rotation.x=-PI2;fill.visible=false;scene.add(fill);
+const frame=mkFrame(0x054958),hoverFrame=mkFrame(0xffffff);frame.material.visible=false;hoverFrame.material.visible=false;
+/* Auswahl: leuchtender, weicher Umriss in CALVERA-Petrol am Boden (pulsiert ganz leicht); Hover: derselbe Umriss, zarter */
+function mkGlow(strength){const m=new T.ShaderMaterial({transparent:true,depthWrite:false,fog:false,polygonOffset:true,polygonOffsetFactor:-3,
+    uniforms:{hs:{value:new T.Vector2(1,1)},full:{value:new T.Vector2(1,1)},col:{value:new T.Color(0x054958)},k:{value:strength},tm:{value:0}},
+    vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    fragmentShader:"uniform vec2 hs;uniform vec2 full;uniform vec3 col;uniform float k;uniform float tm;varying vec2 vUv;void main(){vec2 p=(vUv-.5)*full,q=abs(p)-hs;float sd=length(max(q,0.))+min(max(q.x,q.y),0.)-.05;"+
+      "float pu=.85+.15*sin(tm*3.);float a=(.85*exp(-abs(sd)/.02)+.2*exp(-max(sd,0.)/.14)*pu+.04*step(sd,0.))*k;gl_FragColor=vec4(col*(1.+.9*exp(-abs(sd)/.018)),min(a,.95));}"}),
+    me=new T.Mesh(new T.PlaneGeometry(1,1),m);me.rotation.x=-PI2;me.visible=false;me.renderOrder=2;me.raycast=()=>{};me.onBeforeRender=()=>{m.uniforms.tm.value=performance.now()/1000};scene.add(me);return me}
+function placeGlow(g,o,m){const f=fp(o),sp=.4,w=f.w+m*2,d=f.d+m*2;g.material.uniforms.hs.value.set(w/2,d/2);g.material.uniforms.full.value.set(w+sp*2,d+sp*2);g.scale.set(w+sp*2,d+sp*2,1);
+  g.position.set(o.position.x,heightAt(o.position.x,o.position.z)+.016,o.position.z);g.visible=true}
+const fill=mkGlow(1),hoverGlow=mkGlow(.45);
 function setFrame(l,o,m){const f=fp(o),w=f.w/2+m,d=f.d/2+m,y=heightAt(o.position.x,o.position.z)+.02;l.geometry.setFromPoints([new T.Vector3(-w,0,-d),new T.Vector3(w,0,-d),new T.Vector3(w,0,d),new T.Vector3(-w,0,d)]);l.position.set(o.position.x,y,o.position.z);l.visible=true}
-function showFrame(o,bad){if(!o||!o.visible){frame.visible=fill.visible=false;return}setFrame(frame,o,.06);frame.material.color.set(bad?0x9c3d2a:0x054958);
-  const f=fp(o);fill.scale.set(f.w+.12,f.d+.12,1);fill.position.set(o.position.x,heightAt(o.position.x,o.position.z)+.015,o.position.z);fill.material.color.set(bad?0x9c3d2a:0x054958);fill.visible=true}
-let hovered=null;function showHover(o){hovered=o;if(!o||o===selected){hoverFrame.visible=false;return}setFrame(hoverFrame,o,.04)}
+function showFrame(o,bad){if(!o||!o.visible){frame.visible=fill.visible=false;return}setFrame(frame,o,.06);frame.material.visible=false;frame.material.color.set(bad?0x9c3d2a:0x054958);
+  placeGlow(fill,o,.02);fill.material.uniforms.col.value.set(bad?0x9c3d2a:0x0a6a7c)}
+let hovered=null;function showHover(o){hovered=o;if(!o||o===selected){hoverFrame.visible=hoverGlow.visible=false;return}setFrame(hoverFrame,o,.04);placeGlow(hoverGlow,o,.02)}
 const fineGrid=(()=>{const pts=[],n=40,h=n*SNAP/2;for(let i=0;i<=n;i++){const v=-h+i*SNAP;pts.push(v,.012,-h,v,.012,h,-h,.012,v,h,.012,v)}const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(pts,3));const l=new T.LineSegments(g,new T.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.35,depthWrite:false}));l.visible=false;scene.add(l);return l})();
 function showFine(o){if(!o||!o.visible){fineGrid.visible=false;return}const bb=bbox(state.poly);fineGrid.position.set(bb.x0+r2(o.position.x-bb.x0),heightAt(o.position.x,o.position.z),bb.z0+r2(o.position.z-bb.z0));fineGrid.visible=true}
 
@@ -1593,7 +1679,7 @@ function flyTo(o){const b=new T.Box3().setFromObject(o),c=b.getCenter(new T.Vect
 cv.addEventListener("dblclick",e=>{if(tool!=="select"||eye||drawing||viewMode==="top")return;const o=pick(e);if(o)flyTo(o)});
 /* Leerlauf: nach 25 s ohne Bedienung dreht sich die Ansicht ganz langsam (Präsentation); jede Eingabe stoppt sofort */
 let lastAct=performance.now();["pointerdown","wheel","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();orbit.autoRotate=false},{passive:true,capture:true}));
-function idleSpin(now){orbit.autoRotate=!RM&&!eye&&!camAnim&&!drawing&&!pd&&!drag&&viewMode==="3d"&&now-lastAct>25000&&$("wiz").hidden&&$("pdfView").hidden&&!document.hidden;orbit.autoRotateSpeed=.35}
+function idleSpin(now){if(PRES.on&&!RM){orbit.autoRotate=!pd&&!drag;orbit.autoRotateSpeed=.55;return}orbit.autoRotate=!RM&&!eye&&!camAnim&&!drawing&&!pd&&!drag&&viewMode==="3d"&&now-lastAct>25000&&$("wiz").hidden&&$("pdfView").hidden&&!document.hidden;orbit.autoRotateSpeed=.35}
 
 /* ---------- Werkzeuge ---------- */
 let tool="select",paintMat="bed",brushS=.8,paintMode="brush",rectDraft=null,tMode="set",tSize=.8,tStr=4,tTarget=.4,tShape="rect",tEdge="step",edgeType="curb",edgeDraft=null;
@@ -1753,7 +1839,7 @@ function toggleOpt(o,id,on){const p=BYID[o.userData.pid],D={...(o.userData.dims|
   o.children.slice().forEach(c=>{o.remove(c);c.traverse(q=>{if(q.geometry)q.geometry.dispose()})});o.add(buildInner(p,o.userData.dims||{}));selInfo();commit();if(id==="cover"&&on)toast("Abgedeckt: Schwimmen ist jetzt nicht möglich.")}
 $("sbProps").addEventListener("change",e=>{const t=e.target;if(t.dataset.opt&&selected){toggleOpt(selected,t.dataset.opt,t.checked);return}if(t.dataset.sel){setProp(t.dataset.sel,t.value);return}if(t.dataset.k&&t.tagName==="INPUT")setProp(t.dataset.k,(+t.value||0)/100)});
 $("sbProps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.fill&&selected){if(b.getAttribute("aria-pressed")!=="true")setFill(selected,b.dataset.fill);return}if(b.dataset.size!==undefined){if(b.getAttribute("aria-pressed")!=="true")setProp("size",+b.dataset.size);return}if(b.dataset.act){setProp(b.dataset.act);return}if(b.dataset.step){const k=b.dataset.k,inp=$("sbProps").querySelector('input[data-k="'+k+'"]');setProp(k,(+inp.value/100)+SNAP*(+b.dataset.step)*(e.shiftKey?5:1))}});
-const frameB=b=>{updateHandles(b);frame.geometry.setFromPoints(b.poly?b.poly.map(([x,z])=>new T.Vector3(x,.03,z)):[new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.visible=true;fill.visible=false};
+const frameB=b=>{updateHandles(b);frame.geometry.setFromPoints(b.poly?b.poly.map(([x,z])=>new T.Vector3(x,.03,z)):[new T.Vector3(b.x0-.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z0-.06),new T.Vector3(b.x1+.06,.02,b.z1+.06),new T.Vector3(b.x0-.06,.02,b.z1+.06)]);frame.position.set(0,0,0);frame.material.color.set(0x054958);frame.material.visible=true;frame.visible=true;fill.visible=false};
 const eSel=new T.Line(new T.BufferGeometry(),new T.LineBasicMaterial({color:0x17a2b8,depthTest:false}));eSel.renderOrder=8;eSel.visible=false;scene.add(eSel);
 function frameE(e){if(!e){eSel.visible=false;return}const t=EDGE[e.t]||EDGE.curb,H=(e.h||t.h);eSel.geometry.setFromPoints(e.p.map(([x,z])=>new T.Vector3(x,heightAt(x,z)+H,z)));eSel.visible=true}
 /* ---------- Plan als Vorlage ---------- */
@@ -1903,7 +1989,7 @@ function rotateSel(){if(selB>=0&&state.buildings[selB].poly){const b=state.build
   if(blocked(o,x,z)){let best=null;for(let r=1;r<=6&&!best;r++)for(let i=-r;i<=r&&!best;i++)for(let j=-r;j<=r;j++){if(Math.max(Math.abs(i),Math.abs(j))!==r)continue;const[a,b]=snapPos(o,cx0+i*SNAP,cz0+j*SNAP);if(!blocked(o,a,b)){best=[a,b];break}}
     if(best)[x,z]=best;else{o.userData.rot=old;toast("Zum Drehen ist hier kein Platz.");return}}
   setPos(o,x,z);ud.rcPos=[o.position.x,o.position.z];const r1=-o.userData.rot*PI2,tg=r0-PI2;animate(k=>{const e=1-Math.pow(1-k,3);o.rotation.y=r0+(tg-r0)*e;if(k>=1)o.rotation.y=r1},220);showFrame(o,false);selInfo();measures(o);commit()}
-function delSel(){if(selB>=0){state.buildings.splice(selB,1);select(null);buildBuildings();commit();return}if(selE>=0){state.edges.splice(selE,1);select(null);buildEdges();commit();return}if(!selected)return;const o=selected;select(null);if(RM){removeObject(o);commit();return}animate(k=>{const s=1-k*.9;o.scale.set(s,s,s);if(k>=1){removeObject(o);commit()}},160)}
+function delSel(){if(selB>=0){state.buildings.splice(selB,1);select(null);buildBuildings();commit();return}if(selE>=0){state.edges.splice(selE,1);select(null);buildEdges();commit();return}if(!selected)return;const o=selected;select(null);if(RM){removeObject(o);commit();return}fadeOut(o,()=>{removeObject(o);commit()})}
 function dupSel(){if(selB>=0){const b={...state.buildings[selB]},w=b.x1-b.x0;if(b.op)b.op=b.op.map(o=>({...o}));if(b.poly)b.poly=b.poly.map(([x,z])=>[+(x+w+.48).toFixed(3),z]);b.x0=+(b.x0+w+.48).toFixed(3);b.x1=+(b.x1+w+.48).toFixed(3);state.buildings.push(b);buildBuildings();selectB(state.buildings.length-1);commit();return}if(!selected)return;const o=selected,n=addObject(o.userData.pid,0,0,o.userData.rot,o.userData.dims?{...o.userData.dims}:null),f=findFree(n,o.position.x+fp(o).w,o.position.z);
   if(!f){removeObject(n);toast("Kein Platz mehr. Vergrößern Sie die Gartenfläche.");return}setPos(n,f[0],f[1]);dropIn(n);select(n);commit()}
 $("rot").onclick=rotateSel;$("del").onclick=delSel;$("dup").onclick=dupSel;$("undo").onclick=undo;$("redo").onclick=redo;
@@ -1942,7 +2028,7 @@ function pCancel(){removeEventListener("pointermove",pMove);if(pd&&pd.o){removeO
 function thumbs(){const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,alpha:true});r.setClearColor(0x000000,0);r.setSize(300,300);r.outputEncoding=T.sRGBEncoding;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=.95;
   const s=new T.Scene();thumbScene=s;s.add(new T.HemisphereLight(0xf3f5f2,0x70685a,.6));const l=new T.DirectionalLight(0xfff1dc,1.5);l.position.set(4,8,5);l.castShadow=true;l.shadow.mapSize.set(1024,1024);Object.assign(l.shadow.camera,{left:-4,right:4,top:4,bottom:-4});s.add(l);
   const c=new T.PerspectiveCamera(30,1,.05,200),out={},dir=new T.Vector3(1.25,.95,1.6).normalize(),v=new T.Vector3();
-  for(const p of PRODUCTS){const g=makeProduct(p,p.fills?{_thumb:1}:null);s.add(g);const b=new T.Box3().setFromObject(g),sz=b.getSize(new T.Vector3()),ct=b.getCenter(new T.Vector3()),rad=sz.length()/2;
+  for(const p of PRODUCTS){const g=makeProduct(p,p.fills?{_thumb:1}:null);{const cs=[];g.traverse(q=>{if(q.userData.contact)cs.push(q)});cs.forEach(q=>q.parent.remove(q))}s.add(g);const b=new T.Box3().setFromObject(g),sz=b.getSize(new T.Vector3()),ct=b.getCenter(new T.Vector3()),rad=sz.length()/2;
     /* einheitlich rahmen: Abstand so wählen, dass jedes Produkt gleich viel vom Bild füllt (ohne Bodenschatten) */
     let d=rad*3.3;for(let k=0;k<4;k++){c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);c.updateMatrixWorld();let mx=0;
       for(let q=0;q<8;q++){v.set(q&1?b.max.x:b.min.x,q&2?b.max.y:b.min.y,q&4?b.max.z:b.min.z).project(c);mx=Math.max(mx,Math.abs(v.x),Math.abs(v.y))}d*=mx/.74}
@@ -1976,13 +2062,17 @@ $("products").addEventListener("wheel",e=>{const el=$("products");if(innerWidth>
 
 /* ---------- Zusammenstellung ---------- */
 const eur=n=>n.toLocaleString("de-DE")+" €";
+/* Summe zählt sanft zum neuen Betrag (ca. 0,5 s, abbremsend); kurzer Farbimpuls zeigt die Änderung */
+let SUMV=0,sumShown=0,sumRaf=0;function tweenSum(v){const el=$("sum");if(v===SUMV&&!sumRaf){el.textContent=eur(v);return}const from=sumShown,t0=performance.now(),D=520;SUMV=v;cancelAnimationFrame(sumRaf);
+  if(RM||from===v){sumShown=v;el.textContent=eur(v);sumRaf=0;return}el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");
+  const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);sumShown=Math.round(from+(v-from)*e);el.textContent=eur(sumShown);sumRaf=k<1?requestAnimationFrame(step):0};sumRaf=requestAnimationFrame(step)}
 function refresh(){if(typeof drawZones==="function")drawZones();const cnt={};objects.forEach(o=>{cnt[o.userData.pid]=(cnt[o.userData.pid]||0)+1});const chg=JSON.stringify(cnt)!==JSON.stringify(CNT);CNT=cnt;if(chg&&!pd)renderProducts();
   let sum=0,open=0,n=0;
   const groups={};objects.forEach(o=>{const p=BYID[o.userData.pid];if(p.noList)return;const D=o.userData.dims||{},key=p.id+"|"+(D.sz||0)+"|"+(D.op||[]).slice().sort().join(",")+"|"+(p.fills?fillOf(p,D):"");(groups[key]=groups[key]||{p,D,k:0,pr:priceOf(o)}).k++});
   const order=PRODUCTS.map(p=>p.id),lines=Object.values(groups).sort((a,b)=>order.indexOf(a.p.id)-order.indexOf(b.p.id)||(a.D.sz||0)-(b.D.sz||0));
   $("rows").innerHTML=lines.length?lines.map(({p,D,k,pr})=>{n+=k;if(pr)sum+=pr*k;else open++;const sub=[];if(p.sizes)sub.push(sizeLbl(p.sizes[D.sz||0]));if(p.fills)sub.push("Füllung: "+FILLS[fillOf(p,D)]);(D.op||[]).forEach(id=>{const q=(p.opts||[]).find(x=>x.id===id);if(q)sub.push("+ "+q.n)});
     return '<div class="row"><span><span class="q">'+k+'×</span>'+p.name+(sub.length?'<small class="sz">'+sub.join("<br>")+'</small>':'')+'</span><span class="p">'+(pr?eur(pr*k):"Preis folgt")+'</span></div>'}).join(""):'<p class="empty">Noch nichts geplant. Ziehen Sie ein Produkt in Ihren Garten.</p>';
-  $("sum").textContent=eur(sum);$("sumnote").textContent=(open?"Ohne Produkte, deren Preis noch folgt. ":"")+"Preise inkl. MwSt., zzgl. Lieferung. Prototyp: alle Preise fiktiv.";
+  tweenSum(sum);$("sumnote").textContent=(open?"Ohne Produkte, deren Preis noch folgt. ":"")+"Preise inkl. MwSt., zzgl. Lieferung. Prototyp: alle Preise fiktiv.";
   $("poolnote").hidden=!(cnt.lounge||cnt.poolS||cnt.poolL);$("cnt").textContent=n;hint(!!state.poly&&!objects.length&&!drawing&&!state.paint.length&&!state.buildings.length&&!state.edges.length&&!Object.keys(state.heights).length);updateGardenInfo()}
 function hint(show){$("hint").classList.toggle("hide",!show)}
 
@@ -2045,44 +2135,12 @@ function wizRender(){document.querySelectorAll(".shape").forEach(b=>b.setAttribu
     $("wizInfo").innerHTML="<b>"+areaOf(p).toLocaleString("de-DE",{maximumFractionDigits:1})+" m²</b> Fläche"}
   else if(wiz.shape==="draw"){svg.innerHTML='<path d="M40 120L30 50l60-25 70 30 10 65z" fill="#e4e4e1" stroke="#054958" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="40" cy="120" r="4" fill="#054958"/><circle cx="30" cy="50" r="4" fill="#054958"/><circle cx="90" cy="25" r="4" fill="#054958"/>';$("wizInfo").textContent="Form frei einzeichnen"}
   else{svg.innerHTML="";$("wizInfo").textContent=""}}
-function openWiz(){if(state.poly){wiz.ground=state.ground;wiz.house=state.house}$("wizCancel").hidden=!state.poly;$("wiz").hidden=false;renderExamples();wizRender();setTimeout(()=>{const b=document.querySelector('.shape[aria-pressed="true"]');if(b)b.focus()},30)}
+function openWiz(){if(state.poly){wiz.ground=state.ground;wiz.house=state.house}$("wizCancel").hidden=!state.poly;$("wiz").hidden=false;wizRender();setTimeout(()=>{const b=document.querySelector('.shape[aria-pressed="true"]');if(b)b.focus()},30)}
 function closeWiz(){$("wiz").hidden=true}
 document.querySelectorAll(".shape").forEach(b=>b.onclick=()=>{wiz.shape=b.dataset.shape;wizRender()});
 ["rw","rd","lw","ld","lcw","lcd"].forEach(id=>$(id).addEventListener("input",wizRender));
 $("wizGrounds").addEventListener("click",e=>{const b=e.target.closest(".gr");if(!b)return;wiz.ground=b.dataset.g;wizRender()});
 $("wizCancel").onclick=closeWiz;$("editGarden").onclick=()=>{closeSheets();openWiz()};
-/* ---------- Beispielgärten ----------
-   Fertige Planungen im Speicherformat (Maße in m, Bemalung in cm, r = Drehung in 90°-Schritten). */
-const EXAMPLES=[
-  {name:"Lounge mit Pool",desc:"Lounge Pool auf Plattenterrasse, Liege, Sitzbank und bepflanzte Tröge.",s:{v:6,poly:[[-5,-4],[5,-4],[5,4],[-5,4]],g:"lawn",
-    pt:[[3,-500,-400,0,160],[1,80,-180,500,60]],hm:{},e:[],b:[{x0:-5,z0:-11,x1:3,z1:-4,h:3.04,r:"flat",rd:0}],
-    items:[{id:"lounge",x:-2.6,z:-1.2,r:0},{id:"stepsB",x:-.96,z:-2.24,r:0},{id:"bench",x:2.64,z:-3.2,r:0},{id:"lounger",x:1.6,z:-.64,r:0},{id:"person",x:1.6,z:-.64,r:0},{id:"umbrella",x:2.8,z:-.8,r:0},
-      {id:"troughO",x:.4,z:3.52,r:0,dm:{fill:"plants"}},{id:"troughB",x:2.64,z:3.52,r:0},{id:"olive",x:4.32,z:1.36,r:0},{id:"shrub",x:-4.32,z:3.36,r:0},{id:"shrub",x:-3.44,z:3.44,r:0}]}},
-  {name:"Grüne Oase",desc:"Große Pflanztröge, Bäume und Hecke rahmen eine Sitzbank am Kiesweg.",s:{v:6,poly:[[-4.5,-3.5],[4.5,-3.5],[4.5,3.5],[-4.5,3.5]],g:"lawn",
-    pt:[[2,-64,-136,64,350],[2,-450,-136,450,-56]],hm:{},e:[],b:[],
-    items:[{id:"hedge",x:0,z:-3.2,r:0,dm:{w:8.48,d:.48,h:1.6}},{id:"bench",x:0,z:-1.92,r:0},{id:"troughL",x:-3,z:-1.84,r:0,dm:{fill:"plants"}},{id:"troughL",x:3,z:-1.84,r:0,dm:{fill:"plants"}},
-      {id:"troughO",x:-2.64,z:.48,r:0,dm:{fill:"plants"}},{id:"troughO",x:2.64,z:.48,r:0,dm:{fill:"plants"}},{id:"tree",x:-3.44,z:2.24,r:0},{id:"column",x:3.6,z:2.64,r:0},{id:"column",x:3.6,z:1.6,r:0},
-      {id:"shrub",x:-1.6,z:2.8,r:0},{id:"grass",x:1.28,z:2.8,r:0},{id:"grass",x:1.92,z:3.04,r:0},{id:"person",x:.32,z:1.36,r:0}]}},
-  {name:"Kleiner Stadtgarten",desc:"Kompakter Lounge Pool, Sitzblock und Kleiner Trog auf Pflaster.",s:{v:6,poly:[[-3,-2.5],[3,-2.5],[3,2.5],[-3,2.5]],g:"paver",
-    pt:[[5,160,-250,300,250]],hm:{},e:[],b:[],
-    items:[{id:"lounge",x:-1.6,z:-.64,r:0},{id:"block196",x:.8,z:-2.16,r:0},{id:"troughS",x:.4,z:2.16,r:0,dm:{fill:"plants"}},{id:"olive",x:2.4,z:-1.6,r:0},{id:"shrub",x:2.4,z:.4,r:0},{id:"grass",x:2.4,z:1.6,r:0}]}}];
-function exSvg(s){const bb=bbox(s.poly),W=240,H=140,m=12,sc=Math.min((W-2*m)/bb.w,(H-2*m)/bb.d),X=x=>(W/2+(x-(bb.x0+bb.w/2))*sc).toFixed(1),Z=z=>(H/2+(z-(bb.z0+bb.d/2))*sc).toFixed(1);
-  const col={lawn:"#93a978",deck:"#a68a6c",gravel:"#d3cdc2",tiles:"#c9c4bb",bed:"#7a6450",paver:"#d6d1c8"},P=["lawn","deck","gravel","tiles","paver","bed"],r=(x0,z0,x1,z1,f,st)=>'<rect x="'+X(x0)+'" y="'+Z(z0)+'" width="'+((x1-x0)*sc).toFixed(1)+'" height="'+((z1-z0)*sc).toFixed(1)+'" fill="'+f+'"'+(st?' stroke="'+st+'" stroke-width=".8"':'')+'/>';
-  let o='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><defs><clipPath id="c'+s.poly.length+bb.w+'"><polygon points="'+s.poly.map(([x,z])=>X(x)+","+Z(z)).join(" ")+'"/></clipPath></defs>';
-  (s.b||[]).forEach(b=>{o+=r(Math.max(b.x0,bb.x0-2),Math.max(b.z0,bb.z0-2),Math.min(b.x1,bb.x1+2),b.z1,"#e9e6e0","#b9b4ac")});
-  o+='<polygon points="'+s.poly.map(([x,z])=>X(x)+","+Z(z)).join(" ")+'" fill="'+(col[s.g]||col.lawn)+'"/><g clip-path="url(#c'+s.poly.length+bb.w+')">';
-  (s.pt||[]).forEach(a=>{o+=r(a[1]/100,a[2]/100,a[3]/100,a[4]/100,col[P[a[0]]])});o+='</g>';
-  s.items.forEach(it=>{const p=BYID[it.id];if(!p||it.id==="person")return;const D=it.dm||{},w0=D.w||p.w,d0=D.d||p.d,t=(it.r||0)%2,w=t?d0:w0,d=t?w0:d0,x0=it.x-w/2,z0=it.z-d/2,x1=it.x+w/2,z1=it.z+d/2;
-    if(p.plant&&it.id!=="hedge"){const rr=Math.max(.32,Math.min(1.2,(p.hs||1)*.32));o+='<circle cx="'+X(it.x)+'" cy="'+Z(it.z)+'" r="'+(rr*sc).toFixed(1)+'" fill="#5f7752" fill-opacity=".9"/>';return}
-    if(it.id==="hedge"){o+=r(x0,z0,x1,z1,"#4d5f46");return}
-    if(it.id==="umbrella"){o+='<circle cx="'+X(it.x)+'" cy="'+Z(it.z)+'" r="'+(1.5*sc).toFixed(1)+'" fill="#f3f0ea" fill-opacity=".85" stroke="#cfc9bf" stroke-width=".8"/>';return}
-    if(it.id==="lounger"){o+=r(x0,z0,x1,z1,"#f1eee8","#9f998f");return}
-    const fill=p.fills?((D.fill||p.fills[0])==="water"?"#5fa9b4":(D.fill||p.fills[0])==="none"?"#d9d5ce":"#6f8a5e"):null;
-    o+=r(x0,z0,x1,z1,"#d8d4cc","#8f8a82");if(p.water){const k=.14;o+=r(x0+k,z0+k,x1-k,z1-k,"#5fa9b4")}else if(fill){const k=.08;o+=r(x0+k,z0+k,x1-k,z1-k,fill)}});
-  return o+'</svg>'}
-function renderExamples(){$("wizEx").innerHTML=EXAMPLES.map((e,i)=>'<button class="ex" data-ex="'+i+'">'+exSvg(e.s)+'<span class="ex-t"><b>'+e.name+'</b><small>'+e.desc+'</small></span></button>').join("")}
-$("wizEx").addEventListener("click",ev=>{const b=ev.target.closest(".ex");if(!b)return;const e=EXAMPLES[+b.dataset.ex];closeWiz();if(tool!=="select")setTool("select");
-  applySnap(JSON.parse(JSON.stringify(e.s)));setTimeout(()=>{commit();toast("„"+e.name+"“ geladen. Passen Sie den Garten nach Belieben an.")},60)});
 let placePending=false;
 function placeOnPlan(){if(!plan||!state.poly)return;const bb=bbox(state.poly),dx=r2(plan.cx-(bb.x0+bb.x1)/2),dz=r2(plan.cz-(bb.z0+bb.z1)/2);if(dx||dz)shiftGarden(dx,dz);
   setMode("design");setTool("garden");planFit=true;setView("top");planFit=false;toast("Ziehen Sie die Gartenfläche an die richtige Stelle auf dem Plan.")}
@@ -2172,7 +2230,7 @@ async function exportPlan(){if(!state.poly)return;const qrOk=await loadQR(),qr=q
   '<div class="hd"><svg viewBox="'+logo.getAttribute("viewBox")+'">'+logo.innerHTML+'</svg><span>Gartenplanung · '+date+'</span></div>'+
   '<h1>Ihre Gartenplanung</h1><p class="meta">'+areaOf(state.poly).toLocaleString("de-DE",{maximumFractionDigits:1})+' m² · '+fmtLen(bb.w)+' × '+fmtLen(bb.d)+' · Untergrund: '+groundOf(state.ground).name+'</p>'+
   '<img src="'+img1+'" alt="Ansicht"><p class="cap">Ihre Ansicht</p><div class="two"><div><img src="'+img2+'" alt="Gesamtansicht"><p class="cap">Gesamtansicht</p></div><div><img src="'+img3+'" alt="Draufsicht"><p class="cap">Draufsicht</p></div></div>'+
-  '<div class="br"><h2>Ihre Zusammenstellung</h2><table>'+(rows||'<tr><td>Noch keine Produkte geplant.</td></tr>')+'</table><div class="sum"><span>Summe</span><b>'+$("sum").textContent+'</b></div><p class="note">'+$("sumnote").textContent+'</p>'+
+  '<div class="br"><h2>Ihre Zusammenstellung</h2><table>'+(rows||'<tr><td>Noch keine Produkte geplant.</td></tr>')+'</table><div class="sum"><span>Summe</span><b>'+eur(SUMV)+'</b></div><p class="note">'+$("sumnote").textContent+'</p>'+
   '<div class="link"><div><b style="font-weight:500;color:#3d3a36">Planung online öffnen</b><br>Mit diesem Link öffnen Sie Ihre Planung jederzeit wieder und können sie weiter bearbeiten.<br><a href="'+url+'">Ihre Planung öffnen →</a>'+(qr?'<br><span class="qrh">Oder scannen Sie den QR-Code mit Ihrem Handy.</span>':'')+'</div>'+(qr?'<div class="qr">'+qr+'</div>':'')+'</div>'+
   '<div class="ft"><span>CALVERA LIVING · Laumer Bautechnik GmbH</span><span>www.calvera-living.de</span></div></div></div>'+
   '</body></html>';
@@ -2181,6 +2239,37 @@ async function exportPlan(){if(!state.poly)return;const qrOk=await loadQR(),qr=q
 $("pdfPrint").onclick=()=>{const w=$("pdfFrame").contentWindow;if(w){w.focus();w.print()}};
 $("pdfClose").onclick=()=>{$("pdfView").hidden=true;$("pdfFrame").srcdoc=""};
 $("shot").onclick=exportPlan;
+
+/* ---------- Präsentationsmodus ---------- */
+var PRES={on:false,t:0};
+function startPresent(){if(!state.poly)return;if(eye)setView("3d",true);select(null);showHover(null);if(tool!=="select")setTool("select");closeSheets();
+  PRES.on=true;stage.classList.add("present");presUI();try{const de=document.documentElement;if(de.requestFullscreen)de.requestFullscreen().catch(()=>{})}catch(e){}
+  setTimeout(()=>{resize();setView("3d")},60)}
+function stopPresent(){if(!PRES.on)return;PRES.on=false;stage.classList.remove("present","ui");try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}setTimeout(resize,60)}
+function presUI(){stage.classList.add("ui");clearTimeout(PRES.t);PRES.t=setTimeout(()=>stage.classList.remove("ui"),2600)}
+$("present").onclick=startPresent;$("pexit").onclick=e=>{e.stopPropagation();stopPresent()};
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&PRES.on)stopPresent()});
+addEventListener("keydown",e=>{if(PRES.on&&e.key==="Escape")stopPresent()});
+stage.addEventListener("pointermove",()=>{if(PRES.on)presUI()});stage.addEventListener("pointerdown",()=>{if(PRES.on)presUI()});
+
+/* ---------- Bild teilen: Ansicht als Foto mit CALVERA-Logo ---------- */
+function logoImage(){return new Promise(res=>{const sym=document.getElementById("logo");if(!sym){res(null);return}
+  const s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(sym.getAttribute("viewBox")||"0 0 841.89 218.25")+'" width="842" height="218"><g fill="#1f1e1c">'+sym.innerHTML+'</g></svg>',
+    im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s)})}
+async function shareImage(){if(!state.poly)return;const btn=$("shareImg");btn.disabled=true;
+  try{select(null);showHover(null);const W=1600,H=1000,dir=camera.getWorldDirection(new T.Vector3()),tgt=eye?camera.position.clone().add(dir):orbit.target.clone();
+    const shot=await new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.src=snapView(camera.position.clone(),tgt,W,H)}),logo=await logoImage();
+    const band=150,c=document.createElement("canvas");c.width=W;c.height=H+band;const g=c.getContext("2d");g.drawImage(shot,0,0,W,H);
+    g.fillStyle="#fff";g.fillRect(0,H,W,band);g.fillStyle="rgba(0,0,0,.06)";g.fillRect(0,H,W,1);
+    if(logo){const lw=250,lh=lw*218.25/841.89;g.drawImage(logo,64,H+(band-lh)/2,lw,lh)}
+    try{await document.fonts.load('300 26px Montserrat')}catch(e){}
+    g.textAlign="right";g.fillStyle="#3d3a36";g.font='300 30px Montserrat, Arial, sans-serif';g.fillText("Mein Garten – geplant mit CALVERA",W-64,H+band/2-4);
+    g.fillStyle="#054958";g.font='400 20px Montserrat, Arial, sans-serif';g.fillText("calvera-living.de",W-64,H+band/2+32);
+    const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.92)),file=new File([blob],"calvera-garten.jpg",{type:"image/jpeg"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Mein Garten",text:"Geplant mit CALVERA LIVING – "+location.href})}catch(e){}}
+    else{const a=document.createElement("a"),u=URL.createObjectURL(blob);a.href=u;a.download="calvera-garten.jpg";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("Bild gespeichert – jetzt z. B. per WhatsApp oder Instagram teilen.")}}
+  catch(e){toast("Das Bild konnte nicht erstellt werden.")}btn.disabled=false}
+$("shareImg").onclick=shareImage;
 $("cart").onclick=()=>toast("Prototyp: Hier landen später alle Produkte direkt im Warenkorb.");
 document.querySelectorAll("[data-advice]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();toast("Prototyp: Hier öffnet sich später die Beratungsanfrage mit dem Link zu Ihrer Planung.")}));
 function resetAll(){if(tool!=="select")setTool("select");for(const o of objects.slice())removeObject(o);select(null);state.poly=null;state.paint=[];state.heights={};state.edges=[];state.buildings=[];buildGarden();commit();closeSheets();wiz={shape:"std",ground:"lawn",house:false};openWiz()}
@@ -2198,6 +2287,34 @@ renderTabs();renderProducts();
 if(saved&&saved.poly){applySnap(saved)}else{setView("3d",true);refresh();openWiz()}
 cur=JSON.stringify(snap());persist(cur);updUndo();
 let lastW=innerWidth,lastCam="";addEventListener("resize",()=>{if((lastW<=760)!==(innerWidth<=760)||(lastW<=1099)!==(innerWidth<=1099))closeSheets();lastW=innerWidth});
+/* ---------- Tiefenunschärfe in Augenhöhe ----------
+   Szene in ein (multisample) Renderziel mit Tiefentextur, danach ein Vollbild-Durchgang: Unschärfe wächst mit der Entfernung
+   hinter dem Fokuspunkt (Bildmitte). Tonwert- und sRGB-Umrechnung passieren hier je Abtastpunkt; der Himmel (Tiefe 1)
+   liefert seine Farbe schon fertig und wird nicht umgerechnet. Nebelfarbe wird für diesen Weg passend umgerechnet. */
+const DOF=(()=>{try{
+  const sz=new T.Vector2(1,1),rt=new T.WebGLRenderTarget(1,1,{samples:4,type:T.HalfFloatType});rt.depthTexture=new T.DepthTexture(1,1);rt.depthTexture.type=T.UnsignedIntType;
+  const mat=new T.ShaderMaterial({depthTest:false,depthWrite:false,defines:{NT:innerWidth>760?16:10},uniforms:{tC:{value:rt.texture},tD:{value:rt.depthTexture},cn:{value:.1},cf:{value:2600},fo:{value:8},px:{value:new T.Vector2(1,1)},mr:{value:4}},
+    vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}",
+    fragmentShader:"#include <packing>\nuniform sampler2D tC;uniform sampler2D tD;uniform float cn;uniform float cf;uniform float fo;uniform vec2 px;uniform float mr;varying vec2 vUv;"+
+      "vec3 disp(vec2 uv,float d){vec3 c=texture2D(tC,uv).rgb;if(d>=.99999)return c;\n#ifdef TONE_MAPPING\nc=toneMapping(c);\n#endif\nreturn LinearTosRGB(vec4(c,1.)).rgb;}"+
+      "float coc(float d){float z=-perspectiveDepthToViewZ(d,cn,cf);return clamp((z-fo*1.3)/(fo*3.+4.),0.,1.)*mr;}"+
+      "void main(){float d0=texture2D(tD,vUv).x,c0=coc(d0);vec3 col=disp(vUv,d0);if(c0<.35){gl_FragColor=vec4(col,1.);return;}float W=1.;"+
+      "for(int i=0;i<NT;i++){float fi=float(i),r=c0*sqrt((fi+.5)/float(NT)),a=fi*2.39996;vec2 uv=vUv+vec2(cos(a),sin(a))*r*px;float d=texture2D(tD,uv).x,w=clamp(coc(d)-r+1.,0.,1.);col+=disp(uv,d)*w;W+=w;}"+
+      "gl_FragColor=vec4(col/W,1.);}"}),
+    qs=new T.Scene(),qc=new T.OrthographicCamera(-1,1,1,-1,0,1);qs.add(new T.Mesh(new T.PlaneGeometry(2,2),mat));
+  /* Nebelfarbe so umrechnen, dass sie nach Tonwert + sRGB genau wie im normalen Bild aussieht */
+  const aces=v=>{const e=renderer.toneMappingExposure/.6,x=v[0]*e,y=v[1]*e,z=v[2]*e,i=[.59719*x+.35458*y+.04823*z,.076*x+.90834*y+.01566*z,.0284*x+.13383*y+.83777*z].map(a=>(a*(a+.0245786)-.000090537)/(a*(.983729*a+.432951)+.238081)),
+      o=[1.60475*i[0]-.53108*i[1]-.07367*i[2],-.10208*i[0]+1.10813*i[1]-.00605*i[2],-.00327*i[0]-.07276*i[1]+1.07602*i[2]];return o.map(a=>{a=Math.min(1,Math.max(0,a));return a<.0031308?a*12.92:1.055*Math.pow(a,1/2.4)-.055})};
+  const fogN=scene.fog.color.clone(),tg=[fogN.r,fogN.g,fogN.b];let c=tg.slice();for(let k=0;k<80;k++){const f=aces(c);c=c.map((v,j)=>Math.max(1e-4,v*Math.pow(tg[j]/Math.max(1e-4,f[j]),1.2)))}
+  const fogD=new T.Color(c[0],c[1],c[2]),ray=new T.Ray(),bx=new T.Box3(),hit=new T.Vector3();let on=false,frame=0;
+  function focus(){ray.origin.copy(camera.position);camera.getWorldDirection(ray.direction);let best=ray.direction.y<-.01?camera.position.y/-ray.direction.y:30;
+    objects.forEach(o=>{if(!o.visible)return;bx.setFromObject(o);if(ray.intersectBox(bx,hit)){const d=hit.distanceTo(camera.position);if(d<best)best=d}});return Math.min(40,Math.max(1.2,best))}
+  return{render(){const want=!!eye;if(want!==on){on=want;scene.fog.color.copy(on?fogD:fogN)}if(!on){renderer.render(scene,camera);return}
+    renderer.getDrawingBufferSize(sz);if(rt.width!==sz.x||rt.height!==sz.y)rt.setSize(sz.x,sz.y);
+    if(frame++%5===0){const f=focus();mat.uniforms.fo.value+=(f-mat.uniforms.fo.value)*.5}
+    mat.uniforms.cn.value=camera.near;mat.uniforms.cf.value=camera.far;mat.uniforms.px.value.set(1/sz.x,1/sz.y);mat.uniforms.mr.value=3.2*renderer.getPixelRatio();
+    renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.render(qs,qc)}}}catch(e){return null}})();
+function renderMain(){if(DOF)DOF.render();else renderer.render(scene,camera)}
 let lastFrame=performance.now();
 (function loop(now){requestAnimationFrame(loop);const dtF=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;HLEAF_U.uA.value=opts.wind&&!RM?.3:0;LEAF_U.uA.value=opts.wind&&!RM?.014:0;if(!RM){SKYM.uniforms.tm.value=now/1000;HLEAF_U.uT.value=LEAF_U.uT.value=now/1000;CAUS.offset.set(now*.000045,now*.00003);CAUS2.offset.set(-now*.000035,now*.00005)}if(M.water.normalMap){M.water.normalMap.offset.x=now*.000012;M.water.normalMap.offset.y=now*.000008}
   for(let i=anims.length-1;i>=0;i--){const a=anims[i],k=Math.min(1,(now-a.t0)/a.dur);a.fn(k);if(k>=1)anims.splice(i,1)}
@@ -2209,7 +2326,7 @@ let lastFrame=performance.now();
       const dr=-.96+Math.sin(t*.25+ph)*.1;root.position.set(dr*.7071,(o.userData.wy||.84)-.2+Math.sin(c*Math.PI*2)*.02,dr*.7071);R.head.rotation.x=-.55+w*.1}
     else if(o.userData.pose==="lie"&&!RM){R.chest.rotation.x=.6+Math.sin(t*1.1+ph)*.006}
     else if(o.userData.pose==="stand"&&!RM){R.chest.rotation.z=Math.sin(t*.7+ph)*.012;R.head.rotation.y=Math.sin(t*.35+ph)*.25}})}
-  if(eye)eyeStep(dtF);else if(!camAnim){idleSpin(now);orbit.update()}renderer.render(scene,camera);
+  if(eye)eyeStep(dtF);else if(!camAnim){idleSpin(now);orbit.update()}renderMain();
   const ck=camera.position.x.toFixed(3)+camera.position.y.toFixed(3)+camera.position.z.toFixed(3);if(ck!==lastCam){lastCam=ck;updateCompass()}
   if(mLabels.length||drawLabels.length||rectLabels.length){const w=cv.clientWidth,h=cv.clientHeight;mLabels.forEach(l=>placeLabel(l,w,h));drawLabels.forEach(l=>placeLabel(l,w,h));rectLabels.forEach(l=>placeLabel(l,w,h))}})(performance.now());
 
