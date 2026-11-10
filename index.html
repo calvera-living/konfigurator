@@ -1040,20 +1040,25 @@ function leafTex(kind){const N=256,[c,g]=cvs(N),R=rnd({broad:11,small:23,olive:3
       sprig(x0,y0,x1,y1,cx,cy,9,2.2,44,17,()=>[92+R()*14,26+R()*10,24+R()*12],C(30,25,30))}return fin()}
   if(kind==="small"){for(let k=0;k<9;k++){const x0=N/2+(R()-.5)*40,y0=N-4,a=-Math.PI/2+(R()-.5)*1.6,L=N*(.55+R()*.35),x1=x0+Math.cos(a)*L,y1=y0+Math.sin(a)*L,cx=(x0+x1)/2+(R()-.5)*30,cy=(y0+y1)/2;
       sprig(x0,y0,x1,y1,cx,cy,16,1.4,20,9,()=>[90+R()*14,30+R()*10,24+R()*14],C(80,25,28))}return fin()}
-  if(kind==="olive"){for(let k=0;k<4;k++){const x0=N*(.3+R()*.4),y0=N-4,x1=N*(.1+R()*.8),y1=N*(.05+R()*.2),cx=(x0+x1)/2+(R()-.5)*50,cy=(y0+y1)/2;
-      sprig(x0,y0,x1,y1,cx,cy,12,1.6,40,6,()=>R()<.2?[70,8,58+R()*8]:[76+R()*12,13+R()*7,32+R()*12],C(40,12,38))}return fin()}
-  if(kind==="thuja"){const spray=(x,y,a,len,d)=>{const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len;g.strokeStyle=C(90,30,22);g.lineWidth=Math.max(1.2,4.5-d*1.2);g.beginPath();g.moveTo(x,y);g.lineTo(x2,y2);g.stroke();
-      for(let i=0;i<8;i++){const t=i/8,px=x+(x2-x)*t,py=y+(y2-y)*t;g.fillStyle=C(86+R()*12,28+R()*10,24+R()*14);g.beginPath();g.ellipse(px,py,Math.max(2,4.8-d),2.6,a+(i%2?.7:-.7),0,7);g.fill()}
-      if(d<3)for(let k=0;k<3;k++)spray(x+(x2-x)*(.25+k*.25),y+(y2-y)*(.25+k*.25),a+(k%2?.75:-.75)+(R()-.5)*.3,len*.55,d+1)};
-    for(let i=0;i<5;i++)spray(N/2+(R()-.5)*40,N-6-R()*30,-Math.PI/2+(R()-.5)*1.4,110+R()*40,0);return fin()}
+  if(kind==="olive"){for(let k=0;k<5;k++){const x0=N*(.3+R()*.4),y0=N-4,x1=N*(.1+R()*.8),y1=N*(.05+R()*.2),cx=(x0+x1)/2+(R()-.5)*50,cy=(y0+y1)/2;
+      sprig(x0,y0,x1,y1,cx,cy,15,1.6,40,6.5,()=>R()<.15?[72,9,50+R()*6]:[74+R()*14,14+R()*8,28+R()*12],C(40,12,38))}return fin()}
+  if(kind==="thuja"){/* flache Thuja-Fächer: Schuppenblätter entlang feiner Triebe, je Verzweigungsstufe heller (junge Spitzen) */
+    const spray=(x,y,a,len,d)=>{const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len,steps=Math.max(5,Math.round(len/4));
+      for(let i=0;i<steps;i++){const t=i/steps,px=x+(x2-x)*t,py=y+(y2-y)*t,w=Math.max(2.2,(6.2-d*1.1)*(1-t*.35));g.fillStyle=C(92+R()*12,28+R()*10+d,17+R()*9+d*2.2+t*3);g.beginPath();g.ellipse(px,py,w*1.25,w*.8,a+(i%2?.55:-.55),0,7);g.fill()}
+      if(d<4)for(let k=0;k<4;k++){const tt=.18+k*.2;spray(x+(x2-x)*tt,y+(y2-y)*tt,a+(k%2?.8:-.8)+(R()-.5)*.35,len*(.5-d*.04),d+1)}};
+    for(let i=0;i<12;i++){const a=R()*6.283,r=R()*N*.22;spray(N/2+Math.cos(a)*r,N/2+Math.sin(a)*r,R()*6.283,55+R()*40,0)}return fin()}
   if(kind==="spike"){/* Lavendel-Ähre: übereinander gestaffelte Blütenquirle, unten lockerer */
-    for(let k=0;k<16;k++){const y=N*(.06+k*.055),w=N*(.16-k*.004),n=5+(k>3?3:0);for(let i=0;i<n;i++){g.fillStyle=C(262+R()*12,30+R()*12,46+R()*14+(k<3?6:0));g.beginPath();g.ellipse(N/2+(R()-.5)*w*2,y+(R()-.5)*8,w*.55,N*.035,(R()-.5)*.8,0,7);g.fill()}}
+    for(let k=0;k<16;k++){const y=N*(.06+k*.055),w=N*(.16-k*.004),n=5+(k>3?3:0);for(let i=0;i<n;i++){g.fillStyle=C(250+R()*16,28+R()*16,34+R()*12+k*1.3);g.beginPath();g.ellipse(N/2+(R()-.5)*w*2,y+(R()-.5)*8,w*.55,N*.035,(R()-.5)*.8,0,7);g.fill()}}
     g.strokeStyle=C(95,20,38);g.lineWidth=3;g.beginPath();g.moveTo(N/2,N*.9);g.lineTo(N/2,N);g.stroke();return fin()}
-  if(kind==="plume"){/* federiger Blütenstand (Lampenputzergras) */for(let i=0;i<260;i++){const y=N*(.08+R()*.8),a=(R()-.5)*1.2,l=10+R()*16;g.strokeStyle=C(38+R()*10,18+R()*10,62+R()*16,.5);g.lineWidth=1;g.beginPath();g.moveTo(N/2+(R()-.5)*16,y);g.lineTo(N/2+Math.sin(a)*l,y-Math.cos(a)*l);g.stroke()}return fin()}
+  if(kind==="plume"){/* federiger Blütenstand (Lampenputzergras) */for(let i=0;i<260;i++){const y=N*(.08+R()*.8),a=(R()-.5)*1.2,l=10+R()*16;g.strokeStyle=C(36+R()*10,22+R()*10,52+R()*14,.55);g.lineWidth=1;g.beginPath();g.moveTo(N/2+(R()-.5)*16,y);g.lineTo(N/2+Math.sin(a)*l,y-Math.cos(a)*l);g.stroke()}return fin()}
   return fin()}
 const LM={};
-function leafMat(kind){if(!LM[kind]){const t=leafTex(kind),m=new T.MeshStandardMaterial({map:t,alphaTest:.5,alphaToCoverage:true,side:T.FrontSide,roughness:.8,metalness:0,vertexColors:true});
-  m.userData.depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:t,alphaTest:.45,side:T.DoubleSide});LM[kind]=m}return LM[kind]}
+function leafMat(kind){if(!LM[kind]){const t=leafTex(kind),m=new T.MeshStandardMaterial({map:t,alphaTest:.5,alphaToCoverage:true,side:T.FrontSide,roughness:.8,metalness:0,vertexColors:true,emissive:0x1a1a1a,emissiveMap:t});
+  m.userData.depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:t,alphaTest:.45,side:T.DoubleSide});
+  /* Blätterflattern: jede Karte schwingt leicht und zeitversetzt (Phase aus der Position), mit Böen */
+  m.onBeforeCompile=sh=>{sh.uniforms.uT=LEAF_U.uT;sh.uniforms.uA=LEAF_U.uA;sh.vertexShader="uniform float uT;uniform float uA;\n"+sh.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\nfloat lph=position.x*3.7+position.y*2.9+position.z*4.3;float lg=.55+.45*sin(uT*.7+position.x*.5+position.z*.3);\ntransformed+=vec3(sin(uT*2.3+lph),.5*sin(uT*1.9+lph*1.3),cos(uT*2.1+lph*.8))*uA*lg;")};
+  LM[kind]=m}return LM[kind]}
+const LEAF_U={uT:{value:0},uA:{value:.014}};
 /* Geometrie aus Vierecken (je 4 Ecken) mit beiden Umlaufrichtungen */
 function quadGeo(pos,nor,uv,col){const idx=[];for(let b=0;b<pos.length/3;b+=4)idx.push(b,b+1,b+2,b,b+2,b+3,b,b+2,b+1,b,b+3,b+2);
   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(pos,3));geo.setAttribute("normal",new T.Float32BufferAttribute(nor,3));if(uv)geo.setAttribute("uv",new T.Float32BufferAttribute(uv,2));
@@ -1070,24 +1075,26 @@ function foliage(cards,kind,ctr,R){const pos=[],nor=[],uv=[],col=[],useC=!!ctr,C
 /* ---------- Rinde, Äste ---------- */
 const BARK_T=(()=>{const[c]=pixCanvas(512,(x,y)=>{const a=1-Math.abs(2*nz(NF1,x*4,y)-1),b=1-Math.abs(2*nz(NF2,x*8,y*2)-1),f=.46+.42*Math.pow(a,1.6)+.16*b+(Math.random()-.5)*.07;return[98*f,90*f,80*f]});
   const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.encoding=T.sRGBEncoding;t.anisotropy=4;return t})();
-const BARK={plain:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.012,roughness:.95}),olive:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.015,color:0xd6d0c5,roughness:.95})};
+const BARK={plain:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.014,roughness:.95,vertexColors:true}),olive:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.016,color:0xd6d0c5,roughness:.95,vertexColors:true})};
 /* gebogene, sich verjüngende Röhre in gemeinsame Arrays schreiben (für zusammengefasste Ast-Geometrie) */
 function tubeInto(A,pts,r0,r1,rad,flare){const curve=new T.CatmullRomCurve3(pts),L=curve.getLength(),seg=Math.max(2,Math.round(L*(rad>6?9:5))),fr=curve.computeFrenetFrames(seg,false),base=A.pos.length/3,circ=Math.max(1,Math.round(2*Math.PI*r0*2.5));
   for(let i=0;i<=seg;i++){const t=i/seg,P=curve.getPointAt(t),N=fr.normals[i],B=fr.binormals[i],r=(r0+(r1-r0)*t)*(flare?1+.75*Math.exp(-Math.max(0,t*L-.15)*6):1);
-    for(let j=0;j<=rad;j++){const a=j/rad*Math.PI*2,cx=Math.cos(a),sy=Math.sin(a),nx=N.x*cx+B.x*sy,ny=N.y*cx+B.y*sy,nz2=N.z*cx+B.z*sy;A.pos.push(P.x+nx*r,P.y+ny*r,P.z+nz2*r);A.nor.push(nx,ny,nz2);A.uv.push(j/rad*circ,t*L*1.6)}}
-  for(let i=0;i<seg;i++)for(let j=0;j<rad;j++){const a=base+i*(rad+1)+j,b=a+rad+1;A.idx.push(a,b,a+1,b,b+1,a+1)}}
-function arraysMesh(A,mat){const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(A.pos,3));geo.setAttribute("normal",new T.Float32BufferAttribute(A.nor,3));geo.setAttribute("uv",new T.Float32BufferAttribute(A.uv,2));geo.setIndex(A.idx);geo.computeBoundingSphere();
+    for(let j=0;j<=rad;j++){const a=j/rad*Math.PI*2,cx=Math.cos(a),sy=Math.sin(a),nx=N.x*cx+B.x*sy,ny=N.y*cx+B.y*sy,nz2=N.z*cx+B.z*sy;A.pos.push(P.x+nx*r,P.y+ny*r,P.z+nz2*r);A.nor.push(nx,ny,nz2);A.uv.push(j/rad*circ,t*L*1.6);
+      if(A.col){const y=P.y+ny*r,k=.68+.32*Math.min(1,Math.max(0,(y+.1)/1.3)),moss=Math.min(.9,Math.max(0,ny)*.45+Math.max(0,.55-y)*.7);A.col.push(k*(1-moss*.32),k*(1-moss*.04),k*(1-moss*.42))}}}
+  /* Umlaufrichtung so, dass die Außenseite die Vorderseite ist (sonst sieht man die Innenseite der Rückwand) */
+  for(let i=0;i<seg;i++)for(let j=0;j<rad;j++){const a=base+i*(rad+1)+j,b=a+rad+1;A.idx.push(a,a+1,b,b,a+1,b+1)}}
+function arraysMesh(A,mat){const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(A.pos,3));geo.setAttribute("normal",new T.Float32BufferAttribute(A.nor,3));geo.setAttribute("uv",new T.Float32BufferAttribute(A.uv,2));if(A.col&&A.col.length)geo.setAttribute("color",new T.Float32BufferAttribute(A.col,3));geo.setIndex(A.idx);geo.computeBoundingSphere();
   const m=new T.Mesh(geo,mat);m.castShadow=m.receiveShadow=true;return m}
 /* ---------- Wachstum ----------
    S: {trunk:[Länge,Radius,Neigung], lv:[{n,ang,len,rad,tmin}], up:[...], wob:[...], leaf:{kind,per,size,from}, bark}
    Jede Ebene erzeugt Kinder entlang des Elternastes (Goldener-Winkel-Verteilung), Richtungen mit Schwerkraft/Lichtstreben. */
-function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[]},leaves=[],RAD=[11,7,5,4,3];
+function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[],col:[]},leaves=[],RAD=[11,7,5,4,3];
   const pointAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f)),k=f-i;return pts[i].clone().lerp(pts[i+1],k)};
   const dirAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f));return pts[i+1].clone().sub(pts[i]).normalize()};
   function grow(P,D,len,r0,lvl){const last=lvl===S.lv.length,steps=lvl===0?6:last?2:3,pts=[P.clone()];let p=P.clone(),d=D.clone();
     for(let s=0;s<steps;s++){d.add(new V3(R()-.5,(R()-.5)*.5,R()-.5).multiplyScalar(S.wob[lvl]||.2)).addScaledVector(UP,S.up[lvl]||0).normalize();p=p.clone().addScaledVector(d,len/steps);pts.push(p)}
     const r1=last?Math.max(.004,r0*.35):r0*.62;tubeInto(A,pts,r0,r1,RAD[lvl]||3,lvl===0);
-    if(last||lvl>=S.leaf.from){const n=last?S.leaf.per:Math.round(S.leaf.per*.4);for(let i=0;i<n;i++){const t=last?.15+.85*R():.55+.45*R(),q=pointAt(pts,t),dd=dirAt(pts,t),o=new V3(R()-.5,R()-.5,R()-.5).multiplyScalar(S.leaf.size*.6);
+    if(last||lvl>=S.leaf.from){const al=S.leaf.along||.55,n=last?S.leaf.per:Math.round(S.leaf.per*(S.leaf.mul||.4));for(let i=0;i<n;i++){const t=last?.15+.85*R():al+(1-al)*R(),q=pointAt(pts,t),dd=dirAt(pts,t),o=new V3(R()-.5,R()-.5,R()-.5).multiplyScalar(S.leaf.size*.6);
       leaves.push([q.x+o.x,q.y+o.y,q.z+o.z,S.leaf.size*(.75+R()*.5),dd])}}
     if(last)return;const L=S.lv[lvl];
     for(let k=0;k<L.n;k++){const t=L.tmin+(1-L.tmin)*(k+.3+R()*.5)/L.n,base=pointAt(pts,t),pd=dirAt(pts,t),az=k*2.399+R()*.8,
@@ -1105,54 +1112,97 @@ function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[]},leaves=[],RAD=[11,7,
 const AO_M=(()=>{const[c,g]=cvs(128),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,"rgba(0,0,0,.5)");gr.addColorStop(.45,"rgba(0,0,0,.24)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);
   return new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})})(),AO_G=new T.PlaneGeometry(1,1);
 function aoDisc(sx,sz,op){const m=new T.Mesh(AO_G,op&&op<1?AO_M.clone():AO_M);if(op&&op<1)m.material.opacity=op;m.rotation.x=-PI2;m.scale.set(sx,sz,1);m.position.y=.006;m.raycast=()=>{};m.renderOrder=-2;return m}
-function treeFrom(g,S,seed){const R=rnd(seed),t=growTree(S,R),sw=new T.Group();sw.userData.sway=1;sw.add(t.leaves);g.add(t.wood,sw);
+function treeFrom(g,S,seed){const R=rnd(seed),t=growTree(S,R),sw=new T.Group();sw.userData.sway=1;sw.userData.swayAmp=.2;sw.add(t.leaves);g.add(t.wood,sw);
   /* Bodenschatten: kräftig am Stammfuß, weich und breit unter der Krone */
-  const tr=S.trunk[1];g.add(aoDisc(tr*8,tr*8),aoDisc(t.mx*1.7,t.mx*1.7,.45),baseGrass(R,(a,R)=>tr*(.85+Math.pow(R(),1.6)*2.2),Math.round(180+tr*600)))}
+  const tr=S.trunk[1];g.add(aoDisc(tr*8,tr*8),aoDisc(t.mx*1.7,t.mx*1.7,.45))}
 /* Kranz aus feinem Rasengras (Rasenfarben), z. B. um Stammfüße; dist(a,R) liefert den Abstand je Richtung */
 function baseGrass(R,dist,n){const list=[];for(let i=0;i<n;i++){const a=R()*6.283,d=dist(a,R),dk=.8+R()*.3;
-    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a:a+(R()-.5)*1.5,len:.06+R()*.12,lean:.2+R()*.7,w:.005+R()*.004,seg:3,c0:[.2*dk,.3*dk,.11*dk],c1:[.38*dk,.5*dk,.2*dk]})}
+    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a:a+(R()-.5)*1.5,len:.035+R()*.06,lean:.5+R()*.8,w:.007+R()*.005,seg:3,c0:[.24*dk,.32*dk,.14*dk],c1:[.36*dk,.45*dk,.22*dk]})}
   const m=strands(list);m.castShadow=false;return m}
 /* Laubbaum (Ahorn-Typ): kräftiger Stamm, 6 Hauptäste aus der oberen Stammhälfte, breite, unregelmäßige Krone */
-function deciduousTree(g){treeFrom(g,{trunk:[2.6,.21,.12],lv:[{n:5,ang:.7,len:.62,rad:.66,tmin:.42,leader:.62},{n:4,ang:.62,len:.56,rad:.62,tmin:.22,leader:.45},{n:3,ang:.7,len:.55,rad:.65,tmin:.2}],
-  up:[.1,.09,.06,.02],wob:[.1,.2,.22,.3],leaf:{kind:"broad",per:28,size:.55,from:1}},4501)}
+function deciduousTree(g){treeFrom(g,{trunk:[2.6,.21,.1],lv:[{n:5,ang:.6,len:.58,rad:.66,tmin:.56,leader:.62},{n:5,ang:.62,len:.56,rad:.62,tmin:.14,leader:.45},{n:3,ang:.7,len:.55,rad:.65,tmin:.2}],
+  up:[.1,.07,.06,.02],wob:[.08,.28,.26,.3],leaf:{kind:"broad",per:26,size:.55,from:1,along:.18,mul:.9}},4501)}
 /* Olivenbaum: kurzer, knorriger und geneigter Stamm, früh verzweigt, schirmartige lockere Krone, helle Rinde */
-function oliveTree(g){treeFrom(g,{trunk:[1.05,.13,.35],lv:[{n:3,ang:.55,len:.85,rad:.62,tmin:.62},{n:4,ang:.72,len:.55,rad:.58,tmin:.3},{n:3,ang:.8,len:.5,rad:.6,tmin:.2}],
-  up:[.04,.08,.04,0],wob:[.28,.24,.26,.3],leaf:{kind:"olive",per:26,size:.4,from:2},bark:BARK.olive},2601)}
-/* Säulenbaum (z. B. Säulen-Hainbuche): durchgehender Leittrieb, viele steil aufrechte Äste, schmale Krone */
-function columnTree(g){treeFrom(g,{trunk:[3.25,.1,.02],lv:[{n:12,ang:.3,len:.34,rad:.45,tmin:.2},{n:4,ang:.45,len:.55,rad:.6,tmin:.2}],
-  up:[.05,.22,.12],wob:[.03,.1,.2],leaf:{kind:"broad",per:34,size:.42,from:1}},3501)}
+function oliveTree(g){treeFrom(g,{trunk:[1.05,.13,.08],lv:[{n:4,ang:.55,len:.85,rad:.62,tmin:.6,leader:.5},{n:5,ang:.72,len:.55,rad:.58,tmin:.25},{n:4,ang:.8,len:.5,rad:.6,tmin:.18}],
+  up:[.08,.08,.04,0],wob:[.12,.22,.26,.3],leaf:{kind:"olive",per:30,size:.46,from:1,along:.3,mul:.7},bark:BARK.olive},2601)}
+/* Säulenbaum, in Form geschnitten (wie Säulen-Hainbuche in gepflegten Anlagen): freier, gerader Stamm,
+   darüber eine dichte, glatte Spitzkrone – unten am breitesten, oben spitz zulaufend. Gleiche Technik wie die
+   Hecke: dunkle Grundform (Drehkörper) + tausende kleine 3D-Blätter (InstancedMesh, ein Zeichenaufruf). */
+const COL_CORE_M=new T.MeshStandardMaterial({color:0x13230e,roughness:1,metalness:0});
+function columnTree(g){const R=rnd(3501),A={pos:[],nor:[],uv:[],idx:[],col:[]},y0=1.05,Hc=2.5,R0=.42;
+  /* Kronenprofil (Tropfenform): breiteste Stelle bei ~1/3 der Höhe, oben spitz */
+  const prof=h=>R0*Math.pow(Math.max(0,Math.sin(Math.PI*Math.pow(Math.min(1,Math.max(0,h)),.62))),.85);
+  tubeInto(A,[new V3(0,-.15,0),new V3(.008,.7,0),new V3(0,y0+.5,.006)],.1,.065,10,true);g.add(arraysMesh(A,BARK.plain));
+  /* dunkle Grundform knapp unter der Blattoberfläche */
+  const pts=[];for(let i=0;i<=40;i++){const h=i/40;pts.push(new T.Vector2(Math.max(.002,prof(h)-.07),y0+h*Hc))}
+  const core=new T.Mesh(new T.LatheGeometry(pts,28),COL_CORE_M);core.castShadow=core.receiveShadow=true;
+  /* Blätter auf der Oberfläche: Höhe nach Umfang gewichtet, mehrere Lagen, Ausrichtung nach außen */
+  const N=13000,lm=new T.InstancedMesh(HLEAF_G,HLEAF_M,N),M4=new T.Matrix4(),X=new V3(),Y=new V3(),Z=new V3(),P=new V3(),SC=new V3(),cc=new T.Color(),tmp=new V3(),nn=new V3();let k=0;
+  while(k<N){const h=R(),r0=prof(h);if(R()>r0/R0+.05)continue;const a=R()*6.283,ca=Math.cos(a),sa=Math.sin(a),dr=(prof(h+.01)-prof(h-.01))/(.02*Hc);
+    nn.set(ca,-dr,sa).normalize();const layer=Math.pow(R(),.75),rr=Math.max(.01,r0+layer*.09-.07);P.set(ca*rr,y0+h*Hc+(layer-.5)*.02,sa*rr);
+    Z.copy(nn).add(tmp.set(R()-.5,R()-.5,R()-.5).multiplyScalar(1.4)).normalize();X.set(R()-.5,R()-.25,R()-.5);X.addScaledVector(Z,-X.dot(Z));if(X.lengthSq()<1e-6)X.set(1,0,0);X.normalize();Y.crossVectors(Z,X);
+    const sc=.058*(.7+R()*.6);M4.makeBasis(X,Y,Z).scale(SC.set(sc,sc,sc)).setPosition(P);lm.setMatrixAt(k,M4);
+    const lgt=(.055+.14*layer+.04*R())*(.82+.25*h)*(nn.y>.4?1.08:1);cc.setHSL(.26+R()*.045,.5+R()*.2,Math.min(.24,lgt*.85),"srgb");lm.setColorAt(k,cc);k++}
+  lm.castShadow=lm.receiveShadow=true;lm.frustumCulled=false;
+  const sw=new T.Group();sw.userData.sway=1;sw.userData.swayAmp=.15;sw.add(core,lm);g.add(sw);
+  g.add(aoDisc(.9,.9),aoDisc(1.3,1.3,.4))}
 /* Buchs/Kugelstrauch (Formschnitt): mehrere Lagen kleinblättriger Zweige, leicht unregelmäßig, Kern tief innen */
-const CORE_M=new T.MeshStandardMaterial({color:0x1f2c18,roughness:1});
-function leafBall(R,r,y0){const g=new T.Group(),cards=[],n=Math.round(Math.min(1800,Math.max(160,4*Math.PI*r*r*720))),p1=R()*6,p2=R()*6;
+const CORE_M=new T.MeshStandardMaterial({color:0x2a3a20,roughness:1});
+/* Anzahl so, dass jede Kugel gleich dicht belaubt ist (Kartengröße wächst mit r, also Deckung unabhängig von r) */
+function leafBall(R,r,y0){const g=new T.Group(),cards=[],n=Math.round(Math.min(2200,Math.max(1500,4*Math.PI*r*r*1100))),p1=R()*6,p2=R()*6;
   for(let i=0;i<n;i++){const uy=R()*2-1,a=R()*6.3,s=Math.sqrt(1-uy*uy),ux=Math.cos(a)*s,uz=Math.sin(a)*s,bump=1+.05*Math.sin(ux*5+p1)*Math.sin(uz*5+p2)+.035*Math.sin(uy*7+p1),
-      layer=Math.pow(R(),.7),rr=r*bump*(.3+.7*layer),sh=(.5+.5*layer)*(.82+.22*(uy*.5+.5));
-    cards.push([ux*rr,y0+uy*rr*.93,uz*rr,r*(.55+R()*.3),ux+(R()-.5)*1.2,uy+(R()-.5)*1.2,uz+(R()-.5)*1.2,sh,ux+(R()-.5),uy+(R()-.5)+.3,uz+(R()-.5)])}
-  g.add(foliage(cards,"small",[0,y0,0],R));return g}
+      layer=Math.pow(R(),.45),rr=r*bump*(.62+.38*layer),sh=(.55+.45*layer)*(.82+.22*(uy*.5+.5));
+    cards.push([ux*rr,y0+uy*rr*.93,uz*rr,r*(.42+R()*.22),ux+(R()-.5)*1.2,uy+(R()-.5)*1.2,uz+(R()-.5)*1.2,sh,ux+(R()-.5),uy+(R()-.5)+.3,uz+(R()-.5)])}
+  /* in die Wind-Animation einbinden (leichtes Wiegen um den Fußpunkt) */
+  const sw=new T.Group();sw.userData.sway=1;sw.userData.swayAmp=.35;sw.add(foliage(cards,"small",[0,y0,0],R));g.add(sw);return g}
 /* Hecke: Laub in mehreren Lagen auf einer abgerundeten Quaderform; Kern liegt tief innen und bleibt unsichtbar */
-/* Hecke (Thuja, geschnitten): Laub in mehreren Lagen auf einer abgerundeten Form. Oben unregelmäßige Kante mit
-   vorwitzigen Trieben und hellerem, gelbgrünem Neuaustrieb; zur Basis dunkler und leicht eingezogen; natürliche
-   Farbflecken über großflächiges Rauschen; weicher Bodenschatten. Kern tief innen, nie sichtbar. */
-function hedgeMesh(g,L,H,dp){const R=rnd(Math.round(L*100+H*10+dp*7)),cards=[],rr=Math.min(.12,dp/3,H/3),ins=Math.min(.16,dp*.32);
-  const core=new T.Mesh(new T.BoxGeometry(Math.max(.05,L-2*ins),Math.max(.05,H-ins*1.5),Math.max(.04,dp-2*ins)),CORE_M);core.position.y=(H-ins*1.5)/2;core.castShadow=core.receiveShadow=true;g.add(core);
-  const hx=L/2-rr,hy=H-rr,hz=dp/2-rr,ph=R()*6,wav=(x,y,z)=>.028*Math.sin(x*2.1+ph)*Math.sin(y*2.7+z*1.3+ph*1.7)+.016*Math.sin(x*5.3+y*4.1+z*3+ph)+.01*Math.sin(x*11+z*9+ph);
-  const patch=(x,y,z)=>nz(NF1,(x+7)*55,(y+z*.7+3)*55);/* großflächige Farbflecken (~1 m) */
-  const area=2*L*H+2*dp*H+L*dp,N=Math.min(16000,Math.round(area*230)),faces=[[0,0,1,L*H],[0,0,-1,L*H],[1,0,0,dp*H],[-1,0,0,dp*H],[0,1,0,L*dp*1.4]],tot=faces.reduce((s,f)=>s+f[3],0);
-  faces.forEach(([fx,fy,fz,ar])=>{const cnt=Math.round(N*ar/tot);for(let i=0;i<cnt;i++){const s1=R()-.5,s2=R()-.5;let x,y,z;
-      if(fy){x=s1*L;z=s2*dp;y=H}else if(fx){x=fx*L/2;z=s1*dp;y=Math.pow(s2+.5,.85)*H}else{z=fz*dp/2;x=s1*L;y=Math.pow(s2+.5,.85)*H}
-      const cx=Math.max(-hx,Math.min(hx,x)),cy=Math.max(rr,Math.min(hy,y)),cz=Math.max(-hz,Math.min(hz,z)),n=new V3(x-cx,y-cy,z-cz);if(n.lengthSq()<1e-6)n.set(fx,fy,fz);n.normalize();
-      const layer=Math.pow(R(),.6),base=Math.max(0,1-y/.3),sprout=(y>H*.8||fy)&&R()<.07;
-      let d=rr*(.55+.45*layer)+wav(x,y,z)-(1-layer)*.08-base*.035+(sprout?.05+R()*.08:0);
-      const px=cx+n.x*d,py=Math.max(.02,cy+n.y*d+(sprout&&n.y>.3?.04:0)),pz=cz+n.z*d,ht=py/H,pt=patch(px,py,pz);
-      /* Helligkeit: außen/oben heller, innen/unten dunkler (Umgebungsverdeckung), plus Flecken */
-      const sh=Math.min(1.08,(.48+.52*layer)*(.62+.38*Math.min(1,py/.45))*(.86+.2*ht)*(.9+.2*pt)+(n.y>.5?.05:0));
-      /* Tönung: oben/vorwitzige Triebe gelbgrüner Neuaustrieb, unten kühler */
-      const fresh=Math.max(0,ht-.7)/.3*.6+(sprout?.5:0)+(pt-.5)*.3,tr=1+fresh*.12,tg=1+fresh*.06,tb=.96-fresh*.08-base*.02;
-      cards.push([px,py,pz,(sprout?.26:.2)+R()*.13,n.x+(R()-.5)*.9,n.y+(R()-.5)*.9+.15,n.z+(R()-.5)*.9,sh,(R()-.5)*.6,1,(R()-.5)*.6,tr,tg,tb])}});
-  /* Rasengras entlang der Heckenbasis */
-  const gl=[],gn=Math.round((L+dp)*2*55);for(let i=0;i<gn;i++){const side=R(),along=R()-.5,out=dp/2-.02+Math.pow(R(),1.5)*.22,ex=side<L/(L+dp)?[along*L,(R()<.5?-1:1)*out]:[(R()<.5?-1:1)*(L/2-.02+Math.pow(R(),1.5)*.22),along*dp],dk=.8+R()*.3;
-    gl.push({x:ex[0],z:ex[1],a:R()*6.283,len:.06+R()*.12,lean:.2+R()*.7,w:.005+R()*.004,seg:3,c0:[.2*dk,.3*dk,.11*dk],c1:[.38*dk,.5*dk,.2*dk]})}
-  const gm=strands(gl);gm.castShadow=false;
-  g.add(foliage(cards,"thuja",null,R),aoDisc(L+.45,dp+.55),gm)}
+/* Hecke (Thuja, Formschnitt): geschlossener, abgerundeter Körper mit sanften, unregelmäßigen Schnittwölbungen,
+   darauf eine nahtlose Thuja-Laubtextur im echten Maßstab (mit Relief über bumpMap). Basis dunkler, Oberkante heller
+   (Vertex-Farben). Nur an Oberkante und Kanten ein feiner Saum aus kleinen Trieben, der die Silhouette auflockert. */
+/* Heckenkörper: nur dunkle, matte Schattentiefe zwischen den Blättern (keine eigene Struktur) */
+const HEDGE_CORE_M=new T.MeshStandardMaterial({color:0x14240f,roughness:1,metalness:0,vertexColors:true,envMapIntensity:.3});
+/* einzelnes Heckenblatt: eiförmig mit Spitze, leicht gewölbt; Stiel im Ursprung, Länge 1 (wird je Blatt skaliert) */
+const HLEAF_G=(()=>{const n=7,pos=[],nor=[],idx=[];for(let i=0;i<=n;i++){const t=i/n,w=Math.sin(Math.PI*Math.min(1,t*1.04))*.36*(1-.3*t),z=.16*t*t;pos.push(t,-w,z,t,w,z);nor.push(0,-.3,1,0,.3,1)}
+  for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3,a,a+1,a+2,a+1,a+3,a+2)}
+  const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(pos,3));g.setAttribute("normal",new T.Float32BufferAttribute(nor,3));g.setIndex(idx);g.normalizeNormals();g.computeBoundingSphere();return g})();
+const HLEAF_M=new T.MeshStandardMaterial({color:0xffffff,roughness:.66,metalness:0,envMapIntensity:.45});
+/* Blätterflattern im Wind (Hecke, geschnittener Säulenbaum): jede Blattspitze schwingt minimal und zeitversetzt,
+   Phase aus der Blattposition; direkt im Vertex-Shader, daher praktisch ohne Leistungskosten */
+const HLEAF_U={uT:{value:0},uA:{value:.3}};
+HLEAF_M.onBeforeCompile=sh=>{sh.uniforms.uT=HLEAF_U.uT;sh.uniforms.uA=HLEAF_U.uA;
+  sh.vertexShader="uniform float uT;uniform float uA;\n"+sh.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\n#ifdef USE_INSTANCING\nvec3 ip=instanceMatrix[3].xyz;float ph=ip.x*2.3+ip.z*1.7+ip.y*3.1;float gust=.6+.4*sin(uT*.7+ip.x*.4);\nfloat wave=.5+.5*sin(uT*1.3-ip.x*1.6+ip.z*.8);transformed.z+=sin(uT*2.4+ph)*uA*gust*(.6+.8*wave)*position.x;transformed.y+=sin(uT*1.8+ph*1.3)*uA*.5*gust*position.x;transformed.x+=sin(uT*1.1+ph*.7)*uA*.35*wave;\n#endif")};function hedgeMesh(g,L,H,dp){const R=rnd(Math.round(L*100+H*10+dp*7)),rr=Math.min(.1,dp*.3,H*.3),ph=R()*6,ph2=R()*6;
+  const sx=Math.min(140,Math.max(6,Math.round(L*12))),sy=Math.min(40,Math.max(4,Math.round(H*12))),sz=Math.max(4,Math.round(dp*12)),
+    geo=new T.BoxGeometry(L,H,dp,sx,sy,sz),p=geo.attributes.position,col=[];
+  /* sanfte Schnittwölbungen: Verschiebung nach außen, abhängig nur von der Position (keine Risse an Kanten) */
+  const hx=L/2-rr,hy=H/2-rr,hz=dp/2-rr,v=new V3(),cl=new V3(),dir=new V3();
+  for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);cl.set(Math.max(-hx,Math.min(hx,v.x)),Math.max(-hy,Math.min(hy,v.y)),Math.max(-hz,Math.min(hz,v.z)));dir.subVectors(v,cl);if(dir.lengthSq()<1e-9)dir.set(0,1,0);dir.normalize();
+    const w=.018*Math.sin(v.x*3.1+ph)*Math.sin(v.y*2.6+v.z*2+ph2)+.012*Math.sin(v.x*7.3+v.y*5.1+ph2)+.008*Math.sin(v.x*13+v.z*11+v.y*9+ph),bot=v.y<-H/2+.12?-.02*(1-(v.y+H/2)/.12):0;
+    /* auf die abgerundete Form ziehen (Abstand rr vom inneren Kern) plus Wölbung */
+    v.copy(cl).addScaledVector(dir,Math.max(.005,rr+w+bot-.1));p.setXYZ(i,v.x,v.y,v.z);
+    const y=v.y+H/2,k=(.7+.3*Math.min(1,y/.45))*(.9+.14*(y/H));col.push(k,k*1.01,k*.97)}
+  geo.setAttribute("color",new T.Float32BufferAttribute(col,3));geo.computeVertexNormals();
+  /* Textur im echten Maßstab (eine Kachel = 0,55 m), Projektion je nach Flächenrichtung */
+  const nr=geo.attributes.normal,uv=geo.attributes.uv,S=.55;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i)+H/2,z=p.getZ(i),ax=Math.abs(nr.getX(i)),ay=Math.abs(nr.getY(i)),az=Math.abs(nr.getZ(i));
+    if(ay>=ax&&ay>=az)uv.setXY(i,x/S,z/S);else if(ax>=az)uv.setXY(i,z/S,y/S);else uv.setXY(i,x/S,y/S)}uv.needsUpdate=true;
+  const m=new T.Mesh(geo,HEDGE_CORE_M);m.position.y=H/2;m.castShadow=m.receiveShadow=true;g.add(m);
+  /* Blattwerk wie bei einer Kirschlorbeer-/Liguster-Hecke: zehntausende kleine, gewölbte 3D-Blätter
+     (InstancedMesh = ein Zeichenaufruf) in mehreren Lagen auf der Heckenform, in alle Richtungen gedreht.
+     Der dunkle Körper darunter wirkt in den Lücken als Tiefe; die Blätter bilden die unregelmäßige Kante. */
+  const wv=(x,y,z)=>.018*Math.sin(x*3.1+ph)*Math.sin(y*2.6+z*2+ph2)+.012*Math.sin(x*7.3+y*5.1+ph2)+.008*Math.sin(x*13+z*11+y*9+ph);
+  const area=2*L*H+2*dp*H+L*dp,want=area*1150,N=Math.min(38000,Math.round(want)),ls=.06*Math.sqrt(Math.max(1,want/N));
+  const lm=new T.InstancedMesh(HLEAF_G,HLEAF_M,N),M4=new T.Matrix4(),X=new V3(),Y=new V3(),Z=new V3(),P=new V3(),SC=new V3(),cc=new T.Color(),tmp=new V3(),nn=new V3();
+  const faces=[[0,0,1,L*H],[0,0,-1,L*H],[1,0,0,dp*H],[-1,0,0,dp*H],[0,1,0,L*dp]],tot=faces.reduce((s,f)=>s+f[3],0);let k=0;
+  faces.forEach(([fx,fy,fz,ar])=>{const cnt=Math.round(N*ar/tot);for(let i=0;i<cnt&&k<N;i++){const s1=R()-.5,s2=R()-.5;let x,y,z;
+      if(fy){x=s1*L;z=s2*dp;y=H/2}else if(fx){x=fx*L/2;z=s1*dp;y=s2*H}else{z=fz*dp/2;x=s1*L;y=s2*H}
+      cl.set(Math.max(-hx,Math.min(hx,x)),Math.max(-hy,Math.min(hy,y)),Math.max(-hz,Math.min(hz,z)));nn.set(x,y,z).sub(cl);if(nn.lengthSq()<1e-9)nn.set(fx,fy,fz);nn.normalize();
+      /* Lage 0 = tief innen (bis 9 cm unter der Oberfläche), 1 = ganz außen */
+      const layer=Math.pow(R(),.75),off=rr+wv(x,y,z)+layer*.11-.09;P.copy(cl).addScaledVector(nn,off);P.y+=H/2;if(P.y<.012)continue;
+      /* Blattebene: grob nach außen, stark gestreut; Blattspitze zufällig, leicht nach oben */
+      Z.copy(nn).add(tmp.set(R()-.5,R()-.5,R()-.5).multiplyScalar(1.4)).normalize();X.set(R()-.5,R()-.25,R()-.5);X.addScaledVector(Z,-X.dot(Z));if(X.lengthSq()<1e-6)X.set(1,0,0);X.normalize();Y.crossVectors(Z,X);
+      const sc=ls*(.7+R()*.6);M4.makeBasis(X,Y,Z).scale(SC.set(sc,sc,sc)).setPosition(P);lm.setMatrixAt(k,M4);
+      const ht=P.y/H,lgt=(.055+.14*layer+.04*R())*(.6+.4*Math.min(1,P.y/.5))*(.92+.12*ht)*(nn.y>.6?1.08:1);
+      cc.setHSL(.26+R()*.045,.5+R()*.2,Math.min(.24,lgt*.78),"srgb");lm.setColorAt(k,cc);k++}});
+  lm.count=k;lm.castShadow=lm.receiveShadow=true;lm.frustumCulled=false;g.add(lm,aoDisc(L+.45,dp+.55))}
 function swayAdd(g,m){const sw=new T.Group();sw.userData.sway=1;sw.add(m);g.add(sw)}
 /* ---------- Gräser und Stauden: echte, feine 3D-Halme ----------
    Halm = schmales, sich verjüngendes Band entlang einer überhängenden Kurve; alle Halme eines Horstes in einer Geometrie. */
@@ -1169,15 +1219,17 @@ function spikes(list,kind){const pos=[],nor=[],uv=[],col=[];list.forEach(([x,y,z
 /* Gras-Horst (Lampenputzergras): r = Breite am Boden, h = Höhe; feine, weit überhängende Halme + wenige Blütenstände */
 function grassClump(r,h,R){const g=new T.Group();g.userData.sway=1;const n=Math.round(70+h*150),list=[],pl=[];
   for(let i=0;i<n;i++){const a=R()*6.283,d=Math.sqrt(R())*r*.3,lean=.3+R()*.7,len=h*(.6+R()*.45),dk=.72+R()*.25;
-    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len,lean,w:.006+R()*.006,c0:[.13*dk,.2*dk,.08*dk],c1:[(.4+R()*.1)*dk,(.5+R()*.08)*dk,(.25+R()*.06)*dk]})}
-  for(let i=0;i<Math.round(n*.06);i++){const a=R()*6.283,lean=.2+R()*.3,len=h*(.9+R()*.3),t=1,out=lean*len*.75,y=len*(1-lean*.5);
-    list.push({x:0,z:0,a,len,lean,w:.003,c0:[.2,.25,.12],c1:[.5,.5,.32]});pl.push([Math.cos(a)*out,Math.max(.05,y)-h*.02,Math.sin(a)*out,.045,h*.22,R()*3])}
+    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len,lean,w:.006+R()*.006,c0:[.13*dk,.2*dk,.08*dk],c1:[(.33+R()*.08)*dk,(.45+R()*.07)*dk,(.2+R()*.05)*dk]})}
+  for(let i=0;i<Math.round(n*.05);i++){const a=R()*6.283,lean=.45+R()*.4,len=h*(.82+R()*.22),out=lean*len*.75,y=len*(1-lean*.5);
+    list.push({x:0,z:0,a,len,lean,w:.0028,c0:[.22,.26,.13],c1:[.42,.38,.24]});pl.push([Math.cos(a)*out,Math.max(.05,y)-h*.05,Math.sin(a)*out,.04,h*.17,R()*3])}
   g.add(strands(list));if(pl.length)g.add(spikes(pl,"plume"));return g}
 /* Lavendel: niedriges, graugrünes Blattpolster + schlanke Blütenstiele mit violetten Ähren */
 function lavenderClump(h,R){const g=new T.Group();g.userData.sway=1;const list=[],sp=[];
-  for(let i=0;i<70;i++){const a=R()*6.283,d=Math.sqrt(R())*.05;list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len:h*(.22+R()*.18),lean:.4+R()*.6,w:.007,c0:[.16,.2,.15],c1:[.42,.5,.42],seg:4})}
-  for(let i=0;i<34;i++){const a=R()*6.283,d=Math.sqrt(R())*.05,lean=.12+R()*.3,len=h*(.72+R()*.32),x=Math.cos(a)*d,z=Math.sin(a)*d,out=lean*len*.75,y=len*(1-lean*.5);
-    list.push({x,z,a,len,lean,w:.0035,c0:[.2,.26,.16],c1:[.32,.38,.26],seg:5});sp.push([x+Math.cos(a)*out,y-.01,z+Math.sin(a)*out,.032,.085+R()*.03,R()*3])}
+  /* Blattpolster: viele schmale, graugrüne Blättchen, nach außen gebogen = runder Horst */
+  for(let i=0;i<170;i++){const a=R()*6.283,d=Math.sqrt(R())*.09;list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len:h*(.18+R()*.16),lean:.5+R()*.9,w:.0055,c0:[.045,.065,.04],c1:[.13,.18,.115],seg:4})}
+  /* Blütenstiele: zahlreich, schlank, leicht nach außen geneigt, Ähren oben */
+  for(let i=0;i<56;i++){const a=R()*6.283,d=Math.sqrt(R())*.07,lean=.08+R()*.26,len=h*(.72+R()*.3),x=Math.cos(a)*d,z=Math.sin(a)*d,out=lean*len*.75,y=len*(1-lean*.5);
+    list.push({x,z,a,len,lean,w:.0028,c0:[.06,.09,.05],c1:[.12,.16,.09],seg:5});sp.push([x+Math.cos(a)*out,y-.01,z+Math.sin(a)*out,.026,.07+R()*.03,R()*3])}
   g.add(strands(list),spikes(sp,"spike"));return g}
 function crown(g,parts){const sw=new T.Group();sw.userData.sway=1;parts.forEach(q=>sw.add(vball(...q)));g.add(sw)}
 const ROUND=new Set();function box(w,h,d,mat,x,y,z){const mn=Math.min(w,h,d),rg=T.RoundedBoxGeometry&&ROUND.has(mat)&&mn>=.05;const m=new T.Mesh(rg?new T.RoundedBoxGeometry(w,h,d,2,Math.min(.012,mn/4)):new T.BoxGeometry(w,h,d),mat);m.position.set(x||0,(y||0)+h/2,z||0);m.castShadow=m.receiveShadow=true;return m}
@@ -2129,9 +2181,9 @@ if(saved&&saved.poly){applySnap(saved)}else{setView("3d",true);refresh();openWiz
 cur=JSON.stringify(snap());persist(cur);updUndo();
 let lastW=innerWidth,lastCam="";addEventListener("resize",()=>{if((lastW<=760)!==(innerWidth<=760)||(lastW<=1099)!==(innerWidth<=1099))closeSheets();lastW=innerWidth});
 let lastFrame=performance.now();
-(function loop(now){requestAnimationFrame(loop);const dtF=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(!RM){SKYM.uniforms.tm.value=now/1000;CAUS.offset.set(now*.000045,now*.00003);CAUS2.offset.set(-now*.000035,now*.00005)}if(M.water.normalMap){M.water.normalMap.offset.x=now*.000012;M.water.normalMap.offset.y=now*.000008}
+(function loop(now){requestAnimationFrame(loop);const dtF=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;HLEAF_U.uA.value=opts.wind&&!RM?.3:0;LEAF_U.uA.value=opts.wind&&!RM?.014:0;if(!RM){SKYM.uniforms.tm.value=now/1000;HLEAF_U.uT.value=LEAF_U.uT.value=now/1000;CAUS.offset.set(now*.000045,now*.00003);CAUS2.offset.set(-now*.000035,now*.00005)}if(M.water.normalMap){M.water.normalMap.offset.x=now*.000012;M.water.normalMap.offset.y=now*.000008}
   for(let i=anims.length-1;i>=0;i--){const a=anims[i],k=Math.min(1,(now-a.t0)/a.dur);a.fn(k);if(k>=1)anims.splice(i,1)}
-  if(opts.wind&&!RM){const t=now/1000;objects.forEach(o=>{const s=o.userData.sway;if(s)s.forEach((q,j)=>{const ph=o.userData.phase+j*1.9;q.rotation.z=Math.sin(t*1.3+ph)*.025;q.rotation.x=Math.sin(t*.9+ph*1.7)*.018})})}
+  if(opts.wind&&!RM){const t=now/1000;objects.forEach(o=>{const s=o.userData.sway;if(s)s.forEach((q,j)=>{const ph=o.userData.phase+j*1.9;const ka=q.userData.swayAmp===undefined?1:q.userData.swayAmp;q.rotation.z=Math.sin(t*1.3+ph)*.025*ka;q.rotation.x=Math.sin(t*.9+ph*1.7)*.018*ka})})}
   {const t=now/1000;objects.forEach(o=>{if(!isP(o))return;const root=rigOf(o);if(!root)return;const R=root.userData.rig,ph=o.userData.phase||0;
     if(o.userData.pose==="swim"&&!RM){const c=((t*.55+ph)%1),w=Math.sin(c*Math.PI*2)*.5+.5,w2=Math.sin(c*Math.PI*2-1.6)*.5+.5;
       R.la.rotation.x=R.ra.rotation.x=-Math.PI+1.25*w;R.la.rotation.z=-.95*w;R.ra.rotation.z=.95*w;R.le.rotation.x=R.re.rotation.x=-1.5*w*w;
