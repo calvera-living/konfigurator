@@ -335,11 +335,36 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .eyehint button{background:rgba(255,255,255,.15);border:0;color:#fff;padding:6px 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .m-only2{display:none}
 .stage.eye .selbar,.stage.eye .hintbox,.stage.eye .measures{display:none!important}
+/* Kompass oben links neben der Ansichtsauswahl, im Stil der Knöpfe */
+.overlay-top .compass{position:relative!important;left:auto!important;bottom:auto!important;top:auto!important;width:33px!important;height:33px!important;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.94);border:1px solid var(--line);box-shadow:0 4px 16px rgba(30,30,28,.06);pointer-events:auto;cursor:default}
+.overlay-top .compass svg{width:27px;height:27px}
+.compass .n{fill:var(--petrol)}
+.compass .s{fill:#cdc9c2}
+.compass text{font-size:7.5px;font-weight:600;fill:var(--petrol);font-family:Montserrat,Arial}
+/* beim Durchgehen (Augenhöhe) stört die Produktleiste: ausblenden */
+@media (min-width:761px){.planner:has(.stage.eye) #pLeft{display:none!important}.planner:has(.stage.eye){--dockH:0px!important}}
 @media (max-width:760px){.eyehint{bottom:76px;white-space:normal;max-width:calc(100% - 24px)}.d-only{display:none}.m-only2{display:inline}}
 .modes{display:flex!important;justify-content:space-between;padding:0 18px;gap:6px}
 .seg button.vi{padding:7px 11px;display:inline-flex;align-items:center}
 .seg button.vi .icon{width:17px;height:17px}
 .glinks{display:flex;gap:18px;margin:0 0 6px}
+/* Vorschau „Planung zum Mitnehmen“ */
+.pdfview{position:absolute;inset:0;z-index:45;background:rgba(239,239,238,.9);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;flex-direction:column}
+.pdfbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.pdfbar>span:first-child{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--strong)}
+.pdfbtns{display:flex;gap:10px}.pdfbtns .btn{width:auto;padding:10px 20px}
+.pdfview iframe{flex:1;border:0;width:100%;background:transparent}
+/* Beispielgärten im Startfenster */
+.wiz-ex{grid-column:1/-1}
+.exs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ex{border:1px solid var(--line);background:#fff;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s,transform .2s}
+.ex:hover,.ex:focus-visible{border-color:rgba(5,73,88,.5);box-shadow:0 12px 28px rgba(30,40,40,.1);transform:translateY(-2px)}
+.ex svg{display:block;width:100%;height:auto;background:#eef1ec}
+.ex b{display:block;font-weight:400;color:var(--strong);font-size:14px;padding:12px 14px 2px}
+.ex span{display:block;font-size:12px;line-height:1.5;padding:0 14px 14px}
+.wiz-or{display:flex;align-items:center;gap:14px;margin:24px 0 2px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
+.wiz-or::before,.wiz-or::after{content:"";flex:1;height:1px;background:var(--line)}
+@media (max-width:760px){.exs{grid-template-columns:1fr}.ex{flex-direction:row;align-items:center}.ex svg{width:120px;flex:none}.ex b{padding:10px 12px 2px}.ex span{padding:0 12px 10px}}
 /* ---------- Feinschliff Oberfläche ---------- */
 .intro{padding:30px 24px 28px}
 .intro h1{font-size:clamp(26px,2.9vw,38px);letter-spacing:.12em}
@@ -585,7 +610,7 @@ input[type=range]{accent-color:var(--petrol);width:100%}
     <div class="pane scroll" id="paneSet" hidden>
       <div class="blk">
         <p class="label">Sonne &amp; Ausrichtung</p>
-        <div class="rng wide"><label for="sunT">Uhrzeit</label><input type="range" id="sunT" min="6" max="21" step="0.25" value="14"><output id="sunTO"></output></div>
+        <div class="rng wide"><label for="sunT">Uhrzeit</label><input type="range" id="sunT" min="6" max="21" step="0.25" value="16"><output id="sunTO"></output></div>
         <div class="rng wide"><label for="north">Norden</label><input type="range" id="north" min="0" max="359" step="1" value="0"><output id="northO"></output></div>
         <p class="tip">Stellen Sie ein, wo bei Ihnen Norden liegt. Dann sehen Sie, wann welcher Platz Sonne oder Schatten hat.</p>
       </div>
@@ -608,12 +633,12 @@ input[type=range]{accent-color:var(--petrol);width:100%}
       <div class="row2" id="calIn" hidden><label class="pf">Abstand<span class="in"><input type="number" id="calDist" min="1" step="1"><span>cm</span></span></label><button class="ghost pri" id="calOk">Übernehmen</button></div>
       <button class="linkbtn" id="calCancel">Abbrechen</button>
     </div>
-    <div class="compass" id="compass" title="Norden" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/><path id="cneedle" d="M20 5l5 15h-10z"/><text x="20" y="31" text-anchor="middle">N</text></svg></div>
     <div class="toolchip" id="toolchip" hidden><span id="toolname"></span><button id="toolOff">Beenden</button></div>
     <div class="overlay-top" id="otop">
       <div class="ctrl">
         <div class="seg" role="group" aria-label="Ansicht"><button id="v3d" class="vi" aria-pressed="true" title="3D-Ansicht" aria-label="3D-Ansicht"><svg class="icon"><use href="#i-cube"/></svg></button><button id="vtop" class="vi" aria-pressed="false" title="Draufsicht" aria-label="Draufsicht"><svg class="icon"><use href="#i-top"/></svg></button><button id="veye" class="vi" aria-pressed="false" title="Augenhöhe: durch den Garten gehen" aria-label="Augenhöhe"><svg class="icon"><use href="#i-eye"/></svg></button></div>
         <button class="ghost ic" id="fit" title="Ansicht zentrieren" aria-label="Ansicht zentrieren"><svg class="icon"><use href="#i-fit"/></svg></button>
+        <div class="compass" id="compass" title="Norden – Ausrichtung unter Einstellungen" aria-hidden="true"><svg viewBox="0 0 40 40"><g id="cneedle"><text x="20" y="9" text-anchor="middle">N</text><path class="n" d="M20 11l4 10h-8z"/><path class="s" d="M20 33l-4-12h8z"/></g></svg></div>
       </div>
       <div class="ctrl">
         <button class="ghost ic" id="undo" aria-label="Rückgängig" title="Rückgängig (Strg+Z)" disabled><svg class="icon"><use href="#i-undo"/></svg></button>
@@ -676,18 +701,27 @@ input[type=range]{accent-color:var(--petrol);width:100%}
       <a class="btn" href="https://www.calvera-living.de/" data-advice>Beratung anfragen</a>
       <div class="minor">
         <button id="share"><svg class="icon"><use href="#i-link"/></svg>Link kopieren</button>
-        <button id="shot"><svg class="icon"><use href="#i-img"/></svg>Als Bild</button>
+        <button id="shot"><svg class="icon"><use href="#i-img"/></svg>Als PDF</button>
         <button id="reset2">Neu beginnen</button>
       </div>
     </div>
   </aside>
   <div class="scrim" id="scrim"></div>
+  <div class="pdfview" id="pdfView" role="dialog" aria-modal="true" aria-label="Ihre Gartenplanung" hidden>
+    <div class="pdfbar"><span>Ihre Gartenplanung</span><span class="pdfbtns"><button class="btn pri" id="pdfPrint">Als PDF speichern</button><button class="btn" id="pdfClose">Schließen</button></span></div>
+    <iframe id="pdfFrame" title="Vorschau Ihrer Gartenplanung"></iframe>
+  </div>
 
   <div class="wiz" id="wiz" role="dialog" aria-modal="true" aria-labelledby="wizTitle" hidden>
     <div class="wiz-in">
-      <div>
+      <div class="wiz-ex">
         <h2 id="wizTitle">Ihr Garten</h2>
-        <p class="sub">Welche Form hat die Fläche, die Sie gestalten möchten?</p>
+        <p class="sub">Starten Sie mit einem Beispielgarten und passen Sie ihn an – oder legen Sie Ihre eigene Fläche an.</p>
+        <div class="exs" id="wizEx" role="group" aria-label="Beispielgärten"></div>
+        <p class="wiz-or"><span>oder eigene Fläche anlegen</span></p>
+      </div>
+      <div>
+        <p class="label" style="margin-bottom:14px">Form der Fläche</p>
         <div class="shapes" role="group" aria-label="Form">
           <button class="shape" data-shape="std" aria-pressed="true"><svg viewBox="0 0 46 36"><rect x="5" y="6" width="36" height="24"/></svg>Standard<br>8 × 6 m</button>
           <button class="shape" data-shape="rect" aria-pressed="false"><svg viewBox="0 0 46 36"><rect x="3" y="9" width="40" height="18"/></svg>Rechteck</button>
@@ -745,7 +779,6 @@ input[type=range]{accent-color:var(--petrol);width:100%}
   </div>
 </footer>
 
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
@@ -799,7 +832,7 @@ function concreteCanvas(n,base,seed){const r=rnd(seed),[c,g]=pixCanvas(n,(x,y)=>
   return c}
 const M={
   concrete:new T.MeshStandardMaterial({map:tex(concreteCanvas(1024,[184,179,171],11),1),roughness:.88}),
-  water:new T.MeshStandardMaterial({color:0x2c7884,roughness:.03,metalness:.15,transparent:true,opacity:.8,envMapIntensity:1.8,normalMap:waterNormals(),normalScale:new T.Vector2(.4,.4)}),
+  water:new T.MeshStandardMaterial({color:0x2c7884,roughness:.02,metalness:.15,transparent:true,opacity:.78,envMapIntensity:1.9,normalMap:waterNormals(),normalScale:new T.Vector2(.55,.55)}),
   soil:new T.MeshStandardMaterial({color:0x4a3b2f,roughness:1}),
   leaf:new T.MeshStandardMaterial({color:0x5a7548,roughness:.9}),
   leaf2:new T.MeshStandardMaterial({color:0x6c8752,roughness:.9}),
@@ -820,7 +853,9 @@ const M={
   roof:new T.MeshStandardMaterial({color:0x4b4a48,roughness:.8,side:T.DoubleSide}),
   door:new T.MeshStandardMaterial({color:0x3e3b37,roughness:.6}),
   curb:new T.MeshStandardMaterial({map:tex(noiseCanvas(256,"#c9c4bc",.08,200,17),1),roughness:.9}),
-  plaster:new T.MeshStandardMaterial({color:0xe9e6e0,roughness:.95}),
+  /* Fassade: feiner Kratzputz, Sockel in dunklerem Beton */
+  plaster:new T.MeshStandardMaterial({map:tex(pixCanvas(512,(x,y)=>{const f=.95+.05*nz(NF1,x,y)+.04*nz(NF2,x*4,y*4)+(Math.random()-.5)*.07;return[238*f,235*f,228*f]})[0],1),roughness:.96}),
+  plinth:new T.MeshStandardMaterial({map:tex(concreteCanvas(512,[118,114,108],5),1),roughness:.9}),
   glass:new T.MeshStandardMaterial({color:0x34444a,roughness:.15,metalness:.4}),
   frame:new T.MeshStandardMaterial({color:0x3a3a38,roughness:.6})
 };
@@ -909,8 +944,26 @@ function extractPart(sc,P){const top=sc.children.length===1?sc.children[0]:sc;le
   const b=new T.Box3();out.traverse(o=>{if(o.isMesh&&o.visible){o.geometry.computeBoundingBox();b.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld))}});
   w.position.set(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2);return out}
 function loadModel(n){if(MODEL_P[n])return MODEL_P[n];const P=PARTS[n];return MODEL_P[n]=loadFile(P?P.f:n).then(sc=>{const r=P?extractPart(sc,P):sc;if(!r)throw new Error("Teil nicht gefunden: "+n);MODEL_SC[n]=r;return r})}
-function modelInto(g,n,w,h,d){if(MODEL_SC[n]){g.add(MODEL_SC[n].clone(true));return}const ph=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color:0xcfcac2,transparent:true,opacity:.5}));ph.position.y=h/2;g.add(ph);
-  loadModel(n).then(sc=>{g.remove(ph);ph.geometry.dispose();ph.material.dispose();g.add(sc.clone(true));if(typeof onModelLoaded==="function")onModelLoaded(n)}).catch(()=>{
+/* Platzhalter beim Laden: heller Körper in Produktgröße mit feinem Petrol-Umriss, pulsiert leise */
+const PH_EDGE=new T.LineBasicMaterial({color:0x054958,transparent:true,opacity:.45});
+function loadingBox(w,h,d){const geo=new T.BoxGeometry(w,h,d),m=new T.Mesh(geo,new T.MeshBasicMaterial({color:0xf3f2ef,transparent:true,opacity:.35,depthWrite:false}));m.position.y=h/2;
+  m.add(new T.LineSegments(new T.EdgesGeometry(geo),PH_EDGE));m.onBeforeRender=()=>{const s=.5+.5*Math.sin(performance.now()/260);m.material.opacity=.22+.2*s;PH_EDGE.opacity=.25+.35*s};return m}
+/* Modell weich einblenden: Materialien kurz als transparente Kopien, danach wieder die Originale */
+function fadeIn(root){if(RM||typeof animate!=="function")return;const list=[];root.traverse(o=>{if(o.isMesh&&o.material&&o.visible){const orig=o.material,c=orig.clone(),op=orig.transparent?orig.opacity:1;c.transparent=true;c.opacity=0;o.material=c;list.push([o,orig,c,op])}});
+  animate(k=>{const e=1-Math.pow(1-k,3);list.forEach(([,, c,op])=>c.opacity=op*e);if(k>=1)list.forEach(([o,orig,c])=>{o.material=orig;c.dispose()})},450)}
+/* Lichtspiegelungen (Kaustik) am Beckenboden: zwei gegeneinander laufende Lichtnetze, additiv über dem Boden. */
+const CAUS=(()=>{const[c]=pixCanvas(512,(x,y)=>{const a=1-Math.abs(2*nz(NF1,x*2,y*2)-1),b=1-Math.abs(2*nz(NF2,x*2,y*2)-1),v=Math.pow(a,7)+Math.pow(b,7)*.7,s=Math.min(255,v*255);return[s,s,s]});
+  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t})(),CAUS2=CAUS.clone();CAUS2.needsUpdate=true;
+const CAUSM=[CAUS,CAUS2].map((t,i)=>new T.MeshBasicMaterial({map:t,color:i?0xb8f4fa:0xe6fdff,transparent:true,opacity:i?.8:1,blending:T.AdditiveBlending,depthWrite:false,fog:true}));
+function addCaustics(g,model){const ws=[];model.traverse(o=>{if(o.isMesh&&o.userData.role==="water")ws.push(o)});if(!ws.length)return;
+  g.updateMatrixWorld(true);const inv=new T.Matrix4().copy(g.matrixWorld).invert(),b=new T.Box3();
+  ws.forEach(w=>{w.geometry.computeBoundingBox();b.union(w.geometry.boundingBox.clone().applyMatrix4(new T.Matrix4().multiplyMatrices(inv,w.matrixWorld)))});
+  /* der Wasserkörper reicht genau bis zum Beckenboden: dessen Unterkante ist die Bodenhöhe */
+  const ctr=b.getCenter(new T.Vector3()),fy=b.min.y+.012,w=b.max.x-b.min.x-.04,d=b.max.z-b.min.z-.04;if(w<.3||d<.3)return;
+  CAUSM.forEach((m,i)=>{const geo=new T.PlaneGeometry(w,d),uv=geo.attributes.uv,k=i?1.4:.95;for(let j=0;j<uv.count;j++)uv.setXY(j,uv.getX(j)*w/k,uv.getY(j)*d/k);
+    const pl=new T.Mesh(geo,m);pl.rotation.x=-PI2;pl.position.set(ctr.x,fy+i*.004,ctr.z);pl.renderOrder=-1;pl.raycast=()=>{};g.add(pl)})}
+function modelInto(g,n,w,h,d){if(MODEL_SC[n]){const m=MODEL_SC[n].clone(true);g.add(m);addCaustics(g,m);return}const ph=loadingBox(w,h,d);g.add(ph);
+  loadModel(n).then(sc=>{g.remove(ph);ph.geometry.dispose();ph.material.dispose();const m=sc.clone(true);g.add(m);addCaustics(g,m);let r=g;while(r.parent)r=r.parent;if(r.isScene&&r!==thumbScene)fadeIn(m);if(typeof onModelLoaded==="function")onModelLoaded(n)}).catch(()=>{
     /* Meldung nur, wenn das Produkt wirklich im Garten steht (nicht beim Rendern der Vorschaubilder) */
     let r=g;while(r.parent)r=r.parent;if(r.isScene&&r!==thumbScene&&typeof toast==="function")toast("Das 3D-Modell konnte nicht geladen werden.")})}
 let thumbScene=null;
@@ -963,6 +1016,169 @@ const VG={ball:shadeGeo(new T.SphereGeometry(1,40,28)),trunk:new T.CylinderGeome
 function vball(hex,sx,sy,sz,x,y,z){const m=new T.Mesh(VG.ball,vmat(hex));m.scale.set(sx,sy,sz);m.position.set(x||0,y,z||0);m.castShadow=m.receiveShadow=true;return m}
 /* Stamm/Ast als schlanker Kegelstumpf von Punkt a nach Punkt b */
 function branch(a,b,r){const A=new T.Vector3(...a),d=new T.Vector3(...b).sub(A),L=d.length(),m=new T.Mesh(VG.trunk,M.bark);m.scale.set(r,L,r);m.position.copy(A).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());m.castShadow=true;return m}
+/* ---------- Vegetation (prozedural, Three.js r147) ----------
+   Bäume wachsen rekursiv (Stamm → Haupt- → Seiten- → Feinäste, mit Schwerkraft/Lichtstreben und fester, pro Baum
+   zufälliger Asymmetrie); das Laub sitzt als kleine Zweig-Karten an den Feinästen. Pro Baum werden alle Äste zu
+   EINER Geometrie und alles Laub zu EINER Geometrie zusammengefasst (2 Zeichenaufrufe). Gräser und Lavendel sind
+   echte, feine 3D-Halme (ebenfalls zusammengefasst). Karten/Halme haben beide Umlaufrichtungen (keine dunklen
+   Rückseiten), weich gemischte Normalen und Vertex-Farben für das dunklere Innere; Alpha-Test mit alphaToCoverage
+   für glatte Ränder; eigene Tiefenmaterialien für gesprenkelte Schatten. */
+const V3=T.Vector3,UP=new V3(0,1,0);
+/* Zweig-Texturen: gebogener Zweig mit wechselständigen Blättern (kein radiales Muster), gedeckte Grüntöne */
+function leafTex(kind){const N=256,[c,g]=cvs(N),R=rnd({broad:11,small:23,olive:37,thuja:51,plume:89,spike:97}[kind]),C=(h,s,l,a)=>"hsla("+h+","+s+"%,"+l+"%,"+(a===undefined?1:a)+")";
+  const fin=()=>{const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t};
+  /* Blatt: eiförmig mit Spitze, leichter Verlauf über die Blattfläche, sehr zarte Mittelrippe */
+  const leaf=(x,y,len,wid,ang,h,s,l)=>{g.save();g.translate(x,y);g.rotate(ang);const gr=g.createLinearGradient(0,-wid,0,wid);gr.addColorStop(0,C(h,s,l+5));gr.addColorStop(1,C(h,s+3,l-4));
+    g.beginPath();g.moveTo(0,0);g.bezierCurveTo(len*.2,-wid*1.05,len*.7,-wid*.85,len,0);g.bezierCurveTo(len*.7,wid*.85,len*.2,wid*1.05,0,0);g.fillStyle=gr;g.fill();
+    if(len>16){g.strokeStyle=C(h,s-8,l+10,.35);g.lineWidth=Math.max(.5,wid*.07);g.beginPath();g.moveTo(len*.06,0);g.lineTo(len*.85,0);g.stroke()}g.restore()};
+  /* Zweig entlang einer Kurve, Blätter wechselständig, zur Spitze kleiner */
+  const sprig=(x0,y0,x1,y1,cx,cy,nLeaf,lw,leafLen,leafWid,col,stemCol)=>{g.strokeStyle=stemCol;g.lineWidth=lw;g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo(cx,cy,x1,y1);g.stroke();
+    for(let i=0;i<nLeaf;i++){const t=.12+.86*i/Math.max(1,nLeaf-1),mt=1-t,x=mt*mt*x0+2*mt*t*cx+t*t*x1,y=mt*mt*y0+2*mt*t*cy+t*t*y1,dx=2*mt*(cx-x0)+2*t*(x1-cx),dy=2*mt*(cy-y0)+2*t*(y1-cy),
+      a=Math.atan2(dy,dx)+(i%2?1:-1)*(.65+R()*.45),k=1-t*.45,[h,s,l]=col();leaf(x,y,leafLen*k*(.85+R()*.3),leafWid*k*(.85+R()*.3),a,h,s,l)}
+    const[h,s,l]=col();leaf(x1,y1,leafLen*.55,leafWid*.55,Math.atan2(y1-cy,x1-cx),h,s,l)};
+  if(kind==="broad"){for(let k=0;k<4;k++){const x0=N*(.35+R()*.3),y0=N-4,x1=N*(.15+R()*.7),y1=N*(.06+R()*.2),cx=(x0+x1)/2+(R()-.5)*60,cy=(y0+y1)/2;
+      sprig(x0,y0,x1,y1,cx,cy,9,2.2,44,17,()=>[92+R()*14,26+R()*10,24+R()*12],C(30,25,30))}return fin()}
+  if(kind==="small"){for(let k=0;k<9;k++){const x0=N/2+(R()-.5)*40,y0=N-4,a=-Math.PI/2+(R()-.5)*1.6,L=N*(.55+R()*.35),x1=x0+Math.cos(a)*L,y1=y0+Math.sin(a)*L,cx=(x0+x1)/2+(R()-.5)*30,cy=(y0+y1)/2;
+      sprig(x0,y0,x1,y1,cx,cy,16,1.4,20,9,()=>[90+R()*14,30+R()*10,24+R()*14],C(80,25,28))}return fin()}
+  if(kind==="olive"){for(let k=0;k<4;k++){const x0=N*(.3+R()*.4),y0=N-4,x1=N*(.1+R()*.8),y1=N*(.05+R()*.2),cx=(x0+x1)/2+(R()-.5)*50,cy=(y0+y1)/2;
+      sprig(x0,y0,x1,y1,cx,cy,12,1.6,40,6,()=>R()<.2?[70,8,58+R()*8]:[76+R()*12,13+R()*7,32+R()*12],C(40,12,38))}return fin()}
+  if(kind==="thuja"){const spray=(x,y,a,len,d)=>{const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len;g.strokeStyle=C(90,30,22);g.lineWidth=Math.max(1.2,4.5-d*1.2);g.beginPath();g.moveTo(x,y);g.lineTo(x2,y2);g.stroke();
+      for(let i=0;i<8;i++){const t=i/8,px=x+(x2-x)*t,py=y+(y2-y)*t;g.fillStyle=C(86+R()*12,28+R()*10,24+R()*14);g.beginPath();g.ellipse(px,py,Math.max(2,4.8-d),2.6,a+(i%2?.7:-.7),0,7);g.fill()}
+      if(d<3)for(let k=0;k<3;k++)spray(x+(x2-x)*(.25+k*.25),y+(y2-y)*(.25+k*.25),a+(k%2?.75:-.75)+(R()-.5)*.3,len*.55,d+1)};
+    for(let i=0;i<5;i++)spray(N/2+(R()-.5)*40,N-6-R()*30,-Math.PI/2+(R()-.5)*1.4,110+R()*40,0);return fin()}
+  if(kind==="spike"){/* Lavendel-Ähre: übereinander gestaffelte Blütenquirle, unten lockerer */
+    for(let k=0;k<16;k++){const y=N*(.06+k*.055),w=N*(.16-k*.004),n=5+(k>3?3:0);for(let i=0;i<n;i++){g.fillStyle=C(262+R()*12,30+R()*12,46+R()*14+(k<3?6:0));g.beginPath();g.ellipse(N/2+(R()-.5)*w*2,y+(R()-.5)*8,w*.55,N*.035,(R()-.5)*.8,0,7);g.fill()}}
+    g.strokeStyle=C(95,20,38);g.lineWidth=3;g.beginPath();g.moveTo(N/2,N*.9);g.lineTo(N/2,N);g.stroke();return fin()}
+  if(kind==="plume"){/* federiger Blütenstand (Lampenputzergras) */for(let i=0;i<260;i++){const y=N*(.08+R()*.8),a=(R()-.5)*1.2,l=10+R()*16;g.strokeStyle=C(38+R()*10,18+R()*10,62+R()*16,.5);g.lineWidth=1;g.beginPath();g.moveTo(N/2+(R()-.5)*16,y);g.lineTo(N/2+Math.sin(a)*l,y-Math.cos(a)*l);g.stroke()}return fin()}
+  return fin()}
+const LM={};
+function leafMat(kind){if(!LM[kind]){const t=leafTex(kind),m=new T.MeshStandardMaterial({map:t,alphaTest:.5,alphaToCoverage:true,side:T.FrontSide,roughness:.8,metalness:0,vertexColors:true});
+  m.userData.depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:t,alphaTest:.45,side:T.DoubleSide});LM[kind]=m}return LM[kind]}
+/* Geometrie aus Vierecken (je 4 Ecken) mit beiden Umlaufrichtungen */
+function quadGeo(pos,nor,uv,col){const idx=[];for(let b=0;b<pos.length/3;b+=4)idx.push(b,b+1,b+2,b,b+2,b+3,b,b+2,b+1,b,b+3,b+2);
+  const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(pos,3));geo.setAttribute("normal",new T.Float32BufferAttribute(nor,3));if(uv)geo.setAttribute("uv",new T.Float32BufferAttribute(uv,2));
+  geo.setAttribute("color",new T.Float32BufferAttribute(col,3));geo.setIndex(idx);geo.computeBoundingSphere();return geo}
+function cardMesh(pos,nor,uv,col,kind){const m=new T.Mesh(quadGeo(pos,nor,uv,col),leafMat(kind));m.castShadow=m.receiveShadow=true;m.customDepthMaterial=leafMat(kind).userData.depth;return m}
+/* Laub-Karten: c = [x,y,z,Größe,nx,ny,nz,Helligkeit,(Zweigrichtung dx,dy,dz)]; ctr = Kronenmitte (Normalen weich nach außen) oder null */
+function foliage(cards,kind,ctr,R){const pos=[],nor=[],uv=[],col=[],useC=!!ctr,C=new V3(...(ctr||[0,0,0])),n=new V3(),u=new V3(),v=new V3(),t=new V3(),q=new V3(),nn=new V3();
+  cards.forEach(([x,y,z,s,nx,ny,nz,sh,dx,dy,dz,tr,tg,tb])=>{n.set(nx,ny,nz).normalize();if(tr===undefined){const w=R();tr=.94+w*.1;tg=.97+R()*.06;tb=.92+(1-w)*.12}
+    /* Kartenachse „Zweig“ folgt der Wuchsrichtung (falls bekannt), sonst zufällig */
+    if(dx!==undefined)t.set(dx,dy,dz);else t.set(R()-.5,R()-.5,R()-.5);v.copy(t).addScaledVector(n,-t.dot(n));if(v.lengthSq()<1e-6)v.set(n.y,n.z,n.x);v.normalize();u.crossVectors(v,n);
+    [[-1,-.15,0,0],[1,-.15,1,0],[1,1,1,1],[-1,1,0,1]].forEach(([a,bb,tu,tv])=>{q.set(x,y,z).addScaledVector(u,a*s/2).addScaledVector(v,bb*s*.87);pos.push(q.x,q.y,q.z);
+      if(useC){nn.copy(q).sub(C).normalize().multiplyScalar(.6).addScaledVector(n,.2).addScaledVector(UP,.3).normalize()}else nn.copy(n);nor.push(nn.x,nn.y,nn.z);uv.push(tu,tv);col.push(sh*tr,sh*tg,sh*tb)})});
+  return cardMesh(pos,nor,uv,col,kind)}
+/* ---------- Rinde, Äste ---------- */
+const BARK_T=(()=>{const[c]=pixCanvas(512,(x,y)=>{const a=1-Math.abs(2*nz(NF1,x*4,y)-1),b=1-Math.abs(2*nz(NF2,x*8,y*2)-1),f=.46+.42*Math.pow(a,1.6)+.16*b+(Math.random()-.5)*.07;return[98*f,90*f,80*f]});
+  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.encoding=T.sRGBEncoding;t.anisotropy=4;return t})();
+const BARK={plain:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.012,roughness:.95}),olive:new T.MeshStandardMaterial({map:BARK_T,bumpMap:BARK_T,bumpScale:.015,color:0xd6d0c5,roughness:.95})};
+/* gebogene, sich verjüngende Röhre in gemeinsame Arrays schreiben (für zusammengefasste Ast-Geometrie) */
+function tubeInto(A,pts,r0,r1,rad,flare){const curve=new T.CatmullRomCurve3(pts),L=curve.getLength(),seg=Math.max(2,Math.round(L*(rad>6?9:5))),fr=curve.computeFrenetFrames(seg,false),base=A.pos.length/3,circ=Math.max(1,Math.round(2*Math.PI*r0*2.5));
+  for(let i=0;i<=seg;i++){const t=i/seg,P=curve.getPointAt(t),N=fr.normals[i],B=fr.binormals[i],r=(r0+(r1-r0)*t)*(flare?1+.75*Math.exp(-Math.max(0,t*L-.15)*6):1);
+    for(let j=0;j<=rad;j++){const a=j/rad*Math.PI*2,cx=Math.cos(a),sy=Math.sin(a),nx=N.x*cx+B.x*sy,ny=N.y*cx+B.y*sy,nz2=N.z*cx+B.z*sy;A.pos.push(P.x+nx*r,P.y+ny*r,P.z+nz2*r);A.nor.push(nx,ny,nz2);A.uv.push(j/rad*circ,t*L*1.6)}}
+  for(let i=0;i<seg;i++)for(let j=0;j<rad;j++){const a=base+i*(rad+1)+j,b=a+rad+1;A.idx.push(a,b,a+1,b,b+1,a+1)}}
+function arraysMesh(A,mat){const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(A.pos,3));geo.setAttribute("normal",new T.Float32BufferAttribute(A.nor,3));geo.setAttribute("uv",new T.Float32BufferAttribute(A.uv,2));geo.setIndex(A.idx);geo.computeBoundingSphere();
+  const m=new T.Mesh(geo,mat);m.castShadow=m.receiveShadow=true;return m}
+/* ---------- Wachstum ----------
+   S: {trunk:[Länge,Radius,Neigung], lv:[{n,ang,len,rad,tmin}], up:[...], wob:[...], leaf:{kind,per,size,from}, bark}
+   Jede Ebene erzeugt Kinder entlang des Elternastes (Goldener-Winkel-Verteilung), Richtungen mit Schwerkraft/Lichtstreben. */
+function growTree(S,R){const A={pos:[],nor:[],uv:[],idx:[]},leaves=[],RAD=[11,7,5,4,3];
+  const pointAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f)),k=f-i;return pts[i].clone().lerp(pts[i+1],k)};
+  const dirAt=(pts,t)=>{const f=t*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f));return pts[i+1].clone().sub(pts[i]).normalize()};
+  function grow(P,D,len,r0,lvl){const last=lvl===S.lv.length,steps=lvl===0?6:last?2:3,pts=[P.clone()];let p=P.clone(),d=D.clone();
+    for(let s=0;s<steps;s++){d.add(new V3(R()-.5,(R()-.5)*.5,R()-.5).multiplyScalar(S.wob[lvl]||.2)).addScaledVector(UP,S.up[lvl]||0).normalize();p=p.clone().addScaledVector(d,len/steps);pts.push(p)}
+    const r1=last?Math.max(.004,r0*.35):r0*.62;tubeInto(A,pts,r0,r1,RAD[lvl]||3,lvl===0);
+    if(last||lvl>=S.leaf.from){const n=last?S.leaf.per:Math.round(S.leaf.per*.4);for(let i=0;i<n;i++){const t=last?.15+.85*R():.55+.45*R(),q=pointAt(pts,t),dd=dirAt(pts,t),o=new V3(R()-.5,R()-.5,R()-.5).multiplyScalar(S.leaf.size*.6);
+      leaves.push([q.x+o.x,q.y+o.y,q.z+o.z,S.leaf.size*(.75+R()*.5),dd])}}
+    if(last)return;const L=S.lv[lvl];
+    for(let k=0;k<L.n;k++){const t=L.tmin+(1-L.tmin)*(k+.3+R()*.5)/L.n,base=pointAt(pts,t),pd=dirAt(pts,t),az=k*2.399+R()*.8,
+        perp=new V3(Math.cos(az),0,Math.sin(az)).addScaledVector(pd,-new V3(Math.cos(az),0,Math.sin(az)).dot(pd)).normalize(),ang=L.ang*(.75+R()*.5),cd=pd.clone().multiplyScalar(Math.cos(ang)).addScaledVector(perp,Math.sin(ang)).normalize();
+      grow(base,cd,len*L.len*(.75+R()*.5),Math.max(.006,(r0+(r1-r0)*t)*L.rad),lvl+1)}
+    /* Mitteltrieb: setzt den Ast nach oben fort und füllt die Kronenmitte (verhindert eine V-förmig offene Krone) */
+    if(L.leader){const top=pts[pts.length-1],cd=dirAt(pts,.95).addScaledVector(UP,.6).normalize();grow(top,cd,len*L.leader,Math.max(.006,r1*1.1),lvl+1)}}
+  const tilt=S.trunk[2]||0,td=new V3((R()-.5)*2*tilt,1,(R()-.5)*2*tilt).normalize();grow(new V3(0,-.15,0),td,S.trunk[0]+.15,S.trunk[1],0);
+  /* Kronenmitte und Ausdehnung für weiche Schattierung */
+  const C=new V3();leaves.forEach(l=>C.add(new V3(l[0],l[1],l[2])));C.divideScalar(Math.max(1,leaves.length));let mx=.01;leaves.forEach(l=>mx=Math.max(mx,Math.hypot(l[0]-C.x,l[1]-C.y,l[2]-C.z)));
+  const cards=leaves.map(([x,y,z,s,dd])=>{const o=new V3(x-C.x,y-C.y,z-C.z),od=o.length()/mx,n=o.clone().normalize().multiplyScalar(.6).add(new V3(R()-.5,R()-.5,R()-.5)).addScaledVector(UP,.35),
+    sh=Math.min(1,.6+.32*od+.12*((y-C.y)/mx));return[x,y,z,s,n.x,n.y,n.z,sh,dd.x,dd.y,dd.z]});
+  return{wood:arraysMesh(A,S.bark||BARK.plain),leaves:foliage(cards,S.leaf.kind,[C.x,C.y,C.z],R),mx}}
+/* weicher, dunkler Bodenschatten (wirkt wie Umgebungsverdeckung am Fuß von Pflanzen) */
+const AO_M=(()=>{const[c,g]=cvs(128),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,"rgba(0,0,0,.5)");gr.addColorStop(.45,"rgba(0,0,0,.24)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);
+  return new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})})(),AO_G=new T.PlaneGeometry(1,1);
+function aoDisc(sx,sz,op){const m=new T.Mesh(AO_G,op&&op<1?AO_M.clone():AO_M);if(op&&op<1)m.material.opacity=op;m.rotation.x=-PI2;m.scale.set(sx,sz,1);m.position.y=.006;m.raycast=()=>{};m.renderOrder=-2;return m}
+function treeFrom(g,S,seed){const R=rnd(seed),t=growTree(S,R),sw=new T.Group();sw.userData.sway=1;sw.add(t.leaves);g.add(t.wood,sw);
+  /* Bodenschatten: kräftig am Stammfuß, weich und breit unter der Krone */
+  const tr=S.trunk[1];g.add(aoDisc(tr*8,tr*8),aoDisc(t.mx*1.7,t.mx*1.7,.45),baseGrass(R,(a,R)=>tr*(.85+Math.pow(R(),1.6)*2.2),Math.round(180+tr*600)))}
+/* Kranz aus feinem Rasengras (Rasenfarben), z. B. um Stammfüße; dist(a,R) liefert den Abstand je Richtung */
+function baseGrass(R,dist,n){const list=[];for(let i=0;i<n;i++){const a=R()*6.283,d=dist(a,R),dk=.8+R()*.3;
+    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a:a+(R()-.5)*1.5,len:.06+R()*.12,lean:.2+R()*.7,w:.005+R()*.004,seg:3,c0:[.2*dk,.3*dk,.11*dk],c1:[.38*dk,.5*dk,.2*dk]})}
+  const m=strands(list);m.castShadow=false;return m}
+/* Laubbaum (Ahorn-Typ): kräftiger Stamm, 6 Hauptäste aus der oberen Stammhälfte, breite, unregelmäßige Krone */
+function deciduousTree(g){treeFrom(g,{trunk:[2.6,.21,.12],lv:[{n:5,ang:.7,len:.62,rad:.66,tmin:.42,leader:.62},{n:4,ang:.62,len:.56,rad:.62,tmin:.22,leader:.45},{n:3,ang:.7,len:.55,rad:.65,tmin:.2}],
+  up:[.1,.09,.06,.02],wob:[.1,.2,.22,.3],leaf:{kind:"broad",per:28,size:.55,from:1}},4501)}
+/* Olivenbaum: kurzer, knorriger und geneigter Stamm, früh verzweigt, schirmartige lockere Krone, helle Rinde */
+function oliveTree(g){treeFrom(g,{trunk:[1.05,.13,.35],lv:[{n:3,ang:.55,len:.85,rad:.62,tmin:.62},{n:4,ang:.72,len:.55,rad:.58,tmin:.3},{n:3,ang:.8,len:.5,rad:.6,tmin:.2}],
+  up:[.04,.08,.04,0],wob:[.28,.24,.26,.3],leaf:{kind:"olive",per:26,size:.4,from:2},bark:BARK.olive},2601)}
+/* Säulenbaum (z. B. Säulen-Hainbuche): durchgehender Leittrieb, viele steil aufrechte Äste, schmale Krone */
+function columnTree(g){treeFrom(g,{trunk:[3.25,.1,.02],lv:[{n:12,ang:.3,len:.34,rad:.45,tmin:.2},{n:4,ang:.45,len:.55,rad:.6,tmin:.2}],
+  up:[.05,.22,.12],wob:[.03,.1,.2],leaf:{kind:"broad",per:34,size:.42,from:1}},3501)}
+/* Buchs/Kugelstrauch (Formschnitt): mehrere Lagen kleinblättriger Zweige, leicht unregelmäßig, Kern tief innen */
+const CORE_M=new T.MeshStandardMaterial({color:0x1f2c18,roughness:1});
+function leafBall(R,r,y0){const g=new T.Group(),cards=[],n=Math.round(Math.min(1800,Math.max(160,4*Math.PI*r*r*720))),p1=R()*6,p2=R()*6;
+  for(let i=0;i<n;i++){const uy=R()*2-1,a=R()*6.3,s=Math.sqrt(1-uy*uy),ux=Math.cos(a)*s,uz=Math.sin(a)*s,bump=1+.05*Math.sin(ux*5+p1)*Math.sin(uz*5+p2)+.035*Math.sin(uy*7+p1),
+      layer=Math.pow(R(),.7),rr=r*bump*(.3+.7*layer),sh=(.5+.5*layer)*(.82+.22*(uy*.5+.5));
+    cards.push([ux*rr,y0+uy*rr*.93,uz*rr,r*(.55+R()*.3),ux+(R()-.5)*1.2,uy+(R()-.5)*1.2,uz+(R()-.5)*1.2,sh,ux+(R()-.5),uy+(R()-.5)+.3,uz+(R()-.5)])}
+  g.add(foliage(cards,"small",[0,y0,0],R));return g}
+/* Hecke: Laub in mehreren Lagen auf einer abgerundeten Quaderform; Kern liegt tief innen und bleibt unsichtbar */
+/* Hecke (Thuja, geschnitten): Laub in mehreren Lagen auf einer abgerundeten Form. Oben unregelmäßige Kante mit
+   vorwitzigen Trieben und hellerem, gelbgrünem Neuaustrieb; zur Basis dunkler und leicht eingezogen; natürliche
+   Farbflecken über großflächiges Rauschen; weicher Bodenschatten. Kern tief innen, nie sichtbar. */
+function hedgeMesh(g,L,H,dp){const R=rnd(Math.round(L*100+H*10+dp*7)),cards=[],rr=Math.min(.12,dp/3,H/3),ins=Math.min(.16,dp*.32);
+  const core=new T.Mesh(new T.BoxGeometry(Math.max(.05,L-2*ins),Math.max(.05,H-ins*1.5),Math.max(.04,dp-2*ins)),CORE_M);core.position.y=(H-ins*1.5)/2;core.castShadow=core.receiveShadow=true;g.add(core);
+  const hx=L/2-rr,hy=H-rr,hz=dp/2-rr,ph=R()*6,wav=(x,y,z)=>.028*Math.sin(x*2.1+ph)*Math.sin(y*2.7+z*1.3+ph*1.7)+.016*Math.sin(x*5.3+y*4.1+z*3+ph)+.01*Math.sin(x*11+z*9+ph);
+  const patch=(x,y,z)=>nz(NF1,(x+7)*55,(y+z*.7+3)*55);/* großflächige Farbflecken (~1 m) */
+  const area=2*L*H+2*dp*H+L*dp,N=Math.min(16000,Math.round(area*230)),faces=[[0,0,1,L*H],[0,0,-1,L*H],[1,0,0,dp*H],[-1,0,0,dp*H],[0,1,0,L*dp*1.4]],tot=faces.reduce((s,f)=>s+f[3],0);
+  faces.forEach(([fx,fy,fz,ar])=>{const cnt=Math.round(N*ar/tot);for(let i=0;i<cnt;i++){const s1=R()-.5,s2=R()-.5;let x,y,z;
+      if(fy){x=s1*L;z=s2*dp;y=H}else if(fx){x=fx*L/2;z=s1*dp;y=Math.pow(s2+.5,.85)*H}else{z=fz*dp/2;x=s1*L;y=Math.pow(s2+.5,.85)*H}
+      const cx=Math.max(-hx,Math.min(hx,x)),cy=Math.max(rr,Math.min(hy,y)),cz=Math.max(-hz,Math.min(hz,z)),n=new V3(x-cx,y-cy,z-cz);if(n.lengthSq()<1e-6)n.set(fx,fy,fz);n.normalize();
+      const layer=Math.pow(R(),.6),base=Math.max(0,1-y/.3),sprout=(y>H*.8||fy)&&R()<.07;
+      let d=rr*(.55+.45*layer)+wav(x,y,z)-(1-layer)*.08-base*.035+(sprout?.05+R()*.08:0);
+      const px=cx+n.x*d,py=Math.max(.02,cy+n.y*d+(sprout&&n.y>.3?.04:0)),pz=cz+n.z*d,ht=py/H,pt=patch(px,py,pz);
+      /* Helligkeit: außen/oben heller, innen/unten dunkler (Umgebungsverdeckung), plus Flecken */
+      const sh=Math.min(1.08,(.48+.52*layer)*(.62+.38*Math.min(1,py/.45))*(.86+.2*ht)*(.9+.2*pt)+(n.y>.5?.05:0));
+      /* Tönung: oben/vorwitzige Triebe gelbgrüner Neuaustrieb, unten kühler */
+      const fresh=Math.max(0,ht-.7)/.3*.6+(sprout?.5:0)+(pt-.5)*.3,tr=1+fresh*.12,tg=1+fresh*.06,tb=.96-fresh*.08-base*.02;
+      cards.push([px,py,pz,(sprout?.26:.2)+R()*.13,n.x+(R()-.5)*.9,n.y+(R()-.5)*.9+.15,n.z+(R()-.5)*.9,sh,(R()-.5)*.6,1,(R()-.5)*.6,tr,tg,tb])}});
+  /* Rasengras entlang der Heckenbasis */
+  const gl=[],gn=Math.round((L+dp)*2*55);for(let i=0;i<gn;i++){const side=R(),along=R()-.5,out=dp/2-.02+Math.pow(R(),1.5)*.22,ex=side<L/(L+dp)?[along*L,(R()<.5?-1:1)*out]:[(R()<.5?-1:1)*(L/2-.02+Math.pow(R(),1.5)*.22),along*dp],dk=.8+R()*.3;
+    gl.push({x:ex[0],z:ex[1],a:R()*6.283,len:.06+R()*.12,lean:.2+R()*.7,w:.005+R()*.004,seg:3,c0:[.2*dk,.3*dk,.11*dk],c1:[.38*dk,.5*dk,.2*dk]})}
+  const gm=strands(gl);gm.castShadow=false;
+  g.add(foliage(cards,"thuja",null,R),aoDisc(L+.45,dp+.55),gm)}
+function swayAdd(g,m){const sw=new T.Group();sw.userData.sway=1;sw.add(m);g.add(sw)}
+/* ---------- Gräser und Stauden: echte, feine 3D-Halme ----------
+   Halm = schmales, sich verjüngendes Band entlang einer überhängenden Kurve; alle Halme eines Horstes in einer Geometrie. */
+const STRAND_M=new T.MeshStandardMaterial({roughness:.82,metalness:0,vertexColors:true,side:T.FrontSide});
+function strands(list){const pos=[],nor=[],col=[];
+  list.forEach(({x,z,a,len,lean,w,c0,c1,seg})=>{const S=seg||6,ox=Math.cos(a),oz=Math.sin(a),sx=-oz,sz=ox;let px=x,py=0,pz=z;
+    for(let i=0;i<S;i++){const t0=i/S,t1=(i+1)/S,P=t=>{const out=lean*len*t*t*.75,y=len*(t-lean*.5*t*t*t);return[x+ox*out,Math.max(0,y),z+oz*out]},a0=P(t0),a1=P(t1),w0=w*(1-t0*.9)/2,w1=w*(1-t1*.9)/2;
+      pos.push(a0[0]-sx*w0,a0[1],a0[2]-sz*w0, a0[0]+sx*w0,a0[1],a0[2]+sz*w0, a1[0]+sx*w1,a1[1],a1[2]+sz*w1, a1[0]-sx*w1,a1[1],a1[2]-sz*w1);
+      for(let k=0;k<4;k++){const t=k<2?t0:t1,cc=[c0[0]+(c1[0]-c0[0])*t,c0[1]+(c1[1]-c0[1])*t,c0[2]+(c1[2]-c0[2])*t];col.push(...cc);nor.push(ox*.25,.95,oz*.25)}}});
+  const m=new T.Mesh(quadGeo(pos,nor,null,col),STRAND_M);m.castShadow=m.receiveShadow=true;return m}
+/* stehende Kreuzkarten für Blütenstände/Ähren: [x,y,z,Breite,Höhe,Drehung] */
+function spikes(list,kind){const pos=[],nor=[],uv=[],col=[];list.forEach(([x,y,z,w,h,a])=>{for(const b of[a,a+PI2]){const ux=Math.cos(b)*w/2,uz=Math.sin(b)*w/2;
+    pos.push(x-ux,y,z-uz,x+ux,y,z+uz,x+ux,y+h,z+uz,x-ux,y+h,z-uz);for(let k=0;k<4;k++){nor.push(0,1,0);col.push(1,1,1)}uv.push(0,0,1,0,1,1,0,1)}});return cardMesh(pos,nor,uv,col,kind)}
+/* Gras-Horst (Lampenputzergras): r = Breite am Boden, h = Höhe; feine, weit überhängende Halme + wenige Blütenstände */
+function grassClump(r,h,R){const g=new T.Group();g.userData.sway=1;const n=Math.round(70+h*150),list=[],pl=[];
+  for(let i=0;i<n;i++){const a=R()*6.283,d=Math.sqrt(R())*r*.3,lean=.3+R()*.7,len=h*(.6+R()*.45),dk=.72+R()*.25;
+    list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len,lean,w:.006+R()*.006,c0:[.13*dk,.2*dk,.08*dk],c1:[(.4+R()*.1)*dk,(.5+R()*.08)*dk,(.25+R()*.06)*dk]})}
+  for(let i=0;i<Math.round(n*.06);i++){const a=R()*6.283,lean=.2+R()*.3,len=h*(.9+R()*.3),t=1,out=lean*len*.75,y=len*(1-lean*.5);
+    list.push({x:0,z:0,a,len,lean,w:.003,c0:[.2,.25,.12],c1:[.5,.5,.32]});pl.push([Math.cos(a)*out,Math.max(.05,y)-h*.02,Math.sin(a)*out,.045,h*.22,R()*3])}
+  g.add(strands(list));if(pl.length)g.add(spikes(pl,"plume"));return g}
+/* Lavendel: niedriges, graugrünes Blattpolster + schlanke Blütenstiele mit violetten Ähren */
+function lavenderClump(h,R){const g=new T.Group();g.userData.sway=1;const list=[],sp=[];
+  for(let i=0;i<70;i++){const a=R()*6.283,d=Math.sqrt(R())*.05;list.push({x:Math.cos(a)*d,z:Math.sin(a)*d,a,len:h*(.22+R()*.18),lean:.4+R()*.6,w:.007,c0:[.16,.2,.15],c1:[.42,.5,.42],seg:4})}
+  for(let i=0;i<34;i++){const a=R()*6.283,d=Math.sqrt(R())*.05,lean=.12+R()*.3,len=h*(.72+R()*.32),x=Math.cos(a)*d,z=Math.sin(a)*d,out=lean*len*.75,y=len*(1-lean*.5);
+    list.push({x,z,a,len,lean,w:.0035,c0:[.2,.26,.16],c1:[.32,.38,.26],seg:5});sp.push([x+Math.cos(a)*out,y-.01,z+Math.sin(a)*out,.032,.085+R()*.03,R()*3])}
+  g.add(strands(list),spikes(sp,"spike"));return g}
 function crown(g,parts){const sw=new T.Group();sw.userData.sway=1;parts.forEach(q=>sw.add(vball(...q)));g.add(sw)}
 const ROUND=new Set();function box(w,h,d,mat,x,y,z){const mn=Math.min(w,h,d),rg=T.RoundedBoxGeometry&&ROUND.has(mat)&&mn>=.05;const m=new T.Mesh(rg?new T.RoundedBoxGeometry(w,h,d,2,Math.min(.012,mn/4)):new T.BoxGeometry(w,h,d),mat);m.position.set(x||0,(y||0)+h/2,z||0);m.castShadow=m.receiveShadow=true;return m}
 [M.concrete,M.curb,M.wallM,M.edgeHi].forEach(x=>x&&ROUND.add(x));M.concrete.bumpMap=M.concrete.map;M.concrete.bumpScale=.0022;
@@ -982,20 +1198,19 @@ function troughFill(g,w,d,h,kind){if(!kind||kind==="none")return;const t=.08,iw=
 /* Füllung eines Trogs: in der Produktübersicht (Vorschaubild) leer, im Garten gewählt oder Standard */
 const fillOf=(p,D)=>D&&D._thumb?"none":(D&&D.fill)||p.fills[0];
 /* ---------- Bepflanzung (Tröge) ----------
-   Ruhig und rhythmisch: Kugeln (Buchs) und Grasbüschel im Wechsel auf Rindenmulch.
-   Leichte Größenunterschiede sind pro Trog fest (gleiche Planung = gleiches Bild). */
-const PM={grass:new T.MeshStandardMaterial({color:VC.straw,roughness:.95,side:T.DoubleSide}),grass2:new T.MeshStandardMaterial({color:VC.straw2,roughness:.95,side:T.DoubleSide})};
-const PG={blades:[0,1,2].map(k=>{const g=new T.PlaneGeometry(.024,1,1,6),p=g.attributes.position;for(let i=0;i<p.count;i++){const t=p.getY(i)+.5;p.setXYZ(i,p.getX(i)*(1-t*.9),t,t*t*(.12+k*.08))}g.computeVertexNormals();return g})};
+   Natürlich gemischt wie in einer hochwertigen Gartenplanung: Buchskugeln, überhängende Gräser (Kreuzkarten mit
+   gezeichneten Halmen) und Lavendel. Leichte Unterschiede sind pro Trog fest (gleiche Planung = gleiches Bild). */
 const pmesh=(geo,mat)=>{const m=new T.Mesh(geo,mat);m.castShadow=true;m.receiveShadow=true;return m};
-function boxBall(r,R){const g=new T.Group();g.add(vball(R()>.5?VC.deep:VC.mid,r,r*.92,r,0,r*.86));return g}
-function grassClump(r,h,R){const g=new T.Group();g.userData.sway=1;const n=46,mat=R()>.5?PM.grass:PM.grass2;
-  for(let i=0;i<n;i++){const b=pmesh(PG.blades[i%3],mat),a=i/n*Math.PI*2*7.3,hh=h*(.7+R()*.35);b.castShadow=false;b.rotation.order="YXZ";b.rotation.y=a;b.rotation.x=-(.04+R()*.16);b.scale.set(1,hh,hh);const d=r*Math.sqrt(R());b.position.set(Math.sin(a)*d,0,Math.cos(a)*d);g.add(b)}return g}
+function boxBall(r,R){return leafBall(R,r,r*.86)}
 function plantBed(g,iw,id,y,seed){const R=rnd(seed),bed=new T.Group();bed.position.y=y;g.add(bed);const along=iw>=id,L=along?iw:id,W=along?id:iw,wide=W>.6;
-  const put=(o,u,v)=>{o.position.set(along?u:v,0,along?v:u);bed.add(o)};
-  /* Kugeln und Gräser im Wechsel, bei breiten Trögen zwei versetzte Reihen */
-  const rows=wide?2:1,step=wide?.42:.3,n=Math.max(2,Math.round(L/step));
-  for(let j=0;j<rows;j++)for(let i=0;i<n;i++){const u=-L/2+L*(i+.5)/n,v=rows>1?(j?W/4:-W/4):0,ball=(i+j)%2===0;
-    put(ball?boxBall(Math.min(wide?.19:.135,W*(wide?.22:.4))*(.92+R()*.14),R):grassClump(wide?.08:.055,(wide?.68:.48)*(.92+R()*.14),R),u,v)}
+  const put=(o,u,v)=>{o.position.set(along?u:v,0,along?v:u);o.rotation.y=R()*6.3;bed.add(o)};
+  /* schmale Tröge: Buchs – Gras – Lavendel – Gras … in einer Reihe; breite Tröge: zwei versetzte Reihen, hinten höher */
+  const rows=wide?2:1,step=wide?.36:.3,n=Math.max(2,Math.round(L/step)),pat=["box","grass","lav","grass"];
+  for(let j=0;j<rows;j++)for(let i=0;i<n;i++){const u=-L/2+L*(i+.5)/n+(j?L/n/2:0)*(i<n-1?1:0),v=rows>1?(j?-W/4:W/4):0,k=pat[(i+j*2)%pat.length],big=wide?(j?1.25:1):1;
+    if(Math.abs(u)>L/2-.06)continue;
+    if(k==="box")put(boxBall(Math.min(wide?.2:.155,W*(wide?.25:.5))*(.92+R()*.16)*big,R),u,v);
+    else if(k==="grass")put(grassClump(wide?.16:.1,(wide?.62:.46)*(.9+R()*.2)*big,R),u,v);
+    else put(lavenderClump((wide?.45:.36)*(.9+R()*.2)*big,R),u,v)}
   return bed}
 
 /* ---------- Produkte (später aus Wix-CMS oder Tabelle) ---------- */
@@ -1017,19 +1232,12 @@ const PRODUCTS=[
  {id:"troughL",cat:1,name:"Großer Trog",w:1.44,d:.96,h:.96,price:1190,fills:FILL_FLOOR,build(g,D){modelInto(g,"troughL",1.44,.96,.96);troughFill(g,1.44,.96,.96,fillOf(this,D))}},
  {id:"bench",cat:1,name:"Sitzbank",w:3.44,d:1.2,h:1.12,price:2490,build(g){modelInto(g,"bench",3.44,1.12,1.2)}},
  {id:"block196",cat:1,name:"Sitzblock lang",w:1.96,d:.48,h:.32,build(g){modelInto(g,"block196",1.96,.32,.48)}},
- /* Olivenbaum als Formschnitt: drei bis vier flache Laubpolster auf schlanken Ästen */
- {id:"olive",cat:2,noList:true,plant:true,hs:2.6,rs:{h:[1.2,5.2]},name:"Olivenbaum",w:.48,d:.48,dims:"ca. 2,6 m hoch",build(g){
-   g.add(branch([0,0,0],[.04,1.75,0],.07),branch([.01,1.05,0],[-.42,1.45,.12],.03),branch([.02,1.2,0],[.42,1.58,-.1],.03),branch([.04,1.7,0],[-.06,2.25,-.04],.025));
-   crown(g,[[VC.silver,.46,.3,.46,.04,1.95,0],[VC.silver,.34,.23,.34,-.44,1.5,.12],[VC.silver,.36,.24,.36,.44,1.62,-.1],[VC.silver,.28,.2,.28,-.07,2.36,-.04]])}},
- {id:"tree",cat:2,noList:true,plant:true,hs:4.5,rs:{h:[2,9]},name:"Laubbaum",w:.64,d:.64,dims:"ca. 4,5 m hoch",build(g){
-   g.add(branch([0,0,0],[0,2.6,0],.11));crown(g,[[VC.mid,1.05,1.25,1.05,0,3.2,0]])}},
- {id:"column",cat:2,noList:true,plant:true,hs:3.5,rs:{h:[1.5,7]},name:"Säulenbaum",w:.48,d:.48,dims:"ca. 3,5 m hoch",build(g){
-   g.add(branch([0,0,0],[0,.8,0],.07));crown(g,[[VC.deep,.46,1.4,.46,0,2.08,0]])}},
- {id:"shrub",cat:2,noList:true,plant:true,hs:0.8,rs:{h:[0.32,1.6]},name:"Kugelstrauch",w:.8,d:.8,dims:"ca. 80 cm",build(g){crown(g,[[VC.deep,.4,.4,.4,0,.4,0]])}},
- {id:"grass",cat:2,noList:true,plant:true,hs:1,rs:{h:[0.4,1.6]},name:"Ziergras",w:.48,d:.48,dims:"ca. 1 m",build(g){const R=rnd(77);g.add(grassClump(.15,.95,R),grassClump(.09,.8,R))}},
- /* Hecke: sauber geschnittener, abgerundeter Quader */
- {id:"hedge",cat:2,noList:true,plant:true,rs:{w:[.48,12],d:[.24,1.2],h:[.32,3]},hh:1.2,name:"Hecke",w:1.92,d:.48,dims:"Länge, Breite und Höhe frei",build(g,D){const L=D.w||1.92,dp=D.d||.48,H=D.h||1.2,rr=Math.min(.07,dp/3,H/3);
-   const geo=shadeGeo(T.RoundedBoxGeometry?new T.RoundedBoxGeometry(L,H,dp,3,rr):new T.BoxGeometry(L,H,dp));const h=new T.Mesh(geo,vmat(VC.deep));h.position.y=H/2;h.castShadow=h.receiveShadow=true;g.add(h)}},
+ {id:"olive",cat:2,noList:true,plant:true,hs:2.6,rs:{h:[1.2,5.2]},name:"Olivenbaum",w:.48,d:.48,dims:"ca. 2,6 m hoch",build(g){oliveTree(g)}},
+ {id:"tree",cat:2,noList:true,plant:true,hs:4.5,rs:{h:[2,9]},name:"Laubbaum",w:.64,d:.64,dims:"ca. 4,5 m hoch",build(g){deciduousTree(g)}},
+ {id:"column",cat:2,noList:true,plant:true,hs:3.5,rs:{h:[1.5,7]},name:"Säulenbaum",w:.48,d:.48,dims:"ca. 3,5 m hoch",build(g){columnTree(g)}},
+ {id:"shrub",cat:2,noList:true,plant:true,hs:0.8,rs:{h:[0.32,1.6]},name:"Kugelstrauch",w:.8,d:.8,dims:"ca. 80 cm",build(g){g.add(leafBall(rnd(801),.42,.42),aoDisc(1.15,1.15))}},
+ {id:"grass",cat:2,noList:true,plant:true,hs:1,rs:{h:[0.4,1.6]},name:"Ziergras",w:.48,d:.48,dims:"ca. 1 m",build(g){const R=rnd(77);g.add(grassClump(.15,.95,R),grassClump(.09,.8,R),aoDisc(.7,.7,.7))}},
+ {id:"hedge",cat:2,noList:true,plant:true,rs:{w:[.48,12],d:[.24,1.2],h:[.32,3]},hh:1.2,name:"Hecke",w:1.92,d:.48,dims:"Länge, Breite und Höhe frei",build(g,D){hedgeMesh(g,D.w||1.92,D.h||1.2,D.d||.48)}},
  {id:"umbrella",cat:3,noList:true,name:"Sonnenschirm",w:.48,d:.48,dims:"Ø 3 m",build(g){const p=new T.Mesh(new T.CylinderGeometry(.025,.025,2.4,8),M.metal);p.position.y=1.2;p.castShadow=true;const bse=box(.48,.08,.48,M.concrete);const c=new T.Mesh(new T.ConeGeometry(1.5,.45,8,1,true),M.fabric);c.position.y=2.25;c.castShadow=true;g.add(p,bse,c)}},
  {id:"lounger",cat:3,noList:true,name:"Liege",w:.72,d:2,dims:"72 × 200 cm",build(g){g.add(box(.68,.3,1.9,M.frame,0,0,0));const cu=box(.66,.08,1.4,M.fabric,0,.3,.22);const hinge=new T.Group();hinge.position.set(0,.38,-.48);hinge.rotation.x=.62;const back=box(.66,.08,.62,M.fabric,0,-.04,-.31);hinge.add(back);g.add(cu,hinge)}},
  {id:"person",cat:3,noList:true,name:"Person (1,75 m)",w:.48,d:.32,dims:"In Pool oder auf Liege ziehen",build(g){g.add(makeFigure())}},
@@ -1045,21 +1253,41 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=T.s
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
 stage.prepend(renderer.domElement);
 const cv=renderer.domElement;cv.tabIndex=0;cv.setAttribute("aria-label","3D-Ansicht des Gartens");
-const scene=new T.Scene();scene.background=new T.Color(0xeceeea);scene.fog=new T.Fog(new T.Color(0xe6e9e3),55,140);
-{const sky=new T.Mesh(new T.SphereGeometry(160,32,16),new T.ShaderMaterial({side:T.BackSide,depthWrite:false,fog:false,uniforms:{top:{value:new T.Color(0xc8d6dc)},bot:{value:new T.Color(0xeceeea)}},
-  vertexShader:"varying float h;void main(){h=normalize(position).y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",fragmentShader:"uniform vec3 top;uniform vec3 bot;varying float h;void main(){float t=smoothstep(-.02,.45,h);gl_FragColor=vec4(mix(bot,top,t),1.);}"}));sky.renderOrder=-10;scene.add(sky)}
+/* Himmel: hellblauer Verlauf mit Dunst am Horizont und einem weichen Sonnenleuchten (wandert mit der Uhrzeit).
+   Der Himmels-Shader gibt seine Werte direkt als Bildschirmfarbe aus (setRGB), der Nebel läuft über die normale
+   Farbumrechnung (Hex-Farbe) – beide treffen sich am Horizont im selben Dunstton (#ddeaf4), daher keine Kante. */
+const HZ=new T.Color().setRGB(.866,.918,.957),SKY_MID=new T.Color().setRGB(.62,.79,.95),SKY_TOP=new T.Color().setRGB(.36,.62,.92);
+const scene=new T.Scene();scene.background=new T.Color(0xddeaf4);scene.fog=new T.Fog(new T.Color(0xddeaf4),90,690);
+const SKYM=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,fog:false,uniforms:{tm:{value:0},top:{value:SKY_TOP.clone()},mid:{value:SKY_MID.clone()},bot:{value:HZ.clone()},sd:{value:new T.Vector3(0,.5,-1).normalize()},gc:{value:new T.Color().setRGB(1,.98,.93)},gw:{value:0},cb:{value:1}},
+  vertexShader:"varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+  fragmentShader:"uniform float tm;uniform vec3 top;uniform vec3 mid;uniform vec3 bot;uniform vec3 sd;uniform vec3 gc;uniform float gw;uniform float cb;varying vec3 p;"+
+    /* Wolken: fBm-Rauschen auf eine gedachte Wolkenebene projiziert, in die Länge gezogen, ziehen langsam */
+    "float hs(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}float ns(vec2 q){vec2 i=floor(q),f=fract(q),u=f*f*(3.-2.*f);return mix(mix(hs(i),hs(i+vec2(1.,0.)),u.x),mix(hs(i+vec2(0.,1.)),hs(i+vec2(1.,1.)),u.x),u.y);}"+
+    "float fb(vec2 q){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*ns(q);q=q*2.03+vec2(1.7,9.2);a*=.5;}return v;}"+
+    "void main(){float h=max(p.y,0.);vec3 c=mix(bot,mid,smoothstep(.0,.22,h));c=mix(c,top,smoothstep(.12,.9,h));"+
+    "if(p.y>0.){vec2 q=p.xz/(p.y+.14);q=vec2(q.x*.5,q.y*1.1)*.75+vec2(tm*.006,tm*.002);float n=fb(q)+.12*fb(q*3.1+4.);n=n/1.12;float cl=smoothstep(.37,.58,n)*smoothstep(.02,.18,p.y);float sh=fb(q+vec2(.06,.09));vec3 cc=mix(vec3(.76,.81,.88),vec3(1.),clamp(smoothstep(.42,.75,n)*1.15-(sh-n)*1.8,0.,1.))*cb;c=mix(c,cc,cl*.97);}"+
+    "float s=max(dot(p,sd),0.);c+=gc*(pow(s,64.)*.35+pow(s,8.)*.1)*smoothstep(-.02,.08,p.y);c+=gc*gw*pow(s,2.)*(1.-smoothstep(0.,.4,p.y));gl_FragColor=vec4(min(c,vec3(1.)),1.);}"});
+{const sky=new T.Mesh(new T.SphereGeometry(1200,48,24),SKYM);sky.renderOrder=-10;scene.add(sky)}
 if(T.RoomEnvironment){try{const pm=new T.PMREMGenerator(renderer),env=pm.fromScene(new T.RoomEnvironment(),.04).texture;pm.dispose();[M.metal,M.glass,M.heater].forEach(m=>{if(m){m.envMap=env;m.envMapIntensity=.6;m.needsUpdate=true}})}catch(e){}}
 /* Himmelslicht für alle Materialien: Verlauf blau-hell oben, Horizont hell, warmer Boden-Rückstrahl.
    Gibt runden Formen weiche Schattierung und dem Wasser eine Himmelsspiegelung. */
-try{const es=new T.Scene(),pm=new T.PMREMGenerator(renderer);
-  es.add(new T.Mesh(new T.SphereGeometry(10,32,16),new T.ShaderMaterial({side:T.BackSide,uniforms:{},
+
+function makeEnv(top,hor,gnd){try{const es=new T.Scene(),pm=new T.PMREMGenerator(renderer);
+  es.add(new T.Mesh(new T.SphereGeometry(10,32,16),new T.ShaderMaterial({side:T.BackSide,uniforms:{top:{value:new T.Vector3(...top)},hor:{value:new T.Vector3(...hor)},gnd:{value:new T.Vector3(...gnd)}},
     vertexShader:"varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
-    fragmentShader:"varying vec3 p;void main(){float h=p.y;vec3 top=vec3(.25,.3,.37),hor=vec3(.36,.37,.36),gnd=vec3(.13,.12,.09);vec3 c=h>0.?mix(hor,top,pow(h,.6)):mix(hor,gnd,pow(-h,.4));gl_FragColor=vec4(c,1.);}"})));
-  scene.environment=pm.fromScene(es,.02).texture;pm.dispose()}catch(e){}
-const camera=new T.PerspectiveCamera(38,1,.1,300);
-const hemi=new T.HemisphereLight(0xf3f5f2,0x70685a,.5);scene.add(hemi);
+    fragmentShader:"uniform vec3 top;uniform vec3 hor;uniform vec3 gnd;varying vec3 p;void main(){float h=p.y;vec3 c=h>0.?mix(hor,top,pow(h,.6)):mix(hor,gnd,pow(-h,.4));gl_FragColor=vec4(c,1.);}"})));
+  const tx=pm.fromScene(es,.02).texture;pm.dispose();return tx}catch(e){return null}}
+scene.environment=makeEnv([.25,.3,.37],[.36,.37,.36],[.13,.12,.09]);
+const camera=new T.PerspectiveCamera(38,1,.1,2600);
+const hemi=new T.HemisphereLight(0xf4f1ea,0x7d6a4f,.5);scene.add(hemi);
 const sun=new T.DirectionalLight(0xfff1dc,1.5);sun.castShadow=true;{const q=innerWidth>1000?4096:2048;sun.shadow.mapSize.set(q,q)}sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;scene.add(sun,sun.target);
-const outer=new T.Mesh(new T.CircleGeometry(150,64),new T.MeshStandardMaterial({color:0xc4c8b6,roughness:1}));outer.rotation.x=-PI2;outer.position.y=-.02;outer.receiveShadow=true;scene.add(outer);
+/* Umgebung: offene Wiese um den Garten, läuft am Horizont im hellen Dunst aus */
+function meadowCanvas(){const dk=[92,116,78],lt=[124,144,98];return pixCanvas(512,(x,y)=>{const t=Math.min(1,Math.max(0,.5*nz(NF1,x,y)+.35*nz(NF2,x*2,y*2)+.15*nz(NF2,x*8,y*8))),f=.96+Math.random()*.08,c=mixC(dk,lt,t);return[c[0]*f,c[1]*f,c[2]*f]})[0]}
+/* Wiesentextur in Metern (Kachel 7 m); Kreisflächen bekommen Meter-UVs wie die Fläche mit Loch (ShapeGeometry) */
+const meadowTex=tex(meadowCanvas(),1/7);
+function circleM(){const g=new T.CircleGeometry(1000,96),uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*2000-1000,uv.getY(i)*2000-1000);return g}
+const outer=new T.Mesh(circleM(),new T.MeshStandardMaterial({map:meadowTex,roughness:1}));outer.rotation.x=-PI2;outer.position.y=-.02;outer.receiveShadow=true;scene.add(outer);
+
 const gardenG=new T.Group(),edgeG=new T.Group(),bldG=new T.Group();scene.add(gardenG,edgeG,bldG);
 
 const world=new T.Group();scene.add(world);const objects=[];
@@ -1067,7 +1295,7 @@ const groundPlane=new T.Plane(new T.Vector3(0,1,0),0);
 
 /* ---------- Zustand & Geometrie ---------- */
 const state={poly:null,ground:"lawn",house:false,paint:[],heights:{},edges:[],buildings:[]};
-const opts={sunT:14,north:0,grid:true,measure:true,wind:true,shadow:true};
+const opts={sunT:16,north:0,grid:true,measure:true,wind:true,shadow:true};
 function bbox(p){let a=1e9,b=-1e9,c=1e9,d=-1e9;p.forEach(([x,z])=>{a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,z);d=Math.max(d,z)});return{x0:a,x1:b,z0:c,z1:d,w:b-a,d:d-c}}
 function areaOf(p){let s=0;for(let i=0;i<p.length;i++){const[a,b]=p[i],[c,d]=p[(i+1)%p.length];s+=a*d-c*b}return Math.abs(s)/2}
 function inPoly(p,x,z){let r=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const[xi,zi]=p[i],[xj,zj]=p[j];if((zi>z)!==(zj>z)&&x<(xj-xi)*(z-zi)/(zj-zi)+xi)r=!r}return r}
@@ -1113,25 +1341,28 @@ function rectHitsPoly(cx,cz,w,d,p){const x0=cx-w/2+.01,x1=cx+w/2-.01,z0=cz-d/2+.
 const OPN={win:{w:1.2,h:1.36,y:.96,n:"Fenster"},tall:{w:1.84,h:2.24,y:.04,n:"Bodentiefes Fenster"},door:{w:1.04,h:2.16,y:0,n:"Tür"}};
 function addOpenings(b,i){const p=bPoly(b),opn=b.op||[];opn.forEach((o,k)=>{const sp=OPN[o.k];if(!sp)return;const a=p[o.e],c=p[(o.e+1)%p.length];if(!a||!c)return;const dx=c[0]-a[0],dz=c[1]-a[1],L=Math.hypot(dx,dz);if(L<sp.w+.2||sp.y+sp.h>b.h-.12)return;
   const t=Math.min(1-(sp.w/2+.08)/L,Math.max((sp.w/2+.08)/L,o.t)),px=a[0]+dx*t,pz=a[1]+dz*t;let nx=dz/L,nz=-dx/L;if(inPoly(p,px+nx*.1,pz+nz*.1)){nx=-nx;nz=-nz}
-  const g=new T.Group();g.position.set(px+nx*.012,sp.y,pz+nz*.012);  const pane=new T.Mesh(new T.BoxGeometry(sp.w-.1,sp.h-.1,.03),o.k==="door"?M.door:M.glass);pane.position.y=sp.h/2;g.add(pane);
+  const g=new T.Group();g.position.set(px+nx*.024,sp.y,pz+nz*.024);  const pane=new T.Mesh(new T.BoxGeometry(sp.w-.1,sp.h-.1,.03),o.k==="door"?M.door:M.glass);pane.position.y=sp.h/2;g.add(pane);
   [[sp.w,.06,0,sp.h-.03],[sp.w,.06,0,.03],[.06,sp.h,-sp.w/2+.03,sp.h/2],[.06,sp.h,sp.w/2-.03,sp.h/2]].forEach(([w,h,x,y])=>{const f=new T.Mesh(new T.BoxGeometry(w,h,.06),M.frame);f.position.set(x,y,0);g.add(f)});
   if(o.k==="door"){const hd=new T.Mesh(new T.BoxGeometry(.12,.025,.04),M.metal);hd.position.set(sp.w/2-.16,1.02,.04);g.add(hd)}
   if(o.k==="win"){const sill=new T.Mesh(new T.BoxGeometry(sp.w+.08,.03,.12),M.frame);sill.position.set(0,-.01,.05);g.add(sill)}
   const nrm=new T.Vector3(nx,0,nz);g.lookAt(g.position.clone().add(nrm));g.traverse(m=>{if(m.isMesh){m.castShadow=false;m.receiveShadow=true;m.userData.bld=i;m.userData.opn=k}});bldG.add(g)})}
 function buildBuildings(){disposeGroup(bldG);state.buildings=state.buildings.map(normB);state.buildings.forEach((b,i)=>{
-  if(b.poly){const sh=new T.Shape(b.poly.map(([x,z])=>new T.Vector2(x,-z))),m=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:b.h,bevelEnabled:false}),M.plaster);m.rotation.x=-PI2;m.castShadow=m.receiveShadow=true;m.userData.bld=i;bldG.add(m);
+  if(b.poly){const sh=new T.Shape(b.poly.map(([x,z])=>new T.Vector2(x,-z))),m=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:b.h,bevelEnabled:false}),M.plaster);m.rotation.x=-PI2;m.castShadow=m.receiveShadow=true;m.userData.bld=i;m.updateMatrixWorld();boxUV(m,2);bldG.add(m);
     const cap=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:.12,bevelEnabled:false}),M.frame);cap.rotation.x=-PI2;cap.position.y=b.h;cap.castShadow=true;cap.userData.bld=i;bldG.add(cap);addOpenings(b,i);return}
   addOpenings(b,i);const w=b.x1-b.x0,d=b.z1-b.z0,h=b.h,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;
-  const m=new T.Mesh(new T.BoxGeometry(w,h,d),M.plaster);m.position.set(cx,h/2,cz);m.castShadow=m.receiveShadow=true;m.userData.bld=i;bldG.add(m);
+  const m=new T.Mesh(new T.BoxGeometry(w,h,d),M.plaster);m.position.set(cx,h/2,cz);m.castShadow=m.receiveShadow=true;m.userData.bld=i;m.updateMatrixWorld();boxUV(m,2);bldG.add(m);
+  {const pl=new T.Mesh(new T.BoxGeometry(w+.032,.3,d+.032),M.plinth);pl.position.set(cx,.15,cz);pl.castShadow=pl.receiveShadow=true;pl.userData.bld=i;pl.updateMatrixWorld();boxUV(pl,1.6);bldG.add(pl)}
   if(b.r==="flat"){const cap=new T.Mesh(new T.BoxGeometry(w+.04,.16,d+.04),M.frame);cap.position.set(cx,h+.08,cz);cap.castShadow=true;cap.userData.bld=i;bldG.add(cap)}
   else{const o=.3,along=b.rd?d:w,across=b.rd?w:d,pitch=b.r==="mono"?Math.tan(12*Math.PI/180):Math.tan(35*Math.PI/180),rise=b.r==="mono"?(across+2*o)*pitch:(across/2+o)*pitch;
     const oa=b.r==="hip"?o:.05,rf=new T.Mesh(roofGeo(b.r,along+2*oa,across+2*o,rise,true),M.roof);rf.position.set(cx,h,cz);if(b.rd)rf.rotation.y=PI2;rf.castShadow=rf.receiveShadow=true;rf.userData.bld=i;bldG.add(rf);
     if(b.r!=="hip"){const gab=new T.Mesh(roofGeo(b.r,along,across,rise*(across/(across+2*o))),M.plaster);gab.position.set(cx,h-.001,cz);if(b.rd)gab.rotation.y=PI2;gab.scale.set(.999,1,.999);gab.userData.bld=i;bldG.add(gab)}}})
   if(selB>=0&&selB<state.buildings.length)frameB(state.buildings[selB])}
 function disposeGroup(g){g.children.slice().forEach(c=>{g.remove(c);c.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material.map&&o.material.map.isCanvasTexture&&o.material.userData.own)o.material.map.dispose()})})}
-function buildGarden(){disposeGroup(gardenG);T_=null;P_=null;gardenMesh=null;const p=state.poly;if(!p){outer.geometry.dispose();outer.geometry=new T.CircleGeometry(150,64);buildEdges();return}
-  {const sh=new T.Shape();sh.absarc(0,0,150,0,Math.PI*2,false);const hole=new T.Path(p.map(([x,z])=>new T.Vector2(x,-z)));sh.holes.push(hole);outer.geometry.dispose();outer.geometry=new T.ShapeGeometry(sh,64)}
+function buildGarden(){disposeGroup(gardenG);T_=null;P_=null;gardenMesh=null;const p=state.poly;if(!p){outer.geometry.dispose();outer.geometry=circleM();buildEdges();return}
+  {const sh=new T.Shape();sh.absarc(0,0,1000,0,Math.PI*2,false);const hole=new T.Path(p.map(([x,z])=>new T.Vector2(x,-z)));sh.holes.push(hole);outer.geometry.dispose();outer.geometry=new T.ShapeGeometry(sh,96)}
   const G=terrainGrid(),bb=G.bb;
+  /* Nebel nur als leichter Dunst in der Ferne: setzt weit hinter dem Garten ein und ist vor dem Bodenrand (1 km) ganz dicht */
+  {const R=Math.hypot(bb.w,bb.d);scene.fog.near=Math.max(90,R*3);scene.fog.far=scene.fog.near+600}
   /* Auflösung der Bodentextur: Desktop bis 4096 px Kantenlänge, mobil 2048 px */
   const maxPx=innerWidth>760&&renderer.capabilities.maxTextureSize>=4096?4096:2048,ppm=Math.min(220,maxPx/Math.max(bb.w,bb.d)),cw=Math.ceil(bb.w*ppm),ch=Math.ceil(bb.d*ppm),canvas=document.createElement("canvas");canvas.width=cw;canvas.height=ch;
   const tex=new T.CanvasTexture(canvas);tex.encoding=T.sRGBEncoding;tex.anisotropy=8;P_={canvas,ctx:canvas.getContext("2d"),ppm:cw/bb.w,bb,tex};P_.ppmz=ch/bb.d;
@@ -1242,8 +1473,10 @@ function placeLabel(l,w,h){pv.copy(l.p).project(camera);const vis=pv.z<1&&Math.a
 function updateSun(){const t=opts.sunT,el=Math.max(4,62*Math.sin(Math.PI*(t-5.5)/16))*Math.PI/180,az=(70+(t-6)*(220/15))*Math.PI/180,nr=opts.north*Math.PI/180;
   const ang=az+nr,hx=Math.sin(ang),hz=-Math.cos(ang),bb=state.poly?bbox(state.poly):{x0:0,x1:0,z0:0,z1:0},tx=(bb.x0+bb.x1)/2,tz=(bb.z0+bb.z1)/2,R=30;
   sun.target.position.set(tx,0,tz);sun.position.set(tx+hx*R*Math.cos(el),R*Math.sin(el),tz+hz*R*Math.cos(el));
-  const low=1-Math.min(1,el/(Math.PI/180*25));sun.color.setRGB(1,.95-.18*low,.87-.35*low);sun.intensity=1.55+.6*(1-low);hemi.intensity=.12+.06*(1-low);
+  SKYM.uniforms.sd.value.set(hx*Math.cos(el),Math.sin(el),hz*Math.cos(el)).normalize();
+  const low=1-Math.min(1,el/(Math.PI/180*25));sun.color.setRGB(1,.86-.14*low,.68-.26*low);sun.intensity=1.55+.6*(1-low);hemi.intensity=.12+.06*(1-low);
   const hh=Math.floor(t),mm=Math.round((t-hh)*60);$("sunTO").textContent=String(hh).padStart(2,"0")+":"+String(mm).padStart(2,"0")+" Uhr";$("northO").textContent=opts.north+"°"}
+
 function updateCompass(){const v=new T.Vector3();camera.getWorldDirection(v);const camAz=Math.atan2(v.x,-v.z);$("cneedle").setAttribute("transform","rotate("+((opts.north*Math.PI/180-camAz)*180/Math.PI).toFixed(1)+" 20 20)")}
 
 /* ---------- Kamera ---------- */
@@ -1280,6 +1513,17 @@ function setView(mode,instant){if(mode==="eye"){enterEye();return}if(eye)exitEye
   camAnim=true;const tg=new T.Vector3(),off=new T.Vector3(),sp=new T.Spherical();
   animate(k=>{const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;tg.lerpVectors(t0,P.tgt,e);sp.set(s0.radius+(s1.radius-s0.radius)*e,Math.max(.0001,s0.phi+(s1.phi-s0.phi)*e),s0.theta+dth*e);off.setFromSpherical(sp);camera.position.copy(tg).add(off);camera.lookAt(tg);if(k>=1)fin()},650)}
 $("v3d").onclick=()=>setView("3d");$("vtop").onclick=()=>setView("top");$("fit").onclick=()=>setView(viewMode);
+/* Doppelklick auf ein Produkt: Kamera fährt weich heran (Blickrichtung bleibt, nicht flacher als 20°) */
+function flyTo(o){const b=new T.Box3().setFromObject(o),c=b.getCenter(new T.Vector3()),sz=b.getSize(new T.Vector3()),R=Math.max(2.4,Math.max(sz.x,sz.y,sz.z)*2.2+1.2);
+  c.y=Math.min(c.y,sz.y*.5+b.min.y);const t0=orbit.target.clone(),s0=new T.Spherical().setFromVector3(camera.position.clone().sub(t0)),s1=s0.clone();s1.radius=R;s1.phi=Math.min(Math.max(s0.phi,.35),Math.PI*.42);
+  if(RM){orbit.target.copy(c);camera.position.copy(c).add(new T.Vector3().setFromSpherical(s1));orbit.update();return}
+  camAnim=true;const tg=new T.Vector3(),sp=new T.Spherical(),off=new T.Vector3();
+  animate(k=>{const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;tg.lerpVectors(t0,c,e);sp.set(s0.radius+(s1.radius-s0.radius)*e,s0.phi+(s1.phi-s0.phi)*e,s0.theta);off.setFromSpherical(sp);camera.position.copy(tg).add(off);camera.lookAt(tg);
+    if(k>=1){orbit.target.copy(c);const d=orbit.enableDamping;orbit.enableDamping=false;orbit.update();orbit.enableDamping=d;camAnim=false;needLabels=true}},700)}
+cv.addEventListener("dblclick",e=>{if(tool!=="select"||eye||drawing||viewMode==="top")return;const o=pick(e);if(o)flyTo(o)});
+/* Leerlauf: nach 25 s ohne Bedienung dreht sich die Ansicht ganz langsam (Präsentation); jede Eingabe stoppt sofort */
+let lastAct=performance.now();["pointerdown","wheel","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();orbit.autoRotate=false},{passive:true,capture:true}));
+function idleSpin(now){orbit.autoRotate=!RM&&!eye&&!camAnim&&!drawing&&!pd&&!drag&&viewMode==="3d"&&now-lastAct>25000&&$("wiz").hidden&&$("pdfView").hidden&&!document.hidden;orbit.autoRotateSpeed=.35}
 
 /* ---------- Werkzeuge ---------- */
 let tool="select",paintMat="bed",brushS=.8,paintMode="brush",rectDraft=null,tMode="set",tSize=.8,tStr=4,tTarget=.4,tShape="rect",tEdge="step",edgeType="curb",edgeDraft=null;
@@ -1706,6 +1950,7 @@ $("north").addEventListener("input",e=>{opts.north=+e.target.value;updateSun();u
 $("optGrid").addEventListener("change",e=>{opts.grid=e.target.checked;buildGridLines();saveOpts()});
 $("optMeasure").addEventListener("change",e=>{opts.measure=e.target.checked;measures(selected);saveOpts()});
 $("optWind").addEventListener("change",e=>{opts.wind=e.target.checked;saveOpts()});
+
 $("optShadow").addEventListener("change",e=>{opts.shadow=e.target.checked;renderer.shadowMap.enabled=opts.shadow;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true});saveOpts()});
 /* ---------- Assistent ---------- */
 let wiz={shape:"std",ground:"lawn",house:false};
@@ -1730,12 +1975,44 @@ function wizRender(){document.querySelectorAll(".shape").forEach(b=>b.setAttribu
     $("wizInfo").innerHTML="<b>"+areaOf(p).toLocaleString("de-DE",{maximumFractionDigits:1})+" m²</b> Fläche"}
   else if(wiz.shape==="draw"){svg.innerHTML='<path d="M40 120L30 50l60-25 70 30 10 65z" fill="#e4e4e1" stroke="#054958" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="40" cy="120" r="4" fill="#054958"/><circle cx="30" cy="50" r="4" fill="#054958"/><circle cx="90" cy="25" r="4" fill="#054958"/>';$("wizInfo").textContent="Form frei einzeichnen"}
   else{svg.innerHTML="";$("wizInfo").textContent=""}}
-function openWiz(){if(state.poly){wiz.ground=state.ground;wiz.house=state.house}$("wizCancel").hidden=!state.poly;$("wiz").hidden=false;wizRender();setTimeout(()=>{const b=document.querySelector('.shape[aria-pressed="true"]');if(b)b.focus()},30)}
+function openWiz(){if(state.poly){wiz.ground=state.ground;wiz.house=state.house}$("wizCancel").hidden=!state.poly;$("wiz").hidden=false;renderExamples();wizRender();setTimeout(()=>{const b=document.querySelector('.shape[aria-pressed="true"]');if(b)b.focus()},30)}
 function closeWiz(){$("wiz").hidden=true}
 document.querySelectorAll(".shape").forEach(b=>b.onclick=()=>{wiz.shape=b.dataset.shape;wizRender()});
 ["rw","rd","lw","ld","lcw","lcd"].forEach(id=>$(id).addEventListener("input",wizRender));
 $("wizGrounds").addEventListener("click",e=>{const b=e.target.closest(".gr");if(!b)return;wiz.ground=b.dataset.g;wizRender()});
 $("wizCancel").onclick=closeWiz;$("editGarden").onclick=()=>{closeSheets();openWiz()};
+/* ---------- Beispielgärten ----------
+   Fertige Planungen im Speicherformat (Maße in m, Bemalung in cm, r = Drehung in 90°-Schritten). */
+const EXAMPLES=[
+  {name:"Lounge mit Pool",desc:"Lounge Pool auf Plattenterrasse, Liege, Sitzbank und bepflanzte Tröge.",s:{v:6,poly:[[-5,-4],[5,-4],[5,4],[-5,4]],g:"lawn",
+    pt:[[3,-500,-400,0,160],[1,80,-180,500,60]],hm:{},e:[],b:[{x0:-5,z0:-11,x1:3,z1:-4,h:3.04,r:"flat",rd:0}],
+    items:[{id:"lounge",x:-2.6,z:-1.2,r:0},{id:"stepsB",x:-.96,z:-2.24,r:0},{id:"bench",x:2.64,z:-3.2,r:0},{id:"lounger",x:1.6,z:-.64,r:0},{id:"person",x:1.6,z:-.64,r:0},{id:"umbrella",x:2.8,z:-.8,r:0},
+      {id:"troughO",x:.4,z:3.52,r:0,dm:{fill:"plants"}},{id:"troughB",x:2.64,z:3.52,r:0},{id:"olive",x:4.32,z:1.36,r:0},{id:"shrub",x:-4.32,z:3.36,r:0},{id:"shrub",x:-3.44,z:3.44,r:0}]}},
+  {name:"Grüne Oase",desc:"Große Pflanztröge, Bäume und Hecke rahmen eine Sitzbank am Kiesweg.",s:{v:6,poly:[[-4.5,-3.5],[4.5,-3.5],[4.5,3.5],[-4.5,3.5]],g:"lawn",
+    pt:[[2,-64,-136,64,350],[2,-450,-136,450,-56]],hm:{},e:[],b:[],
+    items:[{id:"hedge",x:0,z:-3.2,r:0,dm:{w:8.48,d:.48,h:1.6}},{id:"bench",x:0,z:-1.92,r:0},{id:"troughL",x:-3,z:-1.84,r:0,dm:{fill:"plants"}},{id:"troughL",x:3,z:-1.84,r:0,dm:{fill:"plants"}},
+      {id:"troughO",x:-2.64,z:.48,r:0,dm:{fill:"plants"}},{id:"troughO",x:2.64,z:.48,r:0,dm:{fill:"plants"}},{id:"tree",x:-3.44,z:2.24,r:0},{id:"column",x:3.6,z:2.64,r:0},{id:"column",x:3.6,z:1.6,r:0},
+      {id:"shrub",x:-1.6,z:2.8,r:0},{id:"grass",x:1.28,z:2.8,r:0},{id:"grass",x:1.92,z:3.04,r:0},{id:"person",x:.32,z:1.36,r:0}]}},
+  {name:"Kleiner Stadtgarten",desc:"Kompakter Lounge Pool, Sitzblock und Kleiner Trog auf Pflaster.",s:{v:6,poly:[[-3,-2.5],[3,-2.5],[3,2.5],[-3,2.5]],g:"paver",
+    pt:[[5,160,-250,300,250]],hm:{},e:[],b:[],
+    items:[{id:"lounge",x:-1.6,z:-.64,r:0},{id:"block196",x:.8,z:-2.16,r:0},{id:"troughS",x:.4,z:2.16,r:0,dm:{fill:"plants"}},{id:"olive",x:2.4,z:-1.6,r:0},{id:"shrub",x:2.4,z:.4,r:0},{id:"grass",x:2.4,z:1.6,r:0}]}}];
+function exSvg(s){const bb=bbox(s.poly),W=240,H=140,m=12,sc=Math.min((W-2*m)/bb.w,(H-2*m)/bb.d),X=x=>(W/2+(x-(bb.x0+bb.w/2))*sc).toFixed(1),Z=z=>(H/2+(z-(bb.z0+bb.d/2))*sc).toFixed(1);
+  const col={lawn:"#93a978",deck:"#a68a6c",gravel:"#d3cdc2",tiles:"#c9c4bb",bed:"#7a6450",paver:"#d6d1c8"},P=["lawn","deck","gravel","tiles","paver","bed"],r=(x0,z0,x1,z1,f,st)=>'<rect x="'+X(x0)+'" y="'+Z(z0)+'" width="'+((x1-x0)*sc).toFixed(1)+'" height="'+((z1-z0)*sc).toFixed(1)+'" fill="'+f+'"'+(st?' stroke="'+st+'" stroke-width=".8"':'')+'/>';
+  let o='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><defs><clipPath id="c'+s.poly.length+bb.w+'"><polygon points="'+s.poly.map(([x,z])=>X(x)+","+Z(z)).join(" ")+'"/></clipPath></defs>';
+  (s.b||[]).forEach(b=>{o+=r(Math.max(b.x0,bb.x0-2),Math.max(b.z0,bb.z0-2),Math.min(b.x1,bb.x1+2),b.z1,"#e9e6e0","#b9b4ac")});
+  o+='<polygon points="'+s.poly.map(([x,z])=>X(x)+","+Z(z)).join(" ")+'" fill="'+(col[s.g]||col.lawn)+'"/><g clip-path="url(#c'+s.poly.length+bb.w+')">';
+  (s.pt||[]).forEach(a=>{o+=r(a[1]/100,a[2]/100,a[3]/100,a[4]/100,col[P[a[0]]])});o+='</g>';
+  s.items.forEach(it=>{const p=BYID[it.id];if(!p||it.id==="person")return;const D=it.dm||{},w0=D.w||p.w,d0=D.d||p.d,t=(it.r||0)%2,w=t?d0:w0,d=t?w0:d0,x0=it.x-w/2,z0=it.z-d/2,x1=it.x+w/2,z1=it.z+d/2;
+    if(p.plant&&it.id!=="hedge"){const rr=Math.max(.32,Math.min(1.2,(p.hs||1)*.32));o+='<circle cx="'+X(it.x)+'" cy="'+Z(it.z)+'" r="'+(rr*sc).toFixed(1)+'" fill="#5f7752" fill-opacity=".9"/>';return}
+    if(it.id==="hedge"){o+=r(x0,z0,x1,z1,"#4d5f46");return}
+    if(it.id==="umbrella"){o+='<circle cx="'+X(it.x)+'" cy="'+Z(it.z)+'" r="'+(1.5*sc).toFixed(1)+'" fill="#f3f0ea" fill-opacity=".85" stroke="#cfc9bf" stroke-width=".8"/>';return}
+    if(it.id==="lounger"){o+=r(x0,z0,x1,z1,"#f1eee8","#9f998f");return}
+    const fill=p.fills?((D.fill||p.fills[0])==="water"?"#5fa9b4":(D.fill||p.fills[0])==="none"?"#d9d5ce":"#6f8a5e"):null;
+    o+=r(x0,z0,x1,z1,"#d8d4cc","#8f8a82");if(p.water){const k=.14;o+=r(x0+k,z0+k,x1-k,z1-k,"#5fa9b4")}else if(fill){const k=.08;o+=r(x0+k,z0+k,x1-k,z1-k,fill)}});
+  return o+'</svg>'}
+function renderExamples(){$("wizEx").innerHTML=EXAMPLES.map((e,i)=>'<button class="ex" data-ex="'+i+'">'+exSvg(e.s)+'<b>'+e.name+'</b><span>'+e.desc+'</span></button>').join("")}
+$("wizEx").addEventListener("click",ev=>{const b=ev.target.closest(".ex");if(!b)return;const e=EXAMPLES[+b.dataset.ex];closeWiz();if(tool!=="select")setTool("select");
+  applySnap(JSON.parse(JSON.stringify(e.s)));setTimeout(()=>{commit();toast("„"+e.name+"“ geladen. Passen Sie den Garten nach Belieben an.")},60)});
 let placePending=false;
 function placeOnPlan(){if(!plan||!state.poly)return;const bb=bbox(state.poly),dx=r2(plan.cx-(bb.x0+bb.x1)/2),dz=r2(plan.cz-(bb.z0+bb.z1)/2);if(dx||dz)shiftGarden(dx,dz);
   setMode("design");setTool("garden");planFit=true;setView("top");planFit=false;toast("Ziehen Sie die Gartenfläche an die richtige Stelle auf dem Plan.")}
@@ -1789,7 +2066,51 @@ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheets);$("s
 $("helpBtn").onclick=()=>{const h=$("help");h.hidden=!h.hidden;$("helpBtn").setAttribute("aria-expanded",!h.hidden)};
 let tt;function toast(m){let el=stage.querySelector(".toast");if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");stage.appendChild(el)}el.textContent=m;clearTimeout(tt);tt=setTimeout(()=>el.remove(),3200)}
 $("share").onclick=()=>{const u=location.href;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast("Link kopiert. Damit lässt sich Ihre Planung jederzeit wieder öffnen."),()=>toast("Kopieren nicht möglich. Bitte die Adresse aus der Browserzeile kopieren."))};
-$("shot").onclick=()=>{const s=selected;select(null);clearMeasures();renderer.render(scene,camera);const a=document.createElement("a");a.href=cv.toDataURL("image/jpeg",.92);a.download="calvera-gartenplanung.jpg";document.body.appendChild(a);a.click();a.remove();if(s)select(s);toast("Bild gespeichert.")};
+/* ---------- Planung zum Mitnehmen (PDF über den Druckdialog) ----------
+   Rendert drei Ansichten in fester Größe, baut daraus eine A4-Seite im CALVERA-Stil und öffnet den Druckdialog. */
+function snapView(pos,tgt,w,h){const pr=renderer.getPixelRatio(),sz=renderer.getSize(new T.Vector2()),cp=camera.position.clone(),cq=camera.quaternion.clone(),asp=camera.aspect;
+  renderer.setPixelRatio(1);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();camera.position.copy(pos);camera.lookAt(tgt);renderer.render(scene,camera);const url=cv.toDataURL("image/jpeg",.9);
+  renderer.setPixelRatio(pr);renderer.setSize(sz.x,sz.y,false);camera.aspect=asp;camera.updateProjectionMatrix();camera.position.copy(cp);camera.quaternion.copy(cq);renderer.render(scene,camera);return url}
+/* QR-Code-Bibliothek nur bei Bedarf laden */
+let QRP=null;function loadQR(){return QRP||(QRP=new Promise(res=>{if(window.qrcode)return res(true);const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";sc.onload=()=>res(!!window.qrcode);sc.onerror=()=>{QRP=null;res(false)};document.head.appendChild(sc)}))}
+function qrSvg(text){try{const q=window.qrcode(0,"L");q.addData(text);q.make();return q.createSvgTag({cellSize:2,margin:0,scalable:true})}catch(e){return""}}
+async function exportPlan(){if(!state.poly)return;const qrOk=await loadQR(),qr=qrOk?qrSvg(location.href):"";
+  const s=selected;select(null);clearMeasures();showHover(null);const wasEye=!!eye;
+  /* eng auf Garten und Produkte rahmen (Haus/Bedienelemente nicht einrechnen) */
+  const pts=[];state.poly.forEach(([x,z])=>pts.push(new T.Vector3(x,0,z)));objects.forEach(o=>{if(!o.visible)return;const b=new T.Box3().setFromObject(o);if(b.isEmpty())return;[b.min.x,b.max.x].forEach(x=>[b.min.y,b.max.y].forEach(y=>[b.min.z,b.max.z].forEach(z=>pts.push(new T.Vector3(x,y,z)))))});
+  const bb0=bbox(state.poly),tgt=new T.Vector3((bb0.x0+bb0.x1)/2,0,(bb0.z0+bb0.z1)/2);
+  const fit=(dir,asp)=>{const c=camera.clone();c.aspect=asp;c.updateProjectionMatrix();let lo=1,hi=400;for(let i=0;i<30;i++){const m=(lo+hi)/2;c.position.copy(tgt).addScaledVector(dir,m);c.lookAt(tgt);c.updateMatrixWorld();let ok=true;for(const q of pts){const v=q.clone().project(c);if(Math.abs(v.x)>.9||Math.abs(v.y)>.86||v.z>1){ok=false;break}}if(ok)hi=m;else lo=m}return{pos:tgt.clone().addScaledVector(dir,hi),tgt}};
+  const W=1500,H=900,curDir=wasEye?new T.Vector3(.55,.62,.85):camera.position.clone().sub(orbit.target).normalize();if(curDir.y<.25){curDir.y=.25;curDir.normalize()}
+  const main=fit(curDir,W/H),p3=fit(new T.Vector3(-.75,.7,.9).normalize(),900/640),pt=fit(new T.Vector3(0,1,.0001).normalize(),900/640);
+  const img1=snapView(main.pos,main.tgt,W,H),img2=snapView(p3.pos,p3.tgt,900,640),img3=snapView(pt.pos,pt.tgt,900,640);if(s)select(s);
+  const rows=[...$("rows").querySelectorAll(".row")].map(r=>{const q=r.querySelector(".q"),sm=r.querySelector("small"),nm=r.firstElementChild.cloneNode(true);nm.querySelectorAll(".q,small").forEach(x=>x.remove());
+    return'<tr><td class="k">'+(q?q.textContent:"")+'</td><td><b>'+nm.textContent.trim()+'</b>'+(sm?'<small>'+sm.innerHTML+'</small>':'')+'</td><td class="pr">'+r.querySelector(".p").textContent+'</td></tr>'}).join("");
+  const bb=bbox(state.poly),logo=document.getElementById("logo"),date=new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"long",year:"numeric"}),url=location.href.replace(/&/g,"&amp;");
+  const html='<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Ihre Gartenplanung – CALVERA LIVING</title>'+
+  '<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"><style>'+
+  '@page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;font-family:Montserrat,Arial,sans-serif;font-weight:300;color:#5E5952;font-size:10.5pt;line-height:1.55;background:#efefee}'+
+  '.pg{background:#fff;max-width:210mm;margin:24px auto;padding:16mm 15mm;box-shadow:0 10px 40px rgba(0,0,0,.08)}.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #e2e0dc;padding-bottom:10px}'+
+  '.hd svg{width:150px;fill:#1f1e1c}.hd span{font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase}h1{font-weight:300;font-size:24pt;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 2px;color:#3d3a36}'+
+  '.meta{margin:0 0 16px;font-size:9.5pt}img{display:block;width:100%}.two{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:5mm}.cap{font-size:8pt;letter-spacing:.12em;text-transform:uppercase;margin:5px 0 0}'+
+  'h2{font-weight:400;font-size:10pt;letter-spacing:.16em;text-transform:uppercase;color:#3d3a36;margin:0 0 8px}table{width:100%;border-collapse:collapse}td{padding:9px 0;border-bottom:1px solid #e2e0dc;vertical-align:top}'+
+  'td.k{width:12mm;color:#3d3a36;font-weight:400}td b{font-weight:400;color:#3d3a36}td small{display:block;font-size:8.5pt}td.pr{text-align:right;white-space:nowrap}.sum{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 2px}'+
+  '.sum b{font-weight:400;font-size:16pt;color:#3d3a36}.note{font-size:8.5pt}.link{margin-top:18px;background:#efefee;padding:12px 14px;font-size:9pt}.link{display:flex;justify-content:space-between;align-items:center;gap:8mm}.link a{color:#054958;font-weight:500;text-decoration:none;border-bottom:1px solid rgba(5,73,88,.4)}.qrh{font-size:8.5pt}.qr{flex:none;width:34mm;background:#fff;padding:2.5mm}.qr svg{display:block;width:100%;height:auto}.qr svg path{fill:#1f1e1c}'+
+  '.ft{margin-top:18px;border-top:1px solid #e2e0dc;padding-top:8px;font-size:8pt;display:flex;justify-content:space-between}.br{break-before:page;page-break-before:always;padding-top:4mm}'+
+  '.bar{position:sticky;top:0;background:#054958;color:#fff;display:flex;justify-content:center;gap:12px;padding:10px}.bar button{font:inherit;font-size:9pt;letter-spacing:.14em;text-transform:uppercase;background:#fff;color:#054958;border:0;padding:9px 18px;cursor:pointer}'+
+  '@media print{body{background:#fff}.pg{box-shadow:none;margin:0;padding:0;max-width:none}.bar{display:none}}</style></head><body>'+
+  '<div class="pg">'+
+  '<div class="hd"><svg viewBox="'+logo.getAttribute("viewBox")+'">'+logo.innerHTML+'</svg><span>Gartenplanung · '+date+'</span></div>'+
+  '<h1>Ihre Gartenplanung</h1><p class="meta">'+areaOf(state.poly).toLocaleString("de-DE",{maximumFractionDigits:1})+' m² · '+fmtLen(bb.w)+' × '+fmtLen(bb.d)+' · Untergrund: '+groundOf(state.ground).name+'</p>'+
+  '<img src="'+img1+'" alt="Ansicht"><p class="cap">Ihre Ansicht</p><div class="two"><div><img src="'+img2+'" alt="Gesamtansicht"><p class="cap">Gesamtansicht</p></div><div><img src="'+img3+'" alt="Draufsicht"><p class="cap">Draufsicht</p></div></div>'+
+  '<div class="br"><h2>Ihre Zusammenstellung</h2><table>'+(rows||'<tr><td>Noch keine Produkte geplant.</td></tr>')+'</table><div class="sum"><span>Summe</span><b>'+$("sum").textContent+'</b></div><p class="note">'+$("sumnote").textContent+'</p>'+
+  '<div class="link"><div><b style="font-weight:500;color:#3d3a36">Planung online öffnen</b><br>Mit diesem Link öffnen Sie Ihre Planung jederzeit wieder und können sie weiter bearbeiten.<br><a href="'+url+'">Ihre Planung öffnen →</a>'+(qr?'<br><span class="qrh">Oder scannen Sie den QR-Code mit Ihrem Handy.</span>':'')+'</div>'+(qr?'<div class="qr">'+qr+'</div>':'')+'</div>'+
+  '<div class="ft"><span>CALVERA LIVING · Laumer Bautechnik GmbH</span><span>www.calvera-living.de</span></div></div></div>'+
+  '</body></html>';
+  /* Vorschau direkt über dem Konfigurator (kein Pop-up nötig), Drucken/PDF über den Rahmen */
+  const ov=$("pdfView"),fr=$("pdfFrame");fr.srcdoc=html;ov.hidden=false;$("pdfPrint").focus()}
+$("pdfPrint").onclick=()=>{const w=$("pdfFrame").contentWindow;if(w){w.focus();w.print()}};
+$("pdfClose").onclick=()=>{$("pdfView").hidden=true;$("pdfFrame").srcdoc=""};
+$("shot").onclick=exportPlan;
 $("cart").onclick=()=>toast("Prototyp: Hier landen später alle Produkte direkt im Warenkorb.");
 document.querySelectorAll("[data-advice]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();toast("Prototyp: Hier öffnet sich später die Beratungsanfrage mit dem Link zu Ihrer Planung.")}));
 function resetAll(){if(tool!=="select")setTool("select");for(const o of objects.slice())removeObject(o);select(null);state.poly=null;state.paint=[];state.heights={};state.edges=[];state.buildings=[];buildGarden();commit();closeSheets();wiz={shape:"std",ground:"lawn",house:false};openWiz()}
@@ -1808,7 +2129,7 @@ if(saved&&saved.poly){applySnap(saved)}else{setView("3d",true);refresh();openWiz
 cur=JSON.stringify(snap());persist(cur);updUndo();
 let lastW=innerWidth,lastCam="";addEventListener("resize",()=>{if((lastW<=760)!==(innerWidth<=760)||(lastW<=1099)!==(innerWidth<=1099))closeSheets();lastW=innerWidth});
 let lastFrame=performance.now();
-(function loop(now){requestAnimationFrame(loop);const dtF=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(M.water.normalMap){M.water.normalMap.offset.x=now*.000012;M.water.normalMap.offset.y=now*.000008}
+(function loop(now){requestAnimationFrame(loop);const dtF=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(!RM){SKYM.uniforms.tm.value=now/1000;CAUS.offset.set(now*.000045,now*.00003);CAUS2.offset.set(-now*.000035,now*.00005)}if(M.water.normalMap){M.water.normalMap.offset.x=now*.000012;M.water.normalMap.offset.y=now*.000008}
   for(let i=anims.length-1;i>=0;i--){const a=anims[i],k=Math.min(1,(now-a.t0)/a.dur);a.fn(k);if(k>=1)anims.splice(i,1)}
   if(opts.wind&&!RM){const t=now/1000;objects.forEach(o=>{const s=o.userData.sway;if(s)s.forEach((q,j)=>{const ph=o.userData.phase+j*1.9;q.rotation.z=Math.sin(t*1.3+ph)*.025;q.rotation.x=Math.sin(t*.9+ph*1.7)*.018})})}
   {const t=now/1000;objects.forEach(o=>{if(!isP(o))return;const root=rigOf(o);if(!root)return;const R=root.userData.rig,ph=o.userData.phase||0;
@@ -1818,7 +2139,7 @@ let lastFrame=performance.now();
       const dr=-.96+Math.sin(t*.25+ph)*.1;root.position.set(dr*.7071,(o.userData.wy||.84)-.2+Math.sin(c*Math.PI*2)*.02,dr*.7071);R.head.rotation.x=-.55+w*.1}
     else if(o.userData.pose==="lie"&&!RM){R.chest.rotation.x=.6+Math.sin(t*1.1+ph)*.006}
     else if(o.userData.pose==="stand"&&!RM){R.chest.rotation.z=Math.sin(t*.7+ph)*.012;R.head.rotation.y=Math.sin(t*.35+ph)*.25}})}
-  if(eye)eyeStep(dtF);else if(!camAnim)orbit.update();renderer.render(scene,camera);
+  if(eye)eyeStep(dtF);else if(!camAnim){idleSpin(now);orbit.update()}renderer.render(scene,camera);
   const ck=camera.position.x.toFixed(3)+camera.position.y.toFixed(3)+camera.position.z.toFixed(3);if(ck!==lastCam){lastCam=ck;updateCompass()}
   if(mLabels.length||drawLabels.length||rectLabels.length){const w=cv.clientWidth,h=cv.clientHeight;mLabels.forEach(l=>placeLabel(l,w,h));drawLabels.forEach(l=>placeLabel(l,w,h));rectLabels.forEach(l=>placeLabel(l,w,h))}})(performance.now());
 
