@@ -360,11 +360,12 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .ex{border:1px solid var(--line);background:#fff;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s,transform .2s}
 .ex:hover,.ex:focus-visible{border-color:rgba(5,73,88,.5);box-shadow:0 12px 28px rgba(30,40,40,.1);transform:translateY(-2px)}
 .ex svg{display:block;width:100%;height:auto;background:#eef1ec}
-.ex b{display:block;font-weight:400;color:var(--strong);font-size:14px;padding:12px 14px 2px}
-.ex span{display:block;font-size:12px;line-height:1.5;padding:0 14px 14px}
+.ex-t{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px;min-width:0}
+.ex-t b{display:block;font-weight:400;color:var(--strong);font-size:14px;line-height:1.3}
+.ex-t small{display:block;font-size:12px;line-height:1.5}
 .wiz-or{display:flex;align-items:center;gap:14px;margin:24px 0 2px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
 .wiz-or::before,.wiz-or::after{content:"";flex:1;height:1px;background:var(--line)}
-@media (max-width:760px){.exs{grid-template-columns:1fr}.ex{flex-direction:row;align-items:center}.ex svg{width:120px;flex:none}.ex b{padding:10px 12px 2px}.ex span{padding:0 12px 10px}}
+@media (max-width:760px){.exs{grid-template-columns:1fr}.exs{gap:10px}.ex{flex-direction:row;align-items:stretch}.ex svg{width:112px;height:auto;flex:none;align-self:stretch;object-fit:cover}.ex-t{justify-content:center;padding:10px 14px;gap:3px}.ex-t b{font-size:14px}.ex-t small{font-size:12px;line-height:1.45}}
 /* ---------- Feinschliff Oberfläche ---------- */
 .intro{padding:30px 24px 28px}
 .intro h1{font-size:clamp(26px,2.9vw,38px);letter-spacing:.12em}
@@ -2079,7 +2080,7 @@ function exSvg(s){const bb=bbox(s.poly),W=240,H=140,m=12,sc=Math.min((W-2*m)/bb.
     const fill=p.fills?((D.fill||p.fills[0])==="water"?"#5fa9b4":(D.fill||p.fills[0])==="none"?"#d9d5ce":"#6f8a5e"):null;
     o+=r(x0,z0,x1,z1,"#d8d4cc","#8f8a82");if(p.water){const k=.14;o+=r(x0+k,z0+k,x1-k,z1-k,"#5fa9b4")}else if(fill){const k=.08;o+=r(x0+k,z0+k,x1-k,z1-k,fill)}});
   return o+'</svg>'}
-function renderExamples(){$("wizEx").innerHTML=EXAMPLES.map((e,i)=>'<button class="ex" data-ex="'+i+'">'+exSvg(e.s)+'<b>'+e.name+'</b><span>'+e.desc+'</span></button>').join("")}
+function renderExamples(){$("wizEx").innerHTML=EXAMPLES.map((e,i)=>'<button class="ex" data-ex="'+i+'">'+exSvg(e.s)+'<span class="ex-t"><b>'+e.name+'</b><small>'+e.desc+'</small></span></button>').join("")}
 $("wizEx").addEventListener("click",ev=>{const b=ev.target.closest(".ex");if(!b)return;const e=EXAMPLES[+b.dataset.ex];closeWiz();if(tool!=="select")setTool("select");
   applySnap(JSON.parse(JSON.stringify(e.s)));setTimeout(()=>{commit();toast("„"+e.name+"“ geladen. Passen Sie den Garten nach Belieben an.")},60)});
 let placePending=false;
