@@ -6,7 +6,9 @@
 <title>Garten planen | CALVERA LIVING</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Planen Sie Ihren Garten mit Lounge Pool, Pflanztrögen und Sitzblöcken aus Beton – in 3D und maßstabsgetreu.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- 3D-Modelle schon beim Laden der Seite anfordern (sonst erst, nachdem das Skript durchgelaufen ist) -->
+<link rel="preload" href="models/produkte.glb" as="fetch" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--petrol:#054958;--warm:#5E5952;--off:#EFEFEE;--text:#5E5952;--strong:#3d3a36;--line:#e2e0dc;--bad:#9c3d2a;--head:76px;
@@ -917,10 +919,17 @@ function stoneCanvas(){const n=1024,rh=n/8,sw=n/4,r=rnd(61),T0=[];for(let i=0;i<
     if(u<2||v<2||u>sw-3||v>rh-3)return[166,158,145];
     const[t,h]=T0[ri*4+ci],e=Math.min(u,v,sw-u,rh-v),b=e<8?.8+.2*e/8:1,f=t*b*(.92+.1*nz(NF1,x/2,y/2)+.05*nz(NF2,x*2,y*2)+(r()-.5)*.04);
     return h>.75?[210*f,200*f,184*f]:[206*f,200*f,192*f]})[0]}
-const GROUNDS=[{id:"lawn",name:"Rasen",c:lawnCanvas(),size:2.5},{id:"deck",name:"Holzdeck",c:deckCanvas(),size:1.28},{id:"gravel",name:"Kies",c:gravelCanvas(),size:.9},{id:"tiles",name:"Platten",c:tileCanvas(),size:1.28},{id:"bed",name:"Beet",c:bedCanvas(),size:1.2},{id:"paver",name:"Pflaster",c:stoneCanvas(),size:1.28}];
+/* Beläge werden erst bei Bedarf berechnet (zusammen fast 2 s beim Start): `gr.c` erzeugt die Textur beim ersten Zugriff,
+   bis dahin zeigen Textur und Vorschau eine passende Grundfarbe. Nach dem Start werden die übrigen nacheinander im Hintergrund erzeugt. */
+const GROUND_COL={lawn:"#8fa572",deck:"#9d7a5a",gravel:"#cfc8bc",tiles:"#c4bfb7",bed:"#5a4535",paver:"#d2cdc4"};
+const GROUNDS=[{id:"lawn",name:"Rasen",gen:lawnCanvas,size:2.5},{id:"deck",name:"Holzdeck",gen:deckCanvas,size:1.28},{id:"gravel",name:"Kies",gen:gravelCanvas,size:.9},{id:"tiles",name:"Platten",gen:tileCanvas,size:1.28},{id:"bed",name:"Beet",gen:bedCanvas,size:1.2},{id:"paver",name:"Pflaster",gen:stoneCanvas,size:1.28}];
 function groundThumb(gr){const part=Math.min(gr.c.width,Math.round(gr.c.width*.6/gr.size)),[m,mg]=cvs(192);mg.imageSmoothingQuality="high";mg.drawImage(gr.c,0,0,part,part,0,0,192,192);
   const[s,sg]=cvs(96);sg.imageSmoothingQuality="high";sg.drawImage(m,0,0,96,96);gr.url=s.toDataURL("image/jpeg",.85)}
-GROUNDS.forEach(gr=>{gr.t=tex(gr.c,1);gr.r=gr.id==="deck"?.7:gr.id==="tiles"?.85:1;groundThumb(gr)});
+let groundUI=0;function groundReady(){clearTimeout(groundUI);groundUI=setTimeout(()=>{try{renderGroundButtons($("grounds"),state.ground);if(typeof renderPaintMats==="function")renderPaintMats();if(!$("wiz").hidden&&typeof wizRender==="function")wizRender()}catch(e){}},0)}
+GROUNDS.forEach(gr=>{const[ph,pg]=cvs(4);pg.fillStyle=GROUND_COL[gr.id];pg.fillRect(0,0,4,4);gr._c=null;gr.t=tex(ph,1);gr.r=gr.id==="deck"?.7:gr.id==="tiles"?.85:1;gr.url=ph.toDataURL();
+  Object.defineProperty(gr,"c",{get(){if(!gr._c){gr._c=gr.gen();gr.t.image=gr._c;gr.t.dispose();gr.t.needsUpdate=true;groundThumb(gr);groundReady()}return gr._c}})});
+/* übrige Beläge nach dem ersten Bild nacheinander erzeugen (je einer, dann Pause, damit die Seite bedienbar bleibt) */
+function idleGrounds(){const g=GROUNDS.find(x=>!x._c);if(!g)return;void g.c;setTimeout(idleGrounds,250)}
 const MODEL_SC={},MODEL_P={},FILE_P={};
 /* Produkte aus der Sammeldatei models/produkte.glb (CAD-Export „Produktübersicht“).
    id = Anfang des Knotennamens (GUID aus dem CAD), rot = beim Import um 90° drehen (lange Seite in X). */
@@ -1518,9 +1527,10 @@ const EDGE={curb:{h:.08,w:.08,m:"curb",n:"Rasenkante"},kerb:{h:.24,w:.16,m:"edge
 function buildEdges(){disposeGroup(edgeG);state.edges.forEach((e,ei)=>edgeMeshes(e,edgeG,ei))}
 /* Kantenmaterialien: alle drei in Betonoptik wie die CALVERA-Produkte (heller Sichtbeton mit Poren, je Element
    3 leichte Tonvarianten). Elemente 1 m lang mit feiner Fuge, Kanten leicht gerundet (fangen das Licht). */
-const EDGE_MS=(()=>{const mk=(canvas,rough,bump)=>{const t=tex(canvas,1),b=new T.CanvasTexture(canvas);b.wrapS=b.wrapT=T.RepeatWrapping;
+/* erst erzeugen, wenn die erste Kante gebaut wird (spart ~0,3 s beim Start) */
+let EDGE_MS=null;const edgeMats=()=>EDGE_MS||(EDGE_MS=(()=>{const mk=(canvas,rough,bump)=>{const t=tex(canvas,1),b=new T.CanvasTexture(canvas);b.wrapS=b.wrapT=T.RepeatWrapping;
     return[.95,1,1.05].map(k=>new T.MeshStandardMaterial({map:t,bumpMap:b,bumpScale:bump,roughnessMap:b,roughness:rough,color:new T.Color().setRGB(k,k,k*.99)}))};
-  return{curb:mk(concreteCanvas(1024,[172,168,161],71),1.3,.012),edgeHi:mk(concreteCanvas(1024,[180,176,169],72),1.28,.012),wallM:mk(concreteCanvas(1024,[184,179,171],74),1.25,.012)}})();
+  return{curb:mk(concreteCanvas(1024,[172,168,161],71),1.3,.012),edgeHi:mk(concreteCanvas(1024,[180,176,169],72),1.28,.012),wallM:mk(concreteCanvas(1024,[184,179,171],74),1.25,.012)}})());
 /* Quader mit Welt-UVs (1 Kachel = 1 m), Muster läuft über Stöße hinweg weiter (Versatz s0 entlang der Kante) */
 function edgeBox(L,h,w,s0,round){const geo=round&&T.RoundedBoxGeometry?new T.RoundedBoxGeometry(L,h,w,2,round):new T.BoxGeometry(L,h,w);
   const p=geo.attributes.position,nr=geo.attributes.normal,uv=geo.attributes.uv;
@@ -1530,9 +1540,9 @@ function edgeBox(L,h,w,s0,round){const geo=round&&T.RoundedBoxGeometry?new T.Rou
 function edgeMeshes(e,grp,ei){const t0=EDGE[e.t]||EDGE.curb,t={h:e.h||t0.h,w:e.w||t0.w,m:t0.m},pts=e.p,R=rnd(ei*97+7),rd=Math.min(t.m==="wallM"?.015:.012,t.h*.15,t.w*.15);let s0=0;
   const put=(geo,mat,x,y,z,rot)=>{const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.y=rot;m.castShadow=m.receiveShadow=true;m.userData.edge=ei;grp.add(m);return m};
   for(let i=0;i+1<pts.length;i++){const[a,b]=pts[i],[c,d]=pts[i+1],L=Math.hypot(c-a,d-b);if(L<.02)continue;const n=Math.max(1,Math.round(L)),rot=-Math.atan2(d-b,c-a);
-    for(let k=0;k<n;k++){const u=(k+.5)/n,x=a+(c-a)*u,z=b+(d-b)*u,y=heightAt(x,z);put(edgeBox(L/n-.006,t.h,t.w,s0+k*L/n,rd),EDGE_MS[t.m][(R()*3)|0],x,y-.02+t.h/2,z,rot)}
+    for(let k=0;k<n;k++){const u=(k+.5)/n,x=a+(c-a)*u,z=b+(d-b)*u,y=heightAt(x,z);put(edgeBox(L/n-.006,t.h,t.w,s0+k*L/n,rd),edgeMats()[t.m][(R()*3)|0],x,y-.02+t.h/2,z,rot)}
     s0+=L;
-    if(i>0){const y=heightAt(a,b);put(edgeBox(t.w,t.h,t.w,0,rd),EDGE_MS[t.m][1],a,y-.02+t.h/2,b,0)}}}
+    if(i>0){const y=heightAt(a,b);put(edgeBox(t.w,t.h,t.w,0,rd),edgeMats()[t.m][1],a,y-.02+t.h/2,b,0)}}}
 
 /* ---------- Objekte ---------- */
 function fp(o){const p=BYID[o.userData.pid],D=o.userData.dims||{},W=D.w||p.w,Dp=D.d||p.d,t=o.userData.rot%2===1;return{w:t?Dp:W,d:t?W:Dp}}
@@ -2282,7 +2292,8 @@ let saved=null;try{const h=location.hash.match(/#p=([\w-]+)/);saved=h?JSON.parse
 try{plan=JSON.parse(localStorage.getItem("calvera-plan")||"null")}catch(e){plan=null}planApply();planUI();
 loadOpts();renderPaintMats();$("brushO").textContent=fmtLen(brushS);$("tSizeO").textContent=fmtLen(tSize*2);tUI();
 renderGroundButtons($("grounds"),state.ground);
-try{TH=thumbs()}catch(e){}
+/* Produkt-Vorschaubilder und restliche Beläge erst nach dem ersten Bild (sonst sieht man ~0,5–2 s länger nichts) */
+setTimeout(()=>{try{TH=thumbs();renderProducts()}catch(e){}setTimeout(idleGrounds,400)},120);
 renderTabs();renderProducts();
 if(saved&&saved.poly){applySnap(saved)}else{setView("3d",true);refresh();openWiz()}
 cur=JSON.stringify(snap());persist(cur);updUndo();
