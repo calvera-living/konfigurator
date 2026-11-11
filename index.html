@@ -1277,6 +1277,20 @@ function lavenderClump(h,R){const g=new T.Group();g.userData.sway=1;const list=[
     list.push({x,z,a,len,lean,w:.0028,c0:[.06,.09,.05],c1:[.12,.16,.09],seg:5});sp.push([x+Math.cos(a)*out,y-.01,z+Math.sin(a)*out,.026,.07+R()*.03,R()*3])}
   g.add(strands(list),spikes(sp,"spike"));return g}
 function crown(g,parts){const sw=new T.Group();sw.userData.sway=1;parts.forEach(q=>sw.add(vball(...q)));g.add(sw)}
+/* Holzabdeckung über dem Technikraum der Pools (Öffnung inkl. Falz aus den CAD-Modellen ausgemessen: x0,z0–x1,z1, Oberkante H).
+   Liegt im Falz, Oberseite bündig mit der Betonkante (keine Stolperkante), Stärke th = Falztiefe; Dielen in Längsrichtung.
+   Abnehmbar über „Technikraum“ in der Auswahlleiste (dims.open) – dann ausgeblendet. */
+/* ruhige Dielen-Maserung (warmes, geöltes Holz), Kachel 1 m längs × 1 Dielenbreite quer; 3 leichte Tonvarianten je Diele */
+let LID_MS=null;const lidMats=()=>LID_MS||(LID_MS=(()=>{const[c]=pixCanvas(512,(x,y)=>{const yy=y/4,f=.82+.22*nz(NF2,x*.35,yy*6)+.1*nz(NF1,x*1.5,yy*24)+.05*Math.sin(yy*.9+nz(NF1,x*.2,yy)*6);return[150*f,112*f,80*f]});
+  const t=tex(c,1);return[.92,1,1.07].map(k=>new T.MeshStandardMaterial({map:t,roughness:.72,color:new T.Color().setRGB(k,k*.99,k*.97)}))})());
+function techLid(g,D,x0,z0,x1,z1,H,th){const ov=-.003,w=x1-x0+2*ov,d=z1-z0+2*ov,L=new T.Group(),alongX=w>=d,n=Math.max(3,Math.round((alongX?d:w)/.145)),bw=(alongX?d:w)/n,ms=lidMats();
+  for(let i=0;i<n;i++){const geo=alongX?new T.BoxGeometry(w,th,bw-.006):new T.BoxGeometry(bw-.006,th,d),p=geo.attributes.position,nr=geo.attributes.normal,uv=geo.attributes.uv,
+      ox=alongX?0:-w/2+bw*(i+.5),oz=alongX?-d/2+bw*(i+.5):0,sh=i*.29;
+    for(let j=0;j<p.count;j++){const lx=p.getX(j),y=p.getY(j),lz=p.getZ(j),ax=Math.abs(nr.getX(j)),ay=Math.abs(nr.getY(j)),az=Math.abs(nr.getZ(j)),a=alongX?lx:lz,c=alongX?lz:lx;
+      /* Maserung immer längs der Diele, quer genau eine Dielenbreite */
+      if(ay>=ax&&ay>=az)uv.setXY(j,a+sh,c/bw+.5+i*.37);else uv.setXY(j,a+sh,y/bw+i*.37)}uv.needsUpdate=true;
+    const m=new T.Mesh(geo,ms[(i*7+3)%3]);m.position.set(ox,th/2,oz);m.castShadow=m.receiveShadow=true;L.add(m)}
+  L.position.set((x0+x1)/2,H-th,(z0+z1)/2);L.userData.hatch=true;L.userData.home=[L.position.x,L.position.y,L.position.z];L.visible=!(D&&D.open);g.add(L);return L}
 const ROUND=new Set();function box(w,h,d,mat,x,y,z){const mn=Math.min(w,h,d),rg=T.RoundedBoxGeometry&&ROUND.has(mat)&&mn>=.05;const m=new T.Mesh(rg?new T.RoundedBoxGeometry(w,h,d,2,Math.min(.012,mn/4)):new T.BoxGeometry(w,h,d),mat);m.position.set(x||0,(y||0)+h/2,z||0);m.castShadow=m.receiveShadow=true;return m}
 [M.concrete,M.curb,M.wallM,M.edgeHi].forEach(x=>x&&ROUND.add(x));M.concrete.bumpMap=M.concrete.map;M.concrete.bumpScale=.0022;
 /* Füllungen für Tröge. Alle Tröge haben 8 cm Wand; nur „Trog ohne Boden“ ist unten offen.
@@ -1314,12 +1328,13 @@ function plantBed(g,iw,id,y,seed){const R=rnd(seed),bed=new T.Group();bed.positi
 const CATS=["Pool & Wasser","Garten","Pflanzen","Extras"];
 const PRODUCTS=[
  /* Echte Produkte aus models/produkte.glb (Maße laut Produktübersicht 06.10.2026). Preise weiterhin fiktiv. */
- {id:"lounge",cat:0,rs:{sink:[0,.96]},water:()=>.81,spot:()=>[0,-.52],opts:[{id:"heater",n:"Durchlauferhitzer",p:1490},{id:"cushion",n:"Nackenkissen (2 Stück)",p:189},{id:"cover",n:"Abdeckung",p:690}],name:"Lounge Pool",w:2.32,d:3.36,h:.96,price:9990,build(g,D){modelInto(g,"lounge",2.32,.96,3.36);
+ {id:"lounge",cat:0,hatch:true,rs:{sink:[0,.96]},water:()=>.81,spot:()=>[0,-.52],opts:[{id:"heater",n:"Durchlauferhitzer",p:1490},{id:"cushion",n:"Nackenkissen (2 Stück)",p:189},{id:"cover",n:"Abdeckung",p:690}],name:"Lounge Pool",w:2.32,d:3.36,h:.96,price:9990,build(g,D){modelInto(g,"lounge",2.32,.96,3.36);
    const op=(D&&D.op)||[];
    if(op.includes("cushion"))[-.55,.55].forEach(x=>{const c=new T.Mesh(new T.CapsuleGeometry(.11,.62,8,20),M.cushion);c.rotation.z=PI2;c.scale.set(1,1,.92);c.position.set(x,.96+.1,-1.68+.1);c.castShadow=true;g.add(c)});
-   if(op.includes("cover")){g.add(box(2.32,.05,2.16,M.poolCover,0,.96,-.6));[-.58,0,.58].forEach(x=>g.add(box(.012,.052,2.12,M.frame,x,.962,-.6)))}}},
- {id:"poolS",cat:0,rs:{sink:[0,1.76]},water:()=>1.61,spot:()=>[-1,-.07],name:"Pool",w:7.52,d:3.84,h:1.76,price:34900,build(g){modelInto(g,"poolS",7.52,1.76,3.84)}},
- {id:"poolL",cat:0,rs:{sink:[0,1.76]},water:()=>1.61,spot:()=>[-1,0],name:"Großer Pool",w:9.52,d:3.84,h:1.76,price:39900,build(g){modelInto(g,"poolL",9.52,1.76,3.84)}},
+   if(op.includes("cover")){g.add(box(2.32,.05,2.16,M.poolCover,0,.96,-.6));[-.58,0,.58].forEach(x=>g.add(box(.012,.052,2.12,M.frame,x,.962,-.6)))}
+   techLid(g,D,-.995,.64,.995,1.52,.96,.08)}},
+ {id:"poolS",cat:0,hatch:true,rs:{sink:[0,1.76]},water:()=>1.61,spot:()=>[-1,-.07],name:"Pool",w:7.52,d:3.84,h:1.76,price:34900,build(g,D){modelInto(g,"poolS",7.52,1.76,3.84);techLid(g,D,1.85,-1.755,3.605,1.755,1.76,.05)}},
+ {id:"poolL",cat:0,hatch:true,rs:{sink:[0,1.76]},water:()=>1.61,spot:()=>[-1,0],name:"Großer Pool",w:9.52,d:3.84,h:1.76,price:39900,build(g,D){modelInto(g,"poolL",9.52,1.76,3.84);techLid(g,D,2.76,-1.72,4.61,1.80,1.76,.05)}},
  {id:"stepsB",cat:0,name:"Stufen breit",w:.96,d:.88,h:.48,price:1290,build(g){modelInto(g,"stepsB",.96,.48,.88)}},
  {id:"stepsN",cat:0,name:"Stufen schmal",w:.72,d:.88,h:.48,price:990,build(g){modelInto(g,"stepsN",.72,.48,.88)}},
  {id:"podest",cat:0,name:"Podest",w:2.32,d:.88,h:.8,price:1890,build(g){modelInto(g,"podest",2.32,.8,.88)}},
@@ -1817,7 +1832,7 @@ function selInfo(){const P=$("sbProps");let h="";
     if(p.opts){const on=(selected.userData.dims&&selected.userData.dims.op)||[];h+='<div class="pf">Ausstattung<div class="optl">'+p.opts.map(q=>'<label class="optc"><input type="checkbox" data-opt="'+q.id+'"'+(on.includes(q.id)?" checked":"")+'><span>'+q.n+'</span><b>+ '+eur(q.p)+'</b></label>').join("")+'</div></div>'}
     if(p.sizes){const cur=(selected.userData.dims&&selected.userData.dims.sz)||0;h+='<div class="pf">Größe<div class="szseg" role="group" aria-label="Größe">'+p.sizes.map((z,i)=>'<button data-size="'+i+'" aria-pressed="'+(i===cur)+'">'+sizeLbl(z)+'</button>').join("")+'</div></div>'}
     if(p.fills){const cur=fillOf(p,selected.userData.dims);h+='<div class="pf">Füllung<div class="szseg" role="group" aria-label="Füllung">'+p.fills.map(f=>'<button data-fill="'+f+'" aria-pressed="'+(f===cur)+'">'+FILLS[f]+'</button>').join("")+'</div></div>'}
-    if(p.rs)Object.keys(p.rs).forEach(k=>{h+=fieldH(k,p.hs&&k==="h"?"Höhe":NAMES[k],cm(dimOf(selected,k)))});if(p.hatch){const op=selected.userData.dims&&selected.userData.dims.open;h+='<span class="pf">Technikraum<button class="tg" data-act="hatch">'+(op?"Abdeckung auflegen":"Abdeckung abnehmen")+'</button></span>'}$("rot").hidden=$("dup").hidden=false}
+    if(p.rs)Object.keys(p.rs).forEach(k=>{h+=fieldH(k,p.hs&&k==="h"?"Höhe":NAMES[k],cm(dimOf(selected,k)))});if(p.hatch){const op=selected.userData.dims&&selected.userData.dims.open;h+='<span class="pf">Technikraum<button class="tg" data-act="hatch">'+(op?"Holzabdeckung auflegen":"Holzabdeckung abnehmen")+'</button></span>'}$("rot").hidden=$("dup").hidden=false}
   else if(selB>=0&&state.buildings[selB].poly){const b=state.buildings[selB];$("selname").textContent="Gebäude (Grundriss)";$("seldim").textContent=cm(b.x1-b.x0)+" × "+cm(b.z1-b.z0)+" cm";h=fieldH("bh","Höhe",cm(b.h))+'<span class="pf">Fassade<span class="tip" style="margin:4px 0 0;text-transform:none;letter-spacing:0;font-weight:300">Fenster und Türen setzen Sie im Werkzeug „Gebäude“.</span></span>';$("rot").hidden=false;$("dup").hidden=false}
   else if(selB>=0){const b=state.buildings[selB];$("selname").textContent="Gebäude";$("seldim").textContent=cm(b.x1-b.x0)+" × "+cm(b.z1-b.z0)+" cm";
     h=fieldH("bw","Breite",cm(b.x1-b.x0))+fieldH("bd","Tiefe",cm(b.z1-b.z0))+fieldH("bh","Höhe",cm(b.h))+'<label class="pf">Dach<select data-sel="r">'+[["flat","Flachdach"],["gable","Satteldach"],["hip","Walmdach"],["mono","Pultdach"]].map(([v,n])=>'<option value="'+v+'"'+(b.r===v?" selected":"")+'>'+n+'</option>').join("")+'</select></label>'+(b.r!=="flat"?'<span class="pf">First<button class="tg" data-act="rd">drehen</button></span>':'');$("rot").hidden=false;$("dup").hidden=false}
@@ -1840,7 +1855,14 @@ function setSize(o,i){const p=BYID[o.userData.pid],z=p.sizes[i];if(!z)return;con
   setPos(o,x,zz);showFrame(o,false);measures(o);selInfo();commit()}
 function setProp(k,v){
   if(selected&&k==="hatch"){const o=selected,D={...(o.userData.dims||{})};D.open=D.open?0:1;if(!D.open)delete D.open;o.userData.dims=Object.keys(D).length?D:null;let hg=null;o.traverse(c=>{if(c.userData.hatch)hg=c});
-    if(hg){const p0=hg.position.clone(),t=D.open?hg.userData.away:hg.userData.home,p1=new T.Vector3(t[0],t[1],t[2]);animate(k2=>{const e2=k2<.5?2*k2*k2:1-Math.pow(-2*k2+2,2)/2;hg.position.lerpVectors(p0,p1,e2);hg.position.y+=Math.sin(Math.PI*k2)*.9;hg.rotation.z=Math.sin(Math.PI*k2)*.08},1100)}selInfo();commit();return}
+    /* Holzabdeckung: abnehmen = kurz anheben und ausblenden, auflegen = einblenden und sanft absenken */
+    /* nur senkrecht: abnehmen = sanft nach oben und ausblenden, auflegen = von leicht oben einblenden und weich absenken */
+    /* Schatten wird währenddessen ausgeschaltet (er würde sonst hart stehen bleiben und am Ende springen); weiche Kurve, kleine Bewegung */
+    if(hg){const h=hg.userData.home,y0=h[1],lift=.16,ms=[];hg.position.set(h[0],y0,h[2]);hg.rotation.set(0,0,0);hg.scale.setScalar(1);
+      hg.traverse(c=>{if(c.isMesh){const orig=c.material,m=orig.clone();m.transparent=true;m.depthWrite=false;c.material=m;c.castShadow=false;ms.push([c,orig,m])}});
+      const done=sh=>ms.forEach(([c,orig,m])=>{c.material=orig;c.castShadow=sh;m.dispose()}),ease=k=>k*k*k*(k*(k*6-15)+10);
+      if(D.open){animate(k2=>{const e=ease(k2);hg.position.y=y0+lift*e;ms.forEach(([,,m])=>m.opacity=1-e);if(k2>=1){hg.visible=false;hg.position.y=y0;done(true)}},900)}
+      else{hg.visible=true;hg.position.y=y0+lift;ms.forEach(([,,m])=>m.opacity=0);animate(k2=>{const e=ease(k2);hg.position.y=y0+lift*(1-e);ms.forEach(([,,m])=>m.opacity=e);if(k2>=1){hg.position.y=y0;done(true)}},900)}}selInfo();commit();return}
   if(selected&&k==="size"){setSize(selected,+v);return}
   if(selected){setDim(selected,k,v);return}
   if(selB>=0){const b=state.buildings[selB];if(k==="bw")b.x1=+(b.x0+Math.max(1,r2(v))).toFixed(3);else if(k==="bd")b.z1=+(b.z0+Math.max(1,r2(v))).toFixed(3);else if(k==="bh")b.h=Math.min(20,Math.max(2,r2(v)));else if(k==="r")b.r=v;else if(k==="rd")b.rd=b.rd?0:1;buildBuildings();selInfo();commit();return}
