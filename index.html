@@ -1372,7 +1372,8 @@ function makeProduct(p,dims){const g=new T.Group();g.add(buildInner(p,dims));g.u
 /* ---------- Szene ---------- */
 const renderer=new T.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+/* weiche Schatten: VSM mit Weichzeichnung (bei PCFSoft wirkt shadow.radius nicht → harte Kanten) */
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.VSMShadowMap;
 stage.prepend(renderer.domElement);
 const cv=renderer.domElement;cv.tabIndex=0;cv.setAttribute("aria-label","3D-Ansicht des Gartens");
 /* Himmel: hellblauer Verlauf mit Dunst am Horizont und einem weichen Sonnenleuchten (wandert mit der Uhrzeit).
@@ -1407,7 +1408,7 @@ try{const es=new T.Scene(),pm=new T.PMREMGenerator(renderer);es.add(new T.Mesh(n
   const tx=pm.fromScene(es,0,.1,1000).texture;pm.dispose();M.water.envMap=tx;M.water.envMapIntensity=.75;M.water.needsUpdate=true}catch(e){}
 const camera=new T.PerspectiveCamera(38,1,.1,2600);
 const hemi=new T.HemisphereLight(0xf4f1ea,0x7d6a4f,.5);scene.add(hemi);
-const sun=new T.DirectionalLight(0xfff1dc,1.5);sun.castShadow=true;{const q=innerWidth>1000?4096:2048;sun.shadow.mapSize.set(q,q)}sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;scene.add(sun,sun.target);
+const sun=new T.DirectionalLight(0xfff1dc,1.5);sun.castShadow=true;{const q=innerWidth>1000?4096:2048;sun.shadow.mapSize.set(q,q)}sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=7;sun.shadow.blurSamples=16;scene.add(sun,sun.target);
 /* Umgebung: offene Wiese um den Garten, läuft am Horizont im hellen Dunst aus */
 function meadowCanvas(){const dk=[92,116,78],lt=[124,144,98];return pixCanvas(512,(x,y)=>{const t=Math.min(1,Math.max(0,.5*nz(NF1,x,y)+.35*nz(NF2,x*2,y*2)+.15*nz(NF2,x*8,y*8))),f=.96+Math.random()*.08,c=mixC(dk,lt,t);return[c[0]*f,c[1]*f,c[2]*f]})[0]}
 /* Wiesentextur in Metern (Kachel 7 m); Kreisflächen bekommen Meter-UVs wie die Fläche mit Loch (ShapeGeometry) */
