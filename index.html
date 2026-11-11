@@ -345,6 +345,8 @@ input[type=range]{accent-color:var(--petrol);width:100%}
 .compass text{font-size:7.5px;font-weight:600;fill:var(--petrol);font-family:Montserrat,Arial}
 /* beim Durchgehen (Augenhöhe) stört die Produktleiste: ausblenden */
 @media (min-width:761px){.planner:has(.stage.eye) #pLeft{display:none!important}.planner:has(.stage.eye){--dockH:0px!important}}
+/* beim Zeichnen der Fläche ist die Produktleiste ausgeblendet → Zeichenleiste ganz unten statt mitten im Bild */
+.planner:has(#drawbar:not([hidden])){--dockH:0px!important}
 @media (max-width:760px){.eyehint{bottom:76px;white-space:normal;max-width:calc(100% - 24px)}.d-only{display:none}.m-only2{display:inline}}
 .modes{display:flex!important;justify-content:space-between;padding:0 18px;gap:6px}
 .seg button.vi{padding:7px 11px;display:inline-flex;align-items:center}
@@ -1932,7 +1934,7 @@ function handleEnd(){handleDrag=null;orbit.enabled=true;clearGuides();updateHand
 function clearSel(){disposeGroup(hG);selected=null;selB=-1;selE=-1;eSel.visible=false;showFrame(null);clearMeasures()}
 function selectB(i){clearSel();selB=i;$("selbar").classList.add("on");frameB(state.buildings[i]);selInfo()}
 function selectE(i){clearSel();selE=i;$("selbar").classList.add("on");frameE(state.edges[i]);selInfo()}
-function select(o){clearSel();selected=o;drawZones();$("selbar").classList.toggle("on",!!o);selInfo();showFrame(o,false);measures(o);showHover(hovered===o?null:hovered)}
+function select(o){if(!o&&dockAuto){dockAuto=false;if($("pLeft").classList.contains("min"))toggleDock()}clearSel();selected=o;drawZones();$("selbar").classList.toggle("on",!!o);selInfo();showFrame(o,false);measures(o);showHover(hovered===o?null:hovered)}
 function pickOther(e){setNdc(e);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(bldG.children.concat(edgeG.children),false);if(!h.length)return null;const u=h[0].object.userData;return u.bld!==undefined?{b:u.bld}:u.edge!==undefined?{e:u.edge}:null}
 cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;cv.focus({preventScroll:true});
   if(eye){eye.drag={x:e.clientX,y:e.clientY,yaw:eye.yaw,pitch:eye.pitch,moved:false,id:e.pointerId};cv.setPointerCapture(e.pointerId);cv.style.cursor="grabbing";return}
@@ -1952,7 +1954,7 @@ cv.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)r
     if((tool==="paint"&&paintMode==="rect")||(tool==="terrain"&&tMode==="set"&&tShape==="rect")){if(!inPoly(state.poly,pt.x,pt.z))return;rectDraft={a:snapG(pt.x,pt.z),id:e.pointerId};cv.setPointerCapture(e.pointerId);return}
     if(!inPoly(state.poly,pt.x,pt.z))return;stroke={last:null,id:e.pointerId,base:T_?T_.h.slice():null};cv.setPointerCapture(e.pointerId);lastT=performance.now();
     if(tool==="paint")paintAt(pt);else sculptAt(pt);return}
-  const o=pick(e);if(o){select(o);const g=groundAt(e);drag={o,ox:g?o.position.x-g.x:0,oz:g?o.position.z-g.z:0,last:[o.position.x,o.position.z],id:e.pointerId,moved:false};orbit.enabled=false;cv.setPointerCapture(e.pointerId);e.preventDefault();cv.style.cursor="grabbing";return}
+  const o=pick(e);if(o){dockAutoHide();select(o);const g=groundAt(e);drag={o,ox:g?o.position.x-g.x:0,oz:g?o.position.z-g.z:0,last:[o.position.x,o.position.z],id:e.pointerId,moved:false};orbit.enabled=false;cv.setPointerCapture(e.pointerId);e.preventDefault();cv.style.cursor="grabbing";return}
   const ot=pickOther(e);if(ot&&ot.b!==undefined){selectB(ot.b);setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3()),b=state.buildings[ot.b];drag={b:ot.b,ox:g?b.x0-g.x:0,oz:g?b.z0-g.z:0,id:e.pointerId,moved:false};orbit.enabled=false;cv.setPointerCapture(e.pointerId);e.preventDefault();return}
   if(ot&&ot.e!==undefined){selectE(ot.e);return}
   drag={empty:true,x:e.clientX,y:e.clientY}});
@@ -2049,7 +2051,7 @@ const CATNOTE={2:"Pflanzen helfen beim Nachbauen Ihres Gartens und erscheinen ni
 function renderTabs(){$("tabs").innerHTML=CATS.map((c,i)=>'<button class="tab" role="tab" aria-selected="'+(i===activeCat)+'" data-cat="'+i+'">'+c+''+'</button>').join("")}
 function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class="soon-note">'+CATNOTE[activeCat]+'</p>':'')+
   PRODUCTS.filter(p=>p.cat===activeCat).map(p=>'<button class="prod" data-id="'+p.id+'" aria-label="'+p.name+' hinzufügen">'+(CNT[p.id]?'<span class="badge">'+CNT[p.id]+'</span>':'')+'<span class="ph">'+(TH[p.id]?'<img alt="" src="'+TH[p.id]+'">':'')+'</span><span class="n">'+p.name+'</span><span class="d">'+(p.noList?p.dims:p.sizes?p.sizes.map(z=>cm(z.w)+" × "+cm(z.d)+" cm").join("<br>"):cm(p.w)+" × "+cm(p.d)+(p.h?" × "+cm(p.h):"")+" cm")+'</span>'+(basePrice(p)?'<span class="pr">'+(p.sizes||p.opts?"ab ":"")+eur(basePrice(p))+'</span>':'<span class="pr none">'+(p.noList?"Planungshilfe":"Preis folgt")+'</span>')+'</button>').join("")}
-$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;if($("pLeft").classList.contains("min"))toggleDock();activeCat=+b.dataset.cat;renderTabs();renderProducts();$("products").scrollLeft=0;updNav()});
+$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;if($("pLeft").classList.contains("min")){dockAuto=false;toggleDock()}activeCat=+b.dataset.cat;renderTabs();renderProducts();$("products").scrollLeft=0;updNav()});
 $("products").addEventListener("pointerdown",e=>{const b=e.target.closest(".prod");if(b)pStart(e,b.dataset.id)});
 $("products").addEventListener("click",e=>{const b=e.target.closest(".prod");if(!b||!state.poly)return;if(innerWidth<=760){const c=viewCenter();addNear(b.dataset.id,c.x,c.z);closeSheets()}else if(e.detail===0){const c=viewCenter();addNear(b.dataset.id,c.x,c.z)}});
 function setMode(m){const pl=$("pLeft");if(m==="prod"&&pl.dataset.mode==="prod"&&innerWidth>760){toggleDock();return}pl.dataset.mode=m;pl.classList.remove("min");$("dockTog").setAttribute("aria-expanded","true");$("planner").dataset.lmode=m;
@@ -2057,7 +2059,10 @@ function setMode(m){const pl=$("pLeft");if(m==="prod"&&pl.dataset.mode==="prod"&
 document.querySelectorAll(".modes [data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 /* Produktleiste: ein-/ausklappen, Höhe für die schwebenden Elemente bereitstellen, Mausrad scrollt waagerecht */
 function toggleDock(){const pl=$("pLeft"),min=pl.classList.toggle("min");$("dockTog").setAttribute("aria-expanded",String(!min));$("dockTog").setAttribute("aria-label",min?"Produktleiste ausklappen":"Produktleiste einklappen")}
-$("dockTog").onclick=toggleDock;
+$("dockTog").onclick=()=>{dockAuto=false;toggleDock()};
+/* Produkt in der 3D-Ansicht angeklickt: Produktleiste automatisch einklappen (Auswahl + Einstellungen frei sichtbar);
+   beim Aufheben der Auswahl klappt sie wieder auf – nur wenn sie vorher offen war und nicht von Hand umgeschaltet wurde. */
+var dockAuto=false;function dockAutoHide(){const pl=$("pLeft");if(innerWidth>760&&pl.dataset.mode==="prod"&&!pl.classList.contains("min")){toggleDock();dockAuto=true}}
 function dockH(){const pl=$("pLeft"),h=innerWidth>760&&pl.dataset.mode==="prod"?pl.offsetHeight+20:0;$("planner").style.setProperty("--dockH",h+"px")}
 if(window.ResizeObserver)new ResizeObserver(dockH).observe($("pLeft"));addEventListener("resize",dockH);
 new MutationObserver(dockH).observe($("pLeft"),{attributes:true,attributeFilter:["data-mode","class"]});
@@ -2168,7 +2173,7 @@ let helpGrid=null;
 function drawStart(){if(tool!=="select")setTool("select");if(plan){plan.vis=true;planApply();planUI();if(!plan.cal)setTimeout(startCalib,350)}drawing={pts:[],cur:null};select(null);world.visible=false;gardenG.visible=false;edgeG.visible=false;
   helpGrid=new T.GridHelper(60,60,0xc9c7c2,0xd8d6d1);helpGrid.position.y=.002;if(plan){helpGrid.position.x=Math.round(plan.cx);helpGrid.position.z=Math.round(plan.cz)}scene.add(helpGrid);
   const g2=new T.GridHelper(60,12,0x9e9a93,0x9e9a93);g2.position.y=.003;helpGrid.add(g2);
-  $("drawbar").hidden=false;$("otop").style.visibility="hidden";$("mbar").style.visibility="hidden";hint(false);
+  $("drawbar").hidden=false;$("otop").style.visibility="hidden";$("mbar").style.visibility="hidden";$("pLeft").style.visibility="hidden";hint(false);
   viewMode="top";orbit.enableRotate=false;orbit.maxPolarAngle=.0001;camera.position.set(0,34,.01);orbit.target.set(0,0,0);if(plan){planFit=true;const P=camPose("top");planFit=false;camera.position.copy(P.pos);orbit.target.copy(P.tgt)}orbit.update();drawRender()}
 function drawPoint(e){setNdc(e);ray.setFromCamera(ndc,camera);const g=ray.ray.intersectPlane(groundPlane,new T.Vector3());if(!g)return null;let x=Math.round(g.x/SNAP)*SNAP,z=Math.round(g.z/SNAP)*SNAP;const p=drawing.pts;
   if(p.length){const[lx,lz]=p[p.length-1],dx=x-lx,dz=z-lz,ang=Math.abs(Math.atan2(dz,dx)*180/Math.PI)%90;if(ang<7||ang>83){if(Math.abs(dx)>Math.abs(dz))z=lz;else x=lx}
@@ -2192,7 +2197,7 @@ function drawRender(){dGroup.children.slice().forEach(c=>{dGroup.remove(c);if(c.
 function drawFinish(){const p=drawing&&drawing.pts;if(!p||p.length<3)return;const a=areaOf(p);if(a<2){toast("Die Fläche ist zu klein.");return}
   const poly=p.map(([x,z])=>[x,z]);drawEnd(true);setGardenPoly(poly,wiz.ground,wiz.house)}
 function drawEnd(ok){drawing=null;dGroup.children.slice().forEach(c=>{dGroup.remove(c);if(c.geometry)c.geometry.dispose()});clearDrawLabels();if(helpGrid){scene.remove(helpGrid);helpGrid=null}
-  world.visible=true;gardenG.visible=true;edgeG.visible=true;$("drawbar").hidden=true;$("otop").style.visibility="";$("mbar").style.visibility="";
+  world.visible=true;gardenG.visible=true;edgeG.visible=true;$("drawbar").hidden=true;$("otop").style.visibility="";$("mbar").style.visibility="";$("pLeft").style.visibility="";
   if(!ok){if(state.poly){setView("3d");refresh()}else openWiz()}}
 $("drawUndo").onclick=drawUndo;$("drawCancel").onclick=()=>drawEnd(false);$("drawDone").onclick=drawFinish;
 
