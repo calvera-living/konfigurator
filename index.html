@@ -2067,9 +2067,19 @@ function thumbs(){const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuf
     /* einheitlich rahmen: Abstand so wählen, dass jedes Produkt gleich viel vom Bild füllt (ohne Bodenschatten) */
     let d=rad*3.3;for(let k=0;k<4;k++){c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);c.updateMatrixWorld();let mx=0;
       for(let q=0;q<8;q++){v.set(q&1?b.max.x:b.min.x,q&2?b.max.y:b.min.y,q&4?b.max.z:b.min.z).project(c);mx=Math.max(mx,Math.abs(v.x),Math.abs(v.y))}d*=mx/.74}
-    c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);r.render(s,c);out[p.id]=r.domElement.toDataURL("image/png");s.remove(g)}
+    c.position.copy(ct).addScaledVector(dir,d);c.lookAt(ct);r.render(s,c);out[p.id]=r.domElement.toDataURL("image/webp",.9);s.remove(g)}
   r.dispose();if(r.forceContextLoss)r.forceContextLoss();return out}
-let TH={},CNT={},activeCat=0;let thumbT=null;function onModelLoaded(){clearTimeout(thumbT);thumbT=setTimeout(()=>{try{TH=thumbs();renderProducts()}catch(e){}},50)}
+/* Vorschaubilder nur EINMAL rendern, wenn alle Modelle da sind, und im Browser speichern (ab dem 2. Besuch sofort da).
+   Bei Änderungen an Produkten/Modellen THUMB_V erhöhen. */
+const THUMB_V="2",THUMB_KEY="calvera_thumbs_"+THUMB_V+"_"+PRODUCTS.map(p=>p.id).join(".");
+let TH={},CNT={},activeCat=0,thumbT=null,thumbsDone=false;
+try{const c=JSON.parse(localStorage.getItem(THUMB_KEY)||"null");if(c&&PRODUCTS.every(p=>c[p.id])){TH=c;thumbsDone=true}}catch(e){}
+const allModels=()=>Object.keys(PARTS).every(n=>MODEL_SC[n]);
+let thumbLeft=-1;
+function onModelLoaded(){if(thumbsDone||thumbLeft!==0)return;clearTimeout(thumbT);thumbT=setTimeout(()=>{if(thumbsDone)return;try{TH=thumbs();renderProducts();
+  if(allModels()){thumbsDone=true;try{Object.keys(localStorage).forEach(k=>{if(k.startsWith("calvera_thumbs_")&&k!==THUMB_KEY)localStorage.removeItem(k)});localStorage.setItem(THUMB_KEY,JSON.stringify(TH))}catch(e){}}}catch(e){}},80)}
+/* ohne gespeicherte Vorschaubilder: alle Modelle laden, danach einmal rendern (auch wenn Modelle fehlen, z. B. file://) */
+function startThumbs(){if(thumbsDone)return;thumbLeft=Object.keys(PARTS).length;Object.keys(PARTS).forEach(n=>loadModel(n).catch(()=>{}).then(()=>{if(--thumbLeft===0)onModelLoaded()}))}
 const CATNOTE={2:"Pflanzen helfen beim Nachbauen Ihres Gartens und erscheinen nicht in der Zusammenstellung.",3:"Diese Objekte dienen der Orientierung und erscheinen nicht in der Zusammenstellung."};
 function renderTabs(){$("tabs").innerHTML=CATS.map((c,i)=>'<button class="tab" role="tab" aria-selected="'+(i===activeCat)+'" data-cat="'+i+'">'+c+''+'</button>').join("")}
 function renderProducts(){$("products").innerHTML=(CATNOTE[activeCat]?'<p class="soon-note">'+CATNOTE[activeCat]+'</p>':'')+
@@ -2321,7 +2331,7 @@ try{plan=JSON.parse(localStorage.getItem("calvera-plan")||"null")}catch(e){plan=
 loadOpts();renderPaintMats();$("brushO").textContent=fmtLen(brushS);$("tSizeO").textContent=fmtLen(tSize*2);tUI();
 renderGroundButtons($("grounds"),state.ground);
 /* Produkt-Vorschaubilder und restliche Beläge erst nach dem ersten Bild (sonst sieht man ~0,5–2 s länger nichts) */
-setTimeout(()=>{try{TH=thumbs();renderProducts()}catch(e){}setTimeout(idleGrounds,400)},120);
+setTimeout(()=>{startThumbs();setTimeout(idleGrounds,400)},120);
 renderTabs();renderProducts();
 if(saved&&saved.poly){applySnap(saved)}else{setView("3d",true);refresh();openWiz()}
 cur=JSON.stringify(snap());persist(cur);updUndo();
